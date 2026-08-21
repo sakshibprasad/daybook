@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="minimal" data-font="elegant">
+<html lang="en" data-theme="velvet" data-font="elegant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Daybook — Daily Planner</title>
-<meta name="theme-color" content="#EDE6DC">
+<meta name="theme-color" content="#362D28">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Daybook">
@@ -58,6 +58,16 @@
     --chip-weekly-bg:rgba(124,147,184,0.18); --chip-weekly-fg:#9DB2D6;
     --chip-monthly-bg:rgba(124,147,184,0.3); --chip-monthly-fg:#D2DDF0;
     --danger:#D97F70; --shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 30px rgba(0,0,0,0.45);
+  }
+  :root[data-theme="velvet"]{
+    --bg:#362D28; --surface:#443830; --surface-2:#4E4139;
+    --ink:#F1E6D8; --ink-soft:#B8A99A; --line:#55483F;
+    --accent:#A69A8A; --accent-2:#D4C7B5; --accent-soft:#4E4139;
+    --gradient: linear-gradient(135deg, #5C4E42 0%, #A69A8A 55%, #D4C7B5 100%);
+    --chip-once-bg:#4E4139; --chip-once-fg:#C9BBA8;
+    --chip-weekly-bg:#584A40; --chip-weekly-fg:#D4C7B5;
+    --chip-monthly-bg:#645347; --chip-monthly-fg:#E8DCC8;
+    --danger:#C77A63; --shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 32px rgba(0,0,0,0.35);
   }
   :root{ --font-display:'Playfair Display', serif; --font-body:'Inter', sans-serif; }
   [data-font="elegant"]{ --font-display:'Playfair Display', serif; --font-body:'Inter', sans-serif; }
@@ -139,17 +149,18 @@
   @keyframes viewIn{ from{ opacity:0; } to{ opacity:1; } }
   @media (prefers-reduced-motion: reduce){ .view.active{ animation:none; } }
 
-  .card{ background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:var(--shadow); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); }
+  .card{ background:var(--surface); border:none; border-radius:26px; padding:22px; box-shadow:var(--shadow); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); }
   .card + .card{ margin-top:12px; }
   .label-bar{
     display:flex; align-items:center; gap:8px; background:none; color:var(--ink); font-family:var(--font-display);
     font-size:15.5px; font-weight:600; letter-spacing:0.005em; text-transform:none;
     padding:0; margin-bottom:14px;
   }
-  .label-bar::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--gradient); flex:0 0 auto; }
+  .label-icon{ width:22px; height:22px; border-radius:7px; background:var(--gradient); color:#fff; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .label-icon svg{ width:12px; height:12px; }
   .label-row{ display:flex; align-items:center; justify-content:space-between; }
 
-  .field-input{ width:100%; border:none; border-bottom:1.5px solid var(--line); background:transparent; font-family:var(--font-display); font-style:italic; font-size:16px; color:var(--ink); padding:4px 2px 8px; outline:none; }
+  .field-input{ width:100%; border:none; border-bottom:1.5px solid transparent; background:transparent; font-family:var(--font-display); font-style:italic; font-size:16px; color:var(--ink); padding:4px 2px 8px; outline:none; transition:border-color .15s ease; }
   .field-input::placeholder{ color: var(--ink-soft); opacity:0.7; }
   .field-input:focus{ border-bottom-color: var(--accent); }
 
@@ -290,13 +301,12 @@
     border-radius:26px 26px 0 0; padding:8px 22px calc(22px + env(safe-area-inset-bottom));
     max-width:480px; margin:0 auto; transform:translateY(105%);
     transition: transform .3s cubic-bezier(.32,.72,0,1); z-index:31;
-    box-shadow:0 -18px 50px rgba(0,0,0,0.35); max-height:88vh; overflow-y:auto;
-    border-top:1px solid var(--line);
+    box-shadow:0 -8px 30px rgba(0,0,0,0.16); max-height:88vh; overflow-y:auto;
     backdrop-filter:blur(30px) saturate(160%); -webkit-backdrop-filter:blur(30px) saturate(160%);
   }
   .sheet.open{ transform:translateY(0); }
-  .sheet::before{ content:""; display:block; height:3px; margin:0 -22px 18px; background:var(--gradient); }
-  .sheet-handle{ width:36px; height:4px; border-radius:2px; background:var(--line); margin:12px auto 16px; }
+
+  .sheet-handle{ width:36px; height:4px; border-radius:2px; background:var(--line); margin:12px auto 16px; cursor:grab; }
   .sheet-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
   .sheet-icon{ flex:0 0 auto; width:40px; height:40px; border-radius:13px; background:var(--gradient); color:#fff; display:flex; align-items:center; justify-content:center; }
   .sheet-icon svg{ width:19px; height:19px; }
@@ -306,21 +316,21 @@
   .sheet input[type="text"]:focus{ border-color:var(--accent); }
   .type-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .type-grid.htype{ grid-template-columns:repeat(3,1fr); }
-  .type-opt{ padding:11px 4px; text-align:center; border-radius:12px; border:1.5px solid var(--line); font-size:12px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:var(--surface-2); transition:box-shadow .15s ease, border-color .15s ease, color .15s ease; }
+  .type-opt{ padding:9px 4px; text-align:center; border-radius:10px; border:1.3px solid var(--line); font-size:11.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:var(--surface-2); transition:box-shadow .15s ease, border-color .15s ease, color .15s ease; }
   .type-opt.active{ border-color:transparent; color:#fff; background:var(--gradient); }
   .sheet input[type="date"]{ width:100%; border:none; border-bottom:1.5px solid var(--line); border-radius:0; padding:10px 2px; font-size:15px; font-family:var(--font-body); background:transparent; color:var(--ink); outline:none; }
   .sheet input[type="time"]{ width:100%; border:none; border-bottom:1.5px solid var(--line); border-radius:0; padding:10px 2px; font-size:15px; font-family:var(--font-body); background:transparent; color:var(--ink); outline:none; margin-top:6px; }
   .date-field{ margin-top:12px; display:none; }
   .date-field.show{ display:block; }
-  .sheet-actions{ display:flex; gap:10px; margin-top:20px; align-items:center; }
-  .btn{ flex:1; padding:14px; border-radius:14px; border:none; font-weight:600; font-size:14.5px; cursor:pointer; font-family:var(--font-body); transition:transform .1s ease, box-shadow .15s ease; }
+  .sheet-actions{ display:flex; gap:8px; margin-top:18px; align-items:center; justify-content:flex-end; }
+  .btn{ padding:9px 20px; border-radius:20px; border:none; font-weight:600; font-size:13px; cursor:pointer; font-family:var(--font-body); transition:transform .1s ease, box-shadow .15s ease; }
   .btn:active{ transform:scale(0.97); }
-  .btn-cancel{ background:none; color:var(--ink-soft); flex:0 0 auto; padding:14px 18px; }
+  .btn-cancel{ background:none; color:var(--ink-soft); padding:9px 14px; }
   .btn-save{ background:var(--gradient); color:#fff; }
   .btn-delete{ background:none; color:var(--danger); font-weight:600; font-size:13px; border:none; cursor:pointer; margin-top:16px; width:100%; text-align:center; padding:6px; }
 
   .day-chip-row{ display:flex; gap:6px; }
-  .day-chip{ flex:1; text-align:center; padding:9px 0; border-radius:10px; border:1.5px solid var(--line); background:var(--surface-2); font-size:12px; font-weight:700; color:var(--ink-soft); cursor:pointer; transition:box-shadow .15s ease, border-color .15s ease, color .15s ease, background .15s ease; }
+  .day-chip{ flex:1; text-align:center; padding:7px 0; border-radius:9px; border:1.3px solid var(--line); background:var(--surface-2); font-size:11px; font-weight:700; color:var(--ink-soft); cursor:pointer; transition:box-shadow .15s ease, border-color .15s ease, color .15s ease, background .15s ease; }
   .day-chip.active{ border-color:transparent; background:var(--gradient); color:#fff; }
 
   .stepper{ display:flex; align-items:center; justify-content:center; gap:22px; padding:6px 0 2px; }
@@ -355,12 +365,13 @@
   }
   .cat-card:active{ transform:scale(0.98); }
   .cat-card-top{ display:flex; align-items:center; gap:8px; }
-  .cat-card-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; }
-  .cat-card-dot.cat-order{ background:var(--chip-once-fg); }
-  .cat-card-dot.cat-homework{ background:var(--chip-weekly-fg); }
-  .cat-card-dot.cat-organize{ background:var(--chip-monthly-fg); }
-  .cat-card-dot.cat-selfcare{ background:var(--accent); }
-  .cat-card-dot.cat-other{ background:var(--ink-soft); }
+  .cat-card-icon{ width:26px; height:26px; border-radius:9px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:#fff; }
+  .cat-card-icon svg{ width:13px; height:13px; }
+  .cat-card-icon.cat-order{ background:var(--chip-once-fg); }
+  .cat-card-icon.cat-homework{ background:var(--chip-weekly-fg); }
+  .cat-card-icon.cat-organize{ background:var(--chip-monthly-fg); }
+  .cat-card-icon.cat-selfcare{ background:var(--accent); }
+  .cat-card-icon.cat-other{ background:var(--ink-soft); }
   .cat-card-name{ font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--ink); }
   .cat-card-count{ font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; color:var(--ink); }
   .cat-card-next{ font-size:10.5px; color:var(--ink-soft); }
@@ -413,10 +424,10 @@
 
   /* ---------- minimal theme: structural, not just color ---------- */
   [data-theme="minimal"] .card{
-    background:none; border:none; border-bottom:1px solid var(--line);
-    border-radius:0; padding:22px 2px 24px; box-shadow:none;
+    background:none; border:none; border-bottom:none;
+    border-radius:0; padding:20px 2px; box-shadow:none;
   }
-  [data-theme="minimal"] .card:last-child{ border-bottom:none; }
+  [data-theme="minimal"] .card + .card{ margin-top:6px; }
   [data-theme="minimal"] .label-bar{
     background:none; color:var(--ink-soft); font-family:var(--font-display); font-style:italic;
     font-size:13px; font-weight:500; text-transform:none; letter-spacing:0.01em; padding:0; margin-bottom:14px;
@@ -446,6 +457,20 @@
   [data-theme="duskglass"] .settings-page, [data-theme="nightglass"] .settings-page{
     backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
   }
+
+  /* ---------- velvet theme: big serif "question" headers, cushioned soft fields ---------- */
+  [data-theme="velvet"] .label-bar{ font-size:19px; font-weight:600; letter-spacing:-0.01em; margin-bottom:16px; }
+  [data-theme="velvet"] .label-icon{ width:26px; height:26px; border-radius:9px; }
+  [data-theme="velvet"] .label-icon svg{ width:14px; height:14px; }
+  [data-theme="velvet"] .field-input{
+    background:var(--surface-2); border:1px solid var(--line) !important; border-radius:18px;
+    padding:16px; font-style:normal; font-size:15.5px; min-height:52px;
+  }
+  [data-theme="velvet"] .field-input:focus{ border-color:var(--accent) !important; }
+  [data-theme="velvet"] textarea.notes-area{ background:var(--surface-2); border:1px solid var(--line); border-radius:18px; padding:16px; }
+  [data-theme="velvet"] .btn-save{ border-radius:26px; padding:14px 28px; font-weight:700; }
+  [data-theme="velvet"] .add-row{ background:var(--surface-2); border-radius:16px; padding:12px 14px; margin-top:10px; }
+  [data-theme="velvet"] .titem{ border-bottom-color:var(--line); }
 </style>
 </head>
 <body>
@@ -524,6 +549,7 @@
             <button class="option-pill" data-theme-opt="duskglass">Dusk Glass</button>
             <button class="option-pill" data-theme-opt="oldmoney">Old Money</button>
             <button class="option-pill" data-theme-opt="nightglass">Night Glass</button>
+            <button class="option-pill" data-theme-opt="velvet">Velvet</button>
           </div>
         </div>
         <div class="settings-row">
@@ -646,19 +672,19 @@
   <div class="view" id="view-today">
     <div class="section">
       <div class="card">
-        <div class="label-bar" style="margin-bottom:0;">Today's Goal</div>
+        <div class="label-bar" style="margin-bottom:0;"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span>Today's Goal</div>
         <input type="text" class="field-input" id="goal-input" placeholder="The one thing that matters most…" style="margin-top:12px;">
       </div>
       <div class="card">
         <div class="label-row">
-          <div class="label-bar" style="margin-bottom:0;">Day Planner</div>
+          <div class="label-bar" style="margin-bottom:0;"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Day Planner</div>
           <button class="option-pill" id="schedule-toggle" style="padding:5px 12px; font-size:11px;">Show</button>
         </div>
         <div id="schedule-wrap" style="display:none; margin-top:14px;"></div>
       </div>
       <div class="card">
         <div class="label-row">
-          <div class="label-bar" style="margin-bottom:0;">To Do</div>
+          <div class="label-bar" style="margin-bottom:0;"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>To Do</div>
           <button class="option-pill" id="sort-toggle" style="padding:5px 11px; font-size:10.5px;">Newest</button>
         </div>
         <div class="label-row" style="margin-top:4px;">
@@ -669,7 +695,7 @@
         <div class="add-row" id="add-today"><span class="plus">+</span> Add a task</div>
       </div>
       <div class="card">
-        <div class="label-bar">Notes</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5a1 1 0 0 0 1 1h5"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></span>Notes</div>
         <textarea class="notes-area" id="today-notes" placeholder="Jot anything down…"></textarea>
       </div>
     </div>
@@ -679,16 +705,16 @@
   <div class="view" id="view-week">
     <div class="section">
       <div class="card">
-        <div class="label-bar">Weekly Focus</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span>Weekly Focus</div>
         <input type="text" class="field-input" id="week-focus-input" placeholder="What matters most this week…">
       </div>
       <div class="card">
-        <div class="label-bar">This Week</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h5"/></svg></span>This Week</div>
         <ul class="tasklist" id="week-list"></ul>
         <div class="add-row" id="add-week"><span class="plus">+</span> Add a weekly task</div>
       </div>
       <div class="card">
-        <div class="label-bar">Notes</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5a1 1 0 0 0 1 1h5"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></span>Notes</div>
         <textarea class="notes-area" id="week-notes" placeholder="Reflections for the week…"></textarea>
       </div>
     </div>
@@ -700,7 +726,7 @@
       <div class="card">
         <div class="cal-nav">
           <button class="cal-nav-btn" id="cal-prev">‹</button>
-          <button class="label-bar" id="month-label" style="margin-bottom:0; border:none; background:none; cursor:pointer;">This Month</button>
+          <button class="label-bar" id="month-label" style="margin-bottom:0; border:none; background:none; cursor:pointer;"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>This Month</button>
           <button class="cal-nav-btn" id="cal-next">›</button>
         </div>
         <div class="cal-head" id="cal-head"></div>
@@ -711,12 +737,12 @@
         </div>
       </div>
       <div class="card">
-        <div class="label-bar">This Month</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span>This Month</div>
         <ul class="tasklist" id="month-list"></ul>
         <div class="add-row" id="add-month"><span class="plus">+</span> Add a monthly task</div>
       </div>
       <div class="card">
-        <div class="label-bar">Notes</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5a1 1 0 0 0 1 1h5"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></span>Notes</div>
         <textarea class="notes-area" id="month-notes" placeholder="Notes for the month…"></textarea>
       </div>
     </div>
@@ -726,16 +752,16 @@
   <div class="view" id="view-habits">
     <div class="section">
       <div class="card">
-        <div class="label-bar">Today's Habits</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 7-2.9 7-6.8 0-2.7-1.8-4.6-2.9-6.5-.3 2-1.4 2.9-2.4 1.9 1-2.9-.9-5.7-3.3-6.6.5 2.9-1 4.8-2.9 6.6-1.4 1.4-1.9 3.3-1.9 4.6 0 3.9 2.9 6.8 6.4 6.8z"/></svg></span>Today's Habits</div>
         <ul class="tasklist" id="habit-today-list"></ul>
         <div class="add-row" id="add-habit"><span class="plus">+</span> Add a habit</div>
       </div>
       <div class="card">
-        <div class="label-bar">This Week</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h5"/></svg></span>This Week</div>
         <div id="habit-week-wrap"></div>
       </div>
       <div class="card">
-        <div class="label-bar">This Month</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="0.9" fill="currentColor" stroke="none"/></svg></span>This Month</div>
         <div id="habit-month-wrap"></div>
       </div>
     </div>
@@ -744,12 +770,12 @@
   <div class="view" id="view-goals">
     <div class="section">
       <div class="card">
-        <div class="label-bar">Short-term Goals</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg></span>Short-term Goals</div>
         <div id="goals-short-wrap"></div>
         <div class="add-row" id="add-goal-short"><span class="plus">+</span> Add a short-term goal</div>
       </div>
       <div class="card">
-        <div class="label-bar">Long-term Goals</div>
+        <div class="label-bar"><span class="label-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/></svg></span>Long-term Goals</div>
         <div id="goals-long-wrap"></div>
         <div class="add-row" id="add-goal-long"><span class="plus">+</span> Add a long-term goal</div>
       </div>
@@ -888,7 +914,10 @@
   <div class="field-label">Progress</div>
   <div class="stepper">
     <button class="stepper-btn" id="goal-progress-minus">−</button>
-    <div class="stepper-value" id="goal-progress-value">0%</div>
+    <div style="display:flex; align-items:center; gap:2px;">
+      <input type="number" class="stepper-value" id="goal-progress-value" min="0" max="100" value="0" style="border:none; background:none; color:var(--ink); font-family:'IBM Plex Mono',monospace; width:56px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:21px; color:var(--ink);">%</span>
+    </div>
     <button class="stepper-btn" id="goal-progress-plus">+</button>
   </div>
 
@@ -1042,6 +1071,37 @@
     }, { passive:true });
   })();
 
+  /* ---------------- swipe down to close sheets ---------------- */
+  (function(){
+    var sheetCloseMap = { "sheet": closeSheet, "habit-sheet": closeHabitSheet, "goal-sheet": closeGoalSheet };
+    var dragSheet = null, startY = 0, dy = 0;
+    document.addEventListener("touchstart", function(e){
+      var handle = e.target.closest(".sheet-handle");
+      if(!handle) return;
+      dragSheet = handle.closest(".sheet");
+      startY = e.touches[0].clientY; dy = 0;
+      if(dragSheet) dragSheet.style.transition = "none";
+    }, { passive:true });
+    document.addEventListener("touchmove", function(e){
+      if(!dragSheet) return;
+      dy = Math.max(0, e.touches[0].clientY - startY);
+      dragSheet.style.transform = "translateY("+dy+"px)";
+    }, { passive:true });
+    document.addEventListener("touchend", function(){
+      if(!dragSheet) return;
+      var el = dragSheet;
+      el.style.transition = "transform .25s ease";
+      if(dy > 90){
+        var closer = sheetCloseMap[el.id];
+        el.style.transform = "translateY(105%)";
+        if(closer) setTimeout(closer, 180);
+      } else {
+        el.style.transform = "";
+      }
+      dragSheet = null; dy = 0;
+    }, { passive:true });
+  })();
+
   /* ---------------- selected date ---------------- */
   var selectedDate = (function(){
     var stored = loadStr("daybook.selectedDate");
@@ -1069,9 +1129,9 @@
   }
 
   /* ---------------- theme / font ---------------- */
-  var THEME_COLORS = { minimal:"#EDE6DC", duskglass:"#8A7A72", oldmoney:"#1C1611", nightglass:"#171B24" };
-  var savedTheme = loadStr("daybook.theme") || "minimal";
-  if(!THEME_COLORS[savedTheme]) savedTheme = "minimal";
+  var THEME_COLORS = { minimal:"#EDE6DC", duskglass:"#8A7A72", oldmoney:"#1C1611", nightglass:"#171B24", velvet:"#362D28" };
+  var savedTheme = loadStr("daybook.theme") || "velvet";
+  if(!THEME_COLORS[savedTheme]) savedTheme = "velvet";
   document.documentElement.setAttribute("data-theme", savedTheme);
   function applyThemeColorMeta(){
     var meta = document.querySelector('meta[name="theme-color"]');
@@ -1828,6 +1888,14 @@
     document.getElementById("tile-goals-sub").textContent = goals.length ? goals.length+" active" : "None yet";
 
     var catWrap = document.getElementById("home-cat-list");
+    var CAT_ICONS = {
+      order: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+      homework: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>',
+      organize: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+      selfcare: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6a4.6 4.6 0 0 0-7.8-3.3L12 6.3l-1-1a4.6 4.6 0 0 0-7.8 3.3c0 2 1.2 3.6 2.4 4.8l5.7 5.6a1 1 0 0 0 1.4 0l5.7-5.6c1.2-1.2 2.4-2.8 2.4-4.8Z"/></svg>',
+      other: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg>',
+      custom: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8Z"/></svg>'
+    };
     var allActive = tasks.filter(function(t){ return !doneFor(t); });
     var catHtml = "";
     CATEGORIES.forEach(function(cat){
@@ -1836,10 +1904,11 @@
       var withTime = inCat.filter(function(t){ return t.dueTime; }).sort(function(a,b){ return a.dueTime.localeCompare(b.dueTime); });
       var nextLine = withTime.length ? '<div class="cat-card-next">⏰ '+withTime[0].dueTime+' · '+escapeHtml(withTime[0].text)+'</div>' : '';
       var col = catColor(cat);
-      var dotStyle = col ? ' style="background:'+col.fg+';"' : '';
-      var dotClass = col ? "cat-card-dot" : "cat-card-dot cat-"+cat;
+      var iconSvg = CAT_ICONS[cat] || CAT_ICONS.custom;
+      var iconStyle = col ? ' style="background:'+col.fg+';"' : '';
+      var iconClass = col ? "cat-card-icon" : "cat-card-icon cat-"+cat;
       catHtml += '<div class="cat-card" data-cat="'+cat+'">' +
-        '<div class="cat-card-top"><span class="'+dotClass+'"'+dotStyle+'></span><span class="cat-card-name">'+CAT_LABELS[cat]+'</span></div>' +
+        '<div class="cat-card-top"><span class="'+iconClass+'"'+iconStyle+'>'+iconSvg+'</span><span class="cat-card-name">'+CAT_LABELS[cat]+'</span></div>' +
         '<div class="cat-card-count">'+count+'</div>' + nextLine +
       '</div>';
     });
@@ -1864,9 +1933,14 @@
   var editingGoalId = null;
 
   function syncGoalTypeUI(){ document.querySelectorAll("#goal-type-grid .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-gtype")===goalTimeframe); }); }
-  function syncGoalProgressUI(){ document.getElementById("goal-progress-value").textContent = goalProgress+"%"; }
+  function syncGoalProgressUI(){ document.getElementById("goal-progress-value").value = goalProgress; }
   document.querySelectorAll("#goal-type-grid .type-opt").forEach(function(opt){
     opt.addEventListener("click", function(){ goalTimeframe = opt.getAttribute("data-gtype"); syncGoalTypeUI(); });
+  });
+  document.getElementById("goal-progress-value").addEventListener("input", function(){
+    var v = parseInt(this.value, 10);
+    if(isNaN(v)) v = 0;
+    goalProgress = Math.max(0, Math.min(100, v));
   });
   document.getElementById("goal-progress-minus").addEventListener("click", function(){ goalProgress = Math.max(0, goalProgress-10); syncGoalProgressUI(); });
   document.getElementById("goal-progress-plus").addEventListener("click", function(){ goalProgress = Math.min(100, goalProgress+10); syncGoalProgressUI(); });
@@ -2345,6 +2419,33 @@
     };
     reader.readAsText(file);
   });
+
+  /* ---------------- swipe down on handle to close sheet ---------------- */
+  function makeSheetSwipeable(sheetEl, closeFn){
+    var handle = sheetEl.querySelector(".sheet-handle");
+    if(!handle) return;
+    var startY = 0, deltaY = 0, dragging = false;
+    handle.addEventListener("touchstart", function(e){
+      startY = e.touches[0].clientY; deltaY = 0; dragging = true;
+      sheetEl.style.transition = "none";
+    }, { passive:true });
+    handle.addEventListener("touchmove", function(e){
+      if(!dragging) return;
+      deltaY = e.touches[0].clientY - startY;
+      if(deltaY < 0) deltaY = 0;
+      sheetEl.style.transform = "translateY("+deltaY+"px)";
+    }, { passive:true });
+    handle.addEventListener("touchend", function(){
+      if(!dragging) return;
+      dragging = false;
+      sheetEl.style.transition = "transform .25s cubic-bezier(.32,.72,0,1)";
+      if(deltaY > 70){ closeFn(); }
+      sheetEl.style.transform = "";
+    }, { passive:true });
+  }
+  makeSheetSwipeable(sheet, closeSheet);
+  makeSheetSwipeable(habitSheet, closeHabitSheet);
+  makeSheetSwipeable(goalSheet, closeGoalSheet);
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
