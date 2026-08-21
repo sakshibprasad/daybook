@@ -384,8 +384,12 @@
   .stepper-value{ font-family:'IBM Plex Mono',monospace; font-size:21px; font-weight:600; min-width:80px; text-align:center; }
 
   /* ---------- goals ---------- */
-  .goal-item{ padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .goal-item{ padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer; display:flex; align-items:center; gap:12px; }
   .goal-item:last-child{ border-bottom:none; }
+  .goal-item.done .goal-name{ text-decoration:line-through; color:var(--ink-soft); }
+  .goal-check{ flex:0 0 auto; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface-2); display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent; }
+  .goal-check svg{ width:14px; height:14px; }
+  .goal-item.done .goal-check{ background:var(--gradient); border-color:transparent; color:#fff; }
   .goal-name{ font-size:14.5px; color:var(--ink); font-weight:600; }
   .goal-due{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
   .goal-pct-badge{
@@ -2126,19 +2130,36 @@
 
   function renderGoalList(containerId, timeframe){
     var wrap = document.getElementById(containerId);
-    var list = goals.filter(function(g){ return g.timeframe===timeframe; }).sort(function(a,b){ return b.createdAt-a.createdAt; });
+    var list = goals.filter(function(g){ return g.timeframe===timeframe; }).sort(function(a,b){
+      var ad = !!a.done, bd = !!b.done;
+      if(ad !== bd) return ad ? 1 : -1;
+      return b.createdAt-a.createdAt;
+    });
     if(list.length===0){ wrap.innerHTML = '<div class="empty-hint">'+emptyLine(EMPTY_GOAL_LINES, timeframe==="short"?2:4)+'</div>'; return; }
     wrap.innerHTML = list.map(function(g){
       var due = g.targetDate ? '<div class="goal-due">Target · '+fmtShort(new Date(g.targetDate+"T00:00:00"))+'</div>' : '';
-      return '<div class="goal-item" data-gid="'+g.id+'">' +
-        '<div><div class="goal-name">'+escapeHtml(g.text)+'</div>'+due+'</div>' +
+      return '<div class="goal-item'+(g.done?" done":"")+'" data-gid="'+g.id+'">' +
+        '<button class="goal-check" data-toggle-gid="'+g.id+'" aria-label="Mark done">'+checkSvg+'</button>' +
+        '<div style="flex:1;"><div class="goal-name">'+escapeHtml(g.text)+'</div>'+due+'</div>' +
         '<div class="goal-pct-badge">'+g.progress+'%</div>' +
       '</div>';
     }).join("");
     wrap.querySelectorAll(".goal-item").forEach(function(el){
-      el.addEventListener("click", function(){
+      el.addEventListener("click", function(e){
+        if(e.target.closest(".goal-check")) return;
         var g = goals.find(function(x){ return x.id===el.getAttribute("data-gid"); });
         if(g) openGoalSheet(g);
+      });
+    });
+    wrap.querySelectorAll(".goal-check").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var g = goals.find(function(x){ return x.id===btn.getAttribute("data-toggle-gid"); });
+        if(g){
+          g.done = !g.done;
+          if(g.done) g.progress = 100;
+          saveGoals(); renderGoals();
+        }
       });
     });
   }
