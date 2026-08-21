@@ -14,7 +14,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Quicksand:wght@500;600;700&family=Caveat:wght@500;600;700&family=Cinzel:wght@500;600;700&family=Lora:wght@500;600;700&family=Parisienne&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root[data-theme="minimal"]{
@@ -27,16 +27,6 @@
     --chip-monthly-bg:#D3C4A6; --chip-monthly-fg:#4A3D28;
     --danger:#A15C4A;
     --shadow:none;
-  }
-  :root[data-theme="duskglass"]{
-    --bg:#8A7A72; --surface:rgba(255,255,255,0.16); --surface-2:rgba(255,255,255,0.10);
-    --ink:#332B24; --ink-soft:rgba(51,43,36,0.62); --line:rgba(255,255,255,0.28);
-    --accent:#C97B5F; --accent-2:#E8B98C; --accent-soft:rgba(201,123,95,0.22);
-    --gradient: linear-gradient(135deg, #9C5A42 0%, #C97B5F 55%, #E8B98C 100%);
-    --chip-once-bg:rgba(255,255,255,0.2); --chip-once-fg:#5A483E;
-    --chip-weekly-bg:rgba(201,123,95,0.2); --chip-weekly-fg:#8A4A32;
-    --chip-monthly-bg:rgba(232,185,140,0.3); --chip-monthly-fg:#6B4322;
-    --danger:#B5493A; --shadow:0 1px 0 rgba(255,255,255,0.25) inset, 0 10px 26px rgba(40,30,24,0.22);
   }
   :root[data-theme="oldmoney"]{
     --bg:#1C1611; --surface:#241D16; --surface-2:#2E251C;
@@ -59,6 +49,36 @@
     --chip-monthly-bg:rgba(124,147,184,0.3); --chip-monthly-fg:#D2DDF0;
     --danger:#D97F70; --shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 30px rgba(0,0,0,0.45);
   }
+  :root[data-theme="walnutnoir"]{
+    --bg:#2E1F1B; --surface:#3A2822; --surface-2:#44302A;
+    --ink:#EDE0D6; --ink-soft:#AC9488; --line:#5E4B43;
+    --accent:#5E4B43; --accent-2:#8A7267; --accent-soft:#44302A;
+    --gradient: linear-gradient(135deg, #2E1F1B 0%, #5E4B43 55%, #8A7267 100%);
+    --chip-once-bg:#44302A; --chip-once-fg:#C4AFA2;
+    --chip-weekly-bg:#4E3931; --chip-weekly-fg:#D6C0B1;
+    --chip-monthly-bg:#5E4B43; --chip-monthly-fg:#EAD9CC;
+    --danger:#B5604A; --shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 30px rgba(0,0,0,0.4);
+  }
+  :root[data-theme="brownstone"]{
+    --bg:#D7CCC8; --surface:#F2ECE9; --surface-2:#E4D8D3;
+    --ink:#3E2723; --ink-soft:#8D6E63; --line:#BCAAA4;
+    --accent:#6D4C41; --accent-2:#A1887F; --accent-soft:#E4D8D3;
+    --gradient: linear-gradient(135deg, #3E2723 0%, #6D4C41 45%, #A1887F 75%, #BCAAA4 100%);
+    --chip-once-bg:#E4D8D3; --chip-once-fg:#6D4C41;
+    --chip-weekly-bg:#D2C2BC; --chip-weekly-fg:#4E342E;
+    --chip-monthly-bg:#BCAAA4; --chip-monthly-fg:#3E2723;
+    --danger:#A24A38; --shadow:0 2px 10px rgba(62,39,35,0.08), 0 10px 24px rgba(62,39,35,0.09);
+  }
+  :root[data-theme="cottonforest"]{
+    --bg:#F2F3ED; --surface:#FFFFFF; --surface-2:#E8EAE1;
+    --ink:#2F3327; --ink-soft:#7D8471; --line:#DADAD2;
+    --accent:#4C513A; --accent-2:#7A8163; --accent-soft:#DCE1D1;
+    --gradient: linear-gradient(135deg, #2F3327 0%, #4C513A 55%, #8A9270 100%);
+    --chip-once-bg:#E8EAE1; --chip-once-fg:#6E7460;
+    --chip-weekly-bg:#DCE1D1; --chip-weekly-fg:#4C513A;
+    --chip-monthly-bg:#BDB7A7; --chip-monthly-fg:#3A3D2E;
+    --danger:#A25B3F; --shadow:0 2px 10px rgba(47,51,39,0.06), 0 10px 24px rgba(47,51,39,0.07);
+  }
   :root[data-theme="velvet"]{
     --bg:#362D28; --surface:#443830; --surface-2:#4E4139;
     --ink:#F1E6D8; --ink-soft:#B8A99A; --line:#55483F;
@@ -71,16 +91,7 @@
   }
   :root{ --font-display:'Playfair Display', serif; --font-body:'Inter', sans-serif; }
   [data-font="elegant"]{ --font-display:'Playfair Display', serif; --font-body:'Inter', sans-serif; }
-  [data-font="classic"]{ --font-display: Georgia, 'Times New Roman', serif; --font-body: Georgia, 'Times New Roman', serif; }
-  [data-font="modern"]{ --font-display:'Inter', sans-serif; --font-body:'Inter', sans-serif; }
   [data-font="refined"]{ --font-display:'Cormorant Garamond', serif; --font-body:'Inter', sans-serif; }
-  [data-font="rounded"]{ --font-display:'Quicksand', sans-serif; --font-body:'Quicksand', sans-serif; }
-  [data-font="bold"]{ --font-display:'Space Grotesk', sans-serif; --font-body:'Inter', sans-serif; }
-  [data-font="handwritten"]{ --font-display:'Caveat', cursive; --font-body:'Inter', sans-serif; }
-  [data-font="technical"]{ --font-display:'IBM Plex Mono', monospace; --font-body:'Inter', sans-serif; }
-  [data-font="luxe"]{ --font-display:'Cinzel', serif; --font-body:'Inter', sans-serif; }
-  [data-font="editorial"]{ --font-display:'Lora', serif; --font-body:'Inter', sans-serif; }
-  [data-font="script"]{ --font-display:'Parisienne', cursive; --font-body:'Inter', sans-serif; }
 
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); }
@@ -306,7 +317,8 @@
   }
   .sheet.open{ transform:translateY(0); }
 
-  .sheet-handle{ width:36px; height:4px; border-radius:2px; background:var(--line); margin:12px auto 16px; cursor:grab; }
+  .sheet-handle{ width:100%; height:28px; display:flex; align-items:center; justify-content:center; cursor:grab; touch-action:none; margin:2px auto 8px; }
+  .sheet-handle::after{ content:""; width:36px; height:4px; border-radius:2px; background:var(--line); }
   .sheet-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
   .sheet-icon{ flex:0 0 auto; width:40px; height:40px; border-radius:13px; background:var(--gradient); color:#fff; display:flex; align-items:center; justify-content:center; }
   .sheet-icon svg{ width:19px; height:19px; }
@@ -317,7 +329,8 @@
   .type-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .type-grid.htype{ grid-template-columns:repeat(3,1fr); }
   .type-opt{ padding:9px 4px; text-align:center; border-radius:10px; border:1.3px solid var(--line); font-size:11.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:var(--surface-2); transition:box-shadow .15s ease, border-color .15s ease, color .15s ease; }
-  .type-opt.active{ border-color:transparent; color:#fff; background:var(--gradient); }
+  .type-opt.active{ border-color:transparent; background:var(--accent-soft); }
+  .type-opt.active .pill-text{ background:var(--gradient); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:700; }
   .sheet input[type="date"]{ width:100%; border:none; border-bottom:1.5px solid var(--line); border-radius:0; padding:10px 2px; font-size:15px; font-family:var(--font-body); background:transparent; color:var(--ink); outline:none; }
   .sheet input[type="time"]{ width:100%; border:none; border-bottom:1.5px solid var(--line); border-radius:0; padding:10px 2px; font-size:15px; font-family:var(--font-body); background:transparent; color:var(--ink); outline:none; margin-top:6px; }
   .date-field{ margin-top:12px; display:none; }
@@ -331,7 +344,8 @@
 
   .day-chip-row{ display:flex; gap:6px; }
   .day-chip{ flex:1; text-align:center; padding:7px 0; border-radius:9px; border:1.3px solid var(--line); background:var(--surface-2); font-size:11px; font-weight:700; color:var(--ink-soft); cursor:pointer; transition:box-shadow .15s ease, border-color .15s ease, color .15s ease, background .15s ease; }
-  .day-chip.active{ border-color:transparent; background:var(--gradient); color:#fff; }
+  .day-chip.active{ border-color:transparent; background:var(--accent-soft); }
+  .day-chip.active .pill-text{ background:var(--gradient); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:700; }
 
   .stepper{ display:flex; align-items:center; justify-content:center; gap:22px; padding:6px 0 2px; }
   .stepper-btn{ width:38px; height:38px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface-2); font-size:19px; color:var(--ink); cursor:pointer; }
@@ -444,18 +458,25 @@
   .heart{ display:none; text-align:center; color:var(--ink-soft); font-size:13px; margin:14px 0 2px; opacity:0.7; }
 
   /* ---------- glass themes: frosted panels over a rich gradient backdrop ---------- */
-  [data-theme="duskglass"] body{ background: linear-gradient(160deg, #6E6560 0%, #A9785E 45%, #D9A272 75%, #8A6A5E 100%) fixed; }
   [data-theme="nightglass"] body{ background: linear-gradient(165deg, #10131A 0%, #1E2A3D 50%, #2C3D55 80%, #171B24 100%) fixed; }
-  [data-theme="duskglass"] .card, [data-theme="nightglass"] .card,
-  [data-theme="duskglass"] .stat-card, [data-theme="nightglass"] .stat-card,
-  [data-theme="duskglass"] .settings-section, [data-theme="nightglass"] .settings-section,
-  [data-theme="duskglass"] .home-quote-card, [data-theme="nightglass"] .home-quote-card,
-  [data-theme="duskglass"] .cat-card, [data-theme="nightglass"] .cat-card,
-  [data-theme="duskglass"] .sheet, [data-theme="nightglass"] .sheet,
-  [data-theme="duskglass"] .topbar, [data-theme="nightglass"] .topbar,
-  [data-theme="duskglass"] .bottom-nav, [data-theme="nightglass"] .bottom-nav,
-  [data-theme="duskglass"] .settings-page, [data-theme="nightglass"] .settings-page{
+  [data-theme="nightglass"] .card,
+  [data-theme="nightglass"] .stat-card,
+  [data-theme="nightglass"] .settings-section,
+  [data-theme="nightglass"] .home-quote-card,
+  [data-theme="nightglass"] .cat-card,
+  [data-theme="nightglass"] .sheet,
+  [data-theme="nightglass"] .topbar,
+  [data-theme="nightglass"] .bottom-nav,
+  [data-theme="nightglass"] .settings-page{
     backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+  }
+
+  /* ---------- minimal glass: a light, subtle frosted touch, not a full glass theme ---------- */
+  [data-theme="minimal"] .sheet, [data-theme="minimal"] .settings-page{
+    backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+  [data-theme="minimal"] .bottom-nav, [data-theme="minimal"] .topbar{
+    background: rgba(237,230,220,0.75); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
   }
 
   /* ---------- velvet theme: big serif "question" headers, cushioned soft fields ---------- */
@@ -546,26 +567,19 @@
           <div class="settings-row-label">Theme</div>
           <div class="option-row">
             <button class="option-pill" data-theme-opt="minimal">Minimal</button>
-            <button class="option-pill" data-theme-opt="duskglass">Dusk Glass</button>
             <button class="option-pill" data-theme-opt="oldmoney">Old Money</button>
             <button class="option-pill" data-theme-opt="nightglass">Night Glass</button>
             <button class="option-pill" data-theme-opt="velvet">Velvet</button>
+            <button class="option-pill" data-theme-opt="walnutnoir">Walnut Noir</button>
+            <button class="option-pill" data-theme-opt="brownstone">Brownstone</button>
+            <button class="option-pill" data-theme-opt="cottonforest">Cotton Forest</button>
           </div>
         </div>
         <div class="settings-row">
           <div class="settings-row-label">Font</div>
           <div class="option-row">
             <button class="option-pill" data-font-opt="elegant">Elegant</button>
-            <button class="option-pill" data-font-opt="classic">Classic</button>
-            <button class="option-pill" data-font-opt="modern">Modern</button>
             <button class="option-pill" data-font-opt="refined">Refined</button>
-            <button class="option-pill" data-font-opt="rounded">Rounded</button>
-            <button class="option-pill" data-font-opt="bold">Bold</button>
-            <button class="option-pill" data-font-opt="handwritten">Handwritten</button>
-            <button class="option-pill" data-font-opt="technical">Technical</button>
-            <button class="option-pill" data-font-opt="luxe">Luxe</button>
-            <button class="option-pill" data-font-opt="editorial">Editorial</button>
-            <button class="option-pill" data-font-opt="script">Script</button>
           </div>
         </div>
       </div>
@@ -824,9 +838,9 @@
   <input type="text" id="text-input" placeholder="What do you need to do?" maxlength="200">
   <div class="field-label">Repeats</div>
   <div class="type-grid" id="type-grid">
-    <div class="type-opt" data-type="once">Once</div>
-    <div class="type-opt" data-type="weekly">Weekly</div>
-    <div class="type-opt" data-type="monthly">Monthly</div>
+    <div class="type-opt" data-type="once"><span class="pill-text">Once</span></div>
+    <div class="type-opt" data-type="weekly"><span class="pill-text">Weekly</span></div>
+    <div class="type-opt" data-type="monthly"><span class="pill-text">Monthly</span></div>
   </div>
   <div class="date-field" id="date-field">
     <div class="field-label">Due date</div>
@@ -858,21 +872,21 @@
 
   <div class="field-label">Schedule</div>
   <div class="type-grid htype" id="habit-type-grid">
-    <div class="type-opt" data-htype="daily">Daily</div>
-    <div class="type-opt" data-htype="days">Specific days</div>
-    <div class="type-opt" data-htype="timesPerWeek">X / week</div>
+    <div class="type-opt" data-htype="daily"><span class="pill-text">Daily</span></div>
+    <div class="type-opt" data-htype="days"><span class="pill-text">Specific days</span></div>
+    <div class="type-opt" data-htype="timesPerWeek"><span class="pill-text">X / week</span></div>
   </div>
 
   <div class="date-field" id="habit-days-row">
     <div class="field-label">Which days</div>
     <div class="day-chip-row" id="habit-day-chips">
-      <div class="day-chip" data-day="0">M</div>
-      <div class="day-chip" data-day="1">T</div>
-      <div class="day-chip" data-day="2">W</div>
-      <div class="day-chip" data-day="3">T</div>
-      <div class="day-chip" data-day="4">F</div>
-      <div class="day-chip" data-day="5">S</div>
-      <div class="day-chip" data-day="6">S</div>
+      <div class="day-chip" data-day="0"><span class="pill-text">M</span></div>
+      <div class="day-chip" data-day="1"><span class="pill-text">T</span></div>
+      <div class="day-chip" data-day="2"><span class="pill-text">W</span></div>
+      <div class="day-chip" data-day="3"><span class="pill-text">T</span></div>
+      <div class="day-chip" data-day="4"><span class="pill-text">F</span></div>
+      <div class="day-chip" data-day="5"><span class="pill-text">S</span></div>
+      <div class="day-chip" data-day="6"><span class="pill-text">S</span></div>
     </div>
   </div>
 
@@ -904,8 +918,8 @@
 
   <div class="field-label">Timeframe</div>
   <div class="type-grid" id="goal-type-grid" style="grid-template-columns:repeat(2,1fr);">
-    <div class="type-opt" data-gtype="short">Short-term</div>
-    <div class="type-opt" data-gtype="long">Long-term</div>
+    <div class="type-opt" data-gtype="short"><span class="pill-text">Short-term</span></div>
+    <div class="type-opt" data-gtype="long"><span class="pill-text">Long-term</span></div>
   </div>
 
   <div class="field-label">Target date (optional)</div>
@@ -1129,7 +1143,7 @@
   }
 
   /* ---------------- theme / font ---------------- */
-  var THEME_COLORS = { minimal:"#EDE6DC", duskglass:"#8A7A72", oldmoney:"#1C1611", nightglass:"#171B24", velvet:"#362D28" };
+  var THEME_COLORS = { minimal:"#EDE6DC", oldmoney:"#1C1611", nightglass:"#171B24", velvet:"#362D28", walnutnoir:"#2E1F1B", brownstone:"#D7CCC8", cottonforest:"#F2F3ED" };
   var savedTheme = loadStr("daybook.theme") || "velvet";
   if(!THEME_COLORS[savedTheme]) savedTheme = "velvet";
   document.documentElement.setAttribute("data-theme", savedTheme);
@@ -2224,20 +2238,22 @@
     var wrap = document.getElementById("task-cat-picker");
     var html = "";
     CATEGORIES.forEach(function(cat){
-      var col = catColor(cat);
       html += '<div class="cat-pill" data-cat="'+cat+'">'+CAT_LABELS[cat]+'</div>';
     });
-    html += '<div class="cat-pill" id="cat-add-trigger">+ New</div>';
+    html += '<button type="button" class="cat-pill" id="cat-add-trigger">+ New</button>';
     wrap.innerHTML = html;
-    wrap.querySelectorAll(".cat-pill[data-cat]").forEach(function(p){
-      p.addEventListener("click", function(){ selectedCategory = p.getAttribute("data-cat"); syncCatPicker(); });
-    });
-    document.getElementById("cat-add-trigger").addEventListener("click", function(){
-      document.getElementById("cat-add-inline").style.display = "flex";
-      document.getElementById("cat-add-input").focus();
-    });
     syncCatPicker();
   }
+  document.getElementById("task-cat-picker").addEventListener("click", function(e){
+    var newBtn = e.target.closest("#cat-add-trigger");
+    if(newBtn){
+      document.getElementById("cat-add-inline").style.display = "flex";
+      document.getElementById("cat-add-input").focus();
+      return;
+    }
+    var pill = e.target.closest(".cat-pill[data-cat]");
+    if(pill){ selectedCategory = pill.getAttribute("data-cat"); syncCatPicker(); }
+  });
   function syncCatPicker(){
     document.querySelectorAll("#task-cat-picker .cat-pill[data-cat]").forEach(function(p){
       var cat = p.getAttribute("data-cat");
@@ -2425,23 +2441,30 @@
     var handle = sheetEl.querySelector(".sheet-handle");
     if(!handle) return;
     var startY = 0, deltaY = 0, dragging = false;
-    handle.addEventListener("touchstart", function(e){
-      startY = e.touches[0].clientY; deltaY = 0; dragging = true;
-      sheetEl.style.transition = "none";
-    }, { passive:true });
-    handle.addEventListener("touchmove", function(e){
+    function start(y){ startY = y; deltaY = 0; dragging = true; sheetEl.style.transition = "none"; }
+    function move(y){
       if(!dragging) return;
-      deltaY = e.touches[0].clientY - startY;
+      deltaY = y - startY;
       if(deltaY < 0) deltaY = 0;
       sheetEl.style.transform = "translateY("+deltaY+"px)";
-    }, { passive:true });
-    handle.addEventListener("touchend", function(){
+    }
+    function end(){
       if(!dragging) return;
       dragging = false;
       sheetEl.style.transition = "transform .25s cubic-bezier(.32,.72,0,1)";
-      if(deltaY > 70){ closeFn(); }
+      if(deltaY > 50){ closeFn(); }
       sheetEl.style.transform = "";
-    }, { passive:true });
+    }
+    handle.addEventListener("touchstart", function(e){ start(e.touches[0].clientY); }, { passive:true });
+    handle.addEventListener("touchmove", function(e){ move(e.touches[0].clientY); }, { passive:true });
+    handle.addEventListener("touchend", end, { passive:true });
+    handle.addEventListener("touchcancel", end, { passive:true });
+    if(window.PointerEvent){
+      handle.addEventListener("pointerdown", function(e){ handle.setPointerCapture(e.pointerId); start(e.clientY); });
+      handle.addEventListener("pointermove", function(e){ move(e.clientY); });
+      handle.addEventListener("pointerup", end);
+      handle.addEventListener("pointercancel", end);
+    }
   }
   makeSheetSwipeable(sheet, closeSheet);
   makeSheetSwipeable(habitSheet, closeHabitSheet);
