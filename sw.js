@@ -1,4 +1,4 @@
-const CACHE = "daybook-v5";
+const CACHE = "daybook-v6";
 const STATIC_ASSETS = ["./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
