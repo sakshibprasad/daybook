@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Daybook">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Caveat:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5F1E6; --paper-2:#EDE7D6; --ink:#2B2620; --ink-soft:#8C8375;
@@ -405,9 +405,33 @@
   html[data-theme="aurora"] .home-greeting-title, html[data-theme="auroranight"] .home-greeting-title{ font-size:15px; opacity:0.75; }
   html[data-theme="aurora"] .home-hero, html[data-theme="auroranight"] .home-hero{ background:none; border:none; box-shadow:none; backdrop-filter:none; padding:4px 2px; overflow:visible; }
 
+  /* ---------- splash screen ---------- */
+  #splash-screen{
+    position:fixed; inset:0; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    background:linear-gradient(160deg, #C9AC8C 0%, #D9C0A2 100%);
+    transition:opacity .5s ease, visibility .5s ease;
+  }
+  #splash-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  #splash-word{
+    font-family:'Caveat', cursive; font-weight:700; font-size:88px; color:#FBF6EE; line-height:1;
+    animation:splashIn .7s cubic-bezier(.22,1,.36,1) both;
+  }
+  #splash-check{
+    width:56px; height:56px; border-radius:50%; border:3px solid #FBF6EE; color:#FBF6EE;
+    display:flex; align-items:center; justify-content:center;
+    animation:splashIn .7s cubic-bezier(.22,1,.36,1) .15s both;
+  }
+  #splash-check svg{ width:26px; height:26px; }
+  @keyframes splashIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
 </style>
 </head>
 <body>
+<div id="splash-screen">
+  <div id="splash-word">Daybook</div>
+  <div id="splash-check">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>
+  </div>
+</div>
 <div class="app">
 
   <!-- HOME -->
@@ -1867,6 +1891,9 @@
   document.getElementById("user-name-input").value = loadStr("db2.userName") || "";
   syncThemeButtons();
   syncFontButtons();
+
+  var splashEl = document.getElementById("splash-screen");
+  setTimeout(function(){ if(splashEl) splashEl.classList.add("hide"); }, 650);
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
