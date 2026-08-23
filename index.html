@@ -82,7 +82,6 @@
   html[data-font="playfair"]{ --font-display:'Playfair Display', serif; }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); min-height:100vh; min-height:100dvh; }
-  body{ zoom:var(--text-zoom, 1); }
   body{ overscroll-behavior-y:none; }
   input,textarea,button{ font-family:inherit; }
   ::selection{ background:var(--moss-soft); }
@@ -158,8 +157,9 @@
   #home-today-list.ledger-list{ display:flex; flex-direction:column; gap:8px; }
   #home-today-list .ledger-item{
     border-bottom:none; background:var(--paper-2); border-radius:14px; padding:14px 15px;
-    box-shadow:0 1px 2px rgba(43,38,32,0.03);
+    box-shadow:0 1px 2px rgba(43,38,32,0.03); border-left:3px solid var(--moss);
   }
+  #home-today-list .ledger-item.done{ border-left-color:var(--line); }
   html[data-theme="dusk"] #home-today-list .ledger-item{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
   .ledger-item:last-child{ border-bottom:none; }
   .ledger-check{ flex:0 0 auto; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--ink-soft); background:none; margin-top:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:transparent; transition:transform .15s cubic-bezier(.34,1.56,.64,1), background .15s ease, border-color .15s ease; }
@@ -167,7 +167,7 @@
   .ledger-item.done .ledger-check{ background:var(--moss); border-color:var(--moss); color:#fff; }
   .ledger-item.done .ledger-text{ color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--line); }
   .ledger-body{ flex:1; min-width:0; }
-  .ledger-text{ font-size:15px; color:var(--ink); line-height:1.4; }
+  .ledger-text{ font-size:calc(15px * var(--text-zoom, 1)); color:var(--ink); line-height:1.4; }
   .ledger-meta{ display:flex; gap:8px; margin-top:5px; }
   .ledger-tag{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); background:var(--paper-2); padding:2px 8px; border-radius:20px; letter-spacing:0.02em; }
   .ledger-tag.cat{ background:var(--moss-soft); color:var(--moss); }
@@ -402,6 +402,8 @@
   html[data-theme="aurora"] .card, html[data-theme="auroranight"] .card{
     border-radius:18px; border-bottom:1px solid var(--line); margin-bottom:12px; padding:18px;
   }
+  html[data-theme="aurora"] #home-today-list .ledger-item, html[data-theme="auroranight"] #home-today-list .ledger-item{ border-left:3px solid var(--moss); }
+  html[data-theme="aurora"] #home-today-list .ledger-item.done, html[data-theme="auroranight"] #home-today-list .ledger-item.done{ border-left-color:var(--line); }
   html[data-theme="aurora"] .card:last-child, html[data-theme="auroranight"] .card:last-child{ margin-bottom:0; }
   html[data-theme="aurora"] .bottom-nav, html[data-theme="auroranight"] .bottom-nav{
     background:var(--glass-dark); border:1px solid var(--line); box-shadow:var(--shadow);
@@ -687,6 +689,7 @@
         <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Get a phone notification when a timed task comes due — while Daybook is open. Fully closing the app or browser will stop them, since that needs a server this app doesn't have.</div>
         <button class="pill-btn" id="reminders-toggle" style="width:100%; padding:10px;">Turn on reminders</button>
         <div id="reminders-status" style="font-size:12px; color:var(--ink-soft); margin-top:8px; display:none;"></div>
+        <button class="pill-btn" id="reminders-test" style="width:100%; padding:9px; margin-top:8px; display:none; font-size:12px;">Send a test notification now</button>
       </div>
       <div class="card">
         <div class="label-row"><span class="label">Data</span></div>
@@ -755,6 +758,9 @@
       <label class="dt-label">Time (optional)</label>
       <input type="time" id="task-time-input">
     </div>
+  </div>
+  <div class="add-line" id="add-to-calendar" style="display:none; margin-bottom:14px; padding-top:0;">
+    <span class="plus">⤓</span>Add to phone calendar for a real reminder
   </div>
   <div class="cat-row" id="task-cat-row"></div>
   <div class="cat-add-inline" id="cat-add-inline" style="display:none;">
@@ -1180,6 +1186,7 @@
   function syncRemindersUI(){
     var btn = document.getElementById("reminders-toggle");
     var status = document.getElementById("reminders-status");
+    var testBtn = document.getElementById("reminders-test");
     var supported = "Notification" in window;
     if(!supported){
       btn.textContent = "Not supported on this browser";
@@ -1189,12 +1196,18 @@
     if(remindersOn && Notification.permission==="granted"){
       btn.textContent = "Turn off reminders";
       status.style.display = "block";
-      status.textContent = "On — checking while Daybook is open.";
+      status.textContent = "On — checking while Daybook is open and in view.";
+      testBtn.style.display = "block";
     } else {
       btn.textContent = "Turn on reminders";
       status.style.display = "none";
+      testBtn.style.display = "none";
     }
   }
+  document.getElementById("reminders-test").addEventListener("click", function(){
+    try{ new Notification("Test reminder", { body:"If you see this, notifications work on this device.", icon:"icon-192.png" }); }
+    catch(e){ alert("Notification failed: "+e.message); }
+  });
   document.getElementById("reminders-toggle").addEventListener("click", function(){
     if(!("Notification" in window)) return;
     if(remindersOn){
@@ -1751,6 +1764,7 @@
     document.getElementById("task-delete").style.display = existing ? "block" : "none";
     document.querySelectorAll("#task-type-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-type")===taskType); });
     document.getElementById("task-date-time-row").style.display = taskType==="once" ? "flex" : "none";
+    document.getElementById("add-to-calendar").style.display = taskType==="once" ? "flex" : "none";
     document.getElementById("task-date-input").value = existing && existing.dueDate ? existing.dueDate : selKey();
     document.getElementById("task-time-input").value = existing && existing.dueTime ? existing.dueTime : "";
     renderCatRow();
@@ -1760,11 +1774,61 @@
     setTimeout(function(){ document.getElementById("task-input").focus(); }, 200);
   }
   function closeTaskSheet(){ overlay.classList.remove("open"); taskSheet.classList.remove("open"); editingTaskId=null; }
+
+  function icsEscape(s){ return String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n"); }
+  function icsDateStamp(){
+    var d = new Date();
+    return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+"T"+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+"Z";
+  }
+  function uid_ics(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,10); }
+  function buildICS(text, dateStr, timeStr, catName){
+    var uid = uid_ics();
+    var lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Daybook//EN","BEGIN:VEVENT","UID:"+uid+"@daybook"];
+    lines.push("DTSTAMP:"+icsDateStamp());
+    var dParts = dateStr.split("-");
+    if(timeStr){
+      var tParts = timeStr.split(":");
+      var startStr = dParts[0]+dParts[1]+dParts[2]+"T"+pad(parseInt(tParts[0],10))+pad(parseInt(tParts[1],10))+"00";
+      lines.push("DTSTART:"+startStr);
+      var endDate = new Date(parseInt(dParts[0],10), parseInt(dParts[1],10)-1, parseInt(dParts[2],10), parseInt(tParts[0],10), parseInt(tParts[1],10));
+      endDate.setMinutes(endDate.getMinutes()+30);
+      var endStr = endDate.getFullYear()+pad(endDate.getMonth()+1)+pad(endDate.getDate())+"T"+pad(endDate.getHours())+pad(endDate.getMinutes())+"00";
+      lines.push("DTEND:"+endStr);
+      lines.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Reminder","TRIGGER:-PT0M","END:VALARM");
+    } else {
+      lines.push("DTSTART;VALUE=DATE:"+dParts[0]+dParts[1]+dParts[2]);
+      lines.push("DTEND;VALUE=DATE:"+dParts[0]+dParts[1]+dParts[2]);
+    }
+    lines.push("SUMMARY:"+icsEscape(text));
+    if(catName) lines.push("DESCRIPTION:"+icsEscape(catName));
+    lines.push("END:VEVENT","END:VCALENDAR");
+    return lines.join("\r\n");
+  }
+  document.getElementById("add-to-calendar").addEventListener("click", function(){
+    var text = document.getElementById("task-input").value.trim();
+    var dateVal = document.getElementById("task-date-input").value;
+    var timeVal = document.getElementById("task-time-input").value;
+    if(!text || !dateVal){ showToast("Add a task name and date first."); return; }
+    var activeCat = document.querySelector("#task-cat-row .cat-opt.active");
+    var catName = activeCat ? (catLabel(activeCat.getAttribute("data-cat"))||"") : "";
+    var icsContent = buildICS(text, dateVal, timeVal, catName);
+    var blob = new Blob([icsContent], { type:"text/calendar" });
+    var file = new File([blob], "daybook-event.ics", { type:"text/calendar" });
+    if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
+      navigator.share({ files:[file], title:text }).catch(function(){});
+    } else {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a"); a.href=url; a.download="daybook-event.ics"; a.click();
+      URL.revokeObjectURL(url);
+    }
+  });
+
   document.querySelectorAll("#task-type-row .type-opt").forEach(function(o){
     o.addEventListener("click", function(){
       document.querySelectorAll("#task-type-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
       o.classList.add("active"); taskType = o.getAttribute("data-type");
       document.getElementById("task-date-time-row").style.display = taskType==="once" ? "flex" : "none";
+      document.getElementById("add-to-calendar").style.display = taskType==="once" ? "flex" : "none";
       if(taskType==="once" && !document.getElementById("task-date-input").value) document.getElementById("task-date-input").value = selKey();
     });
   });
