@@ -19,13 +19,14 @@
 <meta name="apple-mobile-web-app-title" content="Daybook">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Caveat:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5F1E6; --paper-2:#EDE7D6; --ink:#2B2620; --ink-soft:#8C8375;
     --line:#E3DDCE; --moss:#5B6B4F; --moss-soft:#E4E8DA; --moss-2:#7C8E6C;
     --danger:#A3543F; --shadow:0 2px 10px rgba(43,38,32,0.05), 0 10px 26px rgba(43,38,32,0.06);
     --font-display:'Libre Caslon Display', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+    --font-secondary:'Tangerine', cursive;
   }
   html[data-theme="dusk"]{
     --paper:#1C1B18; --paper-2:#26241F; --ink:#EDE7D9; --ink-soft:#8A8377;
@@ -57,6 +58,11 @@
     --line:#24262B; --moss:#8CA0C9; --moss-soft:#1E2530; --moss-2:#A8BAE0;
     --danger:#D9776A; --shadow:0 2px 10px rgba(0,0,0,0.3), 0 10px 26px rgba(0,0,0,0.35);
   }
+  html[data-theme="mochacoast"]{
+    --paper:#F5EFE4; --paper-2:#EAE0D0; --ink:#4A362A; --ink-soft:#A69684;
+    --line:#DDD0BC; --moss:#8B6F47; --moss-soft:#EDE2CE; --moss-2:#A68A5C;
+    --danger:#A24A3A; --shadow:0 2px 10px rgba(74,54,42,0.06), 0 10px 26px rgba(74,54,42,0.07);
+  }
   html[data-theme="aurora"]{
     --paper:#3A3438; --paper-2:rgba(20,15,13,0.55); --ink:#FBF6EE; --ink-soft:rgba(251,246,238,0.62);
     --line:rgba(255,244,230,0.14); --moss:#E8A662; --moss-soft:rgba(232,166,98,0.2); --moss-2:#F0BC85;
@@ -72,8 +78,11 @@
   html[data-font="caslon"]{ --font-display:'Libre Caslon Display', serif; }
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
   html[data-font="fraunces"]{ --font-display:'Fraunces', serif; }
+  html[data-font="cinzel"]{ --font-display:'Cinzel', serif; }
+  html[data-font="playfair"]{ --font-display:'Playfair Display', serif; }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); min-height:100vh; min-height:100dvh; }
+  body{ zoom:var(--text-zoom, 1); }
   body{ overscroll-behavior-y:none; }
   input,textarea,button{ font-family:inherit; }
   ::selection{ background:var(--moss-soft); }
@@ -135,9 +144,9 @@
   .stat-value{ font-family:var(--font-display); font-size:16px; color:var(--ink); }
   .stat-value b{ font-family:var(--font-mono); font-size:22px; font-weight:600; }
 
-  .next-up-card{ background:var(--paper-2); border-radius:16px; padding:18px; margin-top:14px; cursor:pointer; }
+  .next-up-card{ background:var(--paper-2); border-radius:16px; padding:18px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
   .next-up-time{ font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); margin-bottom:8px; }
-  .next-up-title{ font-family:var(--font-display); font-size:18px; color:var(--ink); }
+  .next-up-title{ font-family:var(--font-secondary); font-size:30px; line-height:1.1; color:var(--ink); }
   .next-up-sub{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
   .next-up-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding-top:12px; border-top:1px solid var(--line); font-size:11px; color:var(--ink-soft); }
   .next-up-arrow{ color:var(--moss); font-size:14px; }
@@ -407,7 +416,7 @@
   html[data-theme="aurora"] .home-hero::after, html[data-theme="auroranight"] .home-hero::after{ display:none; }
   html[data-theme="aurora"] .theme-card, html[data-theme="auroranight"] .theme-card{ box-shadow:0 6px 14px rgba(0,0,0,0.3); }
   html[data-theme="aurora"] .stat-card, html[data-theme="auroranight"] .stat-card{ background:var(--glass-light); border:1px solid var(--line); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
-  html[data-theme="aurora"] .next-up-card, html[data-theme="auroranight"] .next-up-card{ background:var(--glass-dark); border:1px solid var(--line); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
+  html[data-theme="aurora"] .next-up-card, html[data-theme="auroranight"] .next-up-card{ background:var(--glass-dark); border:1px solid var(--line); border-left:3px solid var(--moss); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
   html[data-theme="aurora"] .home-greeting-date, html[data-theme="auroranight"] .home-greeting-date{ font-family:var(--font-body); font-size:32px; font-weight:600; color:var(--ink); order:-1; margin-bottom:4px; }
   html[data-theme="aurora"] .home-greeting, html[data-theme="auroranight"] .home-greeting{ display:flex; flex-direction:column; }
   html[data-theme="aurora"] .home-greeting-title, html[data-theme="auroranight"] .home-greeting-title{ font-size:15px; opacity:0.75; }
@@ -661,7 +670,23 @@
           <div class="theme-opt" data-font-opt="caslon">Caslon</div>
           <div class="theme-opt" data-font-opt="cormorant">Cormorant</div>
           <div class="theme-opt" data-font-opt="fraunces">Fraunces</div>
+          <div class="theme-opt" data-font-opt="cinzel">Cinzel</div>
+          <div class="theme-opt" data-font-opt="playfair">Playfair</div>
         </div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Text size</span></div>
+        <div class="theme-row" id="fontsize-row">
+          <div class="theme-opt" data-fontsize-opt="small">Small</div>
+          <div class="theme-opt" data-fontsize-opt="medium">Medium</div>
+          <div class="theme-opt" data-fontsize-opt="large">Large</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Reminders</span></div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Get a phone notification when a timed task comes due — while Daybook is open. Fully closing the app or browser will stop them, since that needs a server this app doesn't have.</div>
+        <button class="pill-btn" id="reminders-toggle" style="width:100%; padding:10px;">Turn on reminders</button>
+        <div id="reminders-status" style="font-size:12px; color:var(--ink-soft); margin-top:8px; display:none;"></div>
       </div>
       <div class="card">
         <div class="label-row"><span class="label">Data</span></div>
@@ -1148,12 +1173,74 @@
       el.style.display = "none";
     }
   }
+
+  /* ---------------- task reminders (foreground-only - see caveat in Settings copy) ---------------- */
+  var remindersOn = loadStr("db2.remindersOn") === "1";
+  var notifiedTaskKeys = load("db2.notifiedTaskKeys", {});
+  function syncRemindersUI(){
+    var btn = document.getElementById("reminders-toggle");
+    var status = document.getElementById("reminders-status");
+    var supported = "Notification" in window;
+    if(!supported){
+      btn.textContent = "Not supported on this browser";
+      btn.disabled = true;
+      return;
+    }
+    if(remindersOn && Notification.permission==="granted"){
+      btn.textContent = "Turn off reminders";
+      status.style.display = "block";
+      status.textContent = "On — checking while Daybook is open.";
+    } else {
+      btn.textContent = "Turn on reminders";
+      status.style.display = "none";
+    }
+  }
+  document.getElementById("reminders-toggle").addEventListener("click", function(){
+    if(!("Notification" in window)) return;
+    if(remindersOn){
+      remindersOn = false;
+      saveStr("db2.remindersOn", "0");
+      syncRemindersUI();
+      return;
+    }
+    Notification.requestPermission().then(function(perm){
+      if(perm==="granted"){
+        remindersOn = true;
+        saveStr("db2.remindersOn", "1");
+        new Notification("Daybook reminders are on", { body:"You'll be notified when a timed task comes due, while the app is open.", icon:"icon-192.png" });
+      }
+      syncRemindersUI();
+    });
+  });
+  function checkDueReminders(){
+    if(!remindersOn || !("Notification" in window) || Notification.permission!=="granted") return;
+    var now = new Date();
+    var nowStr = pad(now.getHours())+":"+pad(now.getMinutes());
+    tasks.forEach(function(t){
+      if(t.type!=="once" || !t.dueTime || t.doneOnce) return;
+      if(t.dueDate!==todayKey) return;
+      var key = t.id+"_"+todayKey;
+      if(notifiedTaskKeys[key]) return;
+      if(t.dueTime <= nowStr){
+        notifiedTaskKeys[key] = true;
+        save("db2.notifiedTaskKeys", notifiedTaskKeys);
+        try{
+          new Notification(t.text, { body:"Due "+fmtTime(t.dueTime)+(t.category?" · "+ (catLabel(t.category)||"") : ""), icon:"icon-192.png" });
+        }catch(e){}
+      }
+    });
+  }
+  setInterval(checkDueReminders, 30000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) checkDueReminders(); });
+
   document.getElementById("settings-btn").addEventListener("click", function(){
     switchTab("settings");
     document.getElementById("user-name-input").value = loadStr("db2.userName") || "";
     syncThemeButtons();
     syncFontButtons();
+    syncFontSizeButtons();
     syncExportReminder();
+    syncRemindersUI();
   });
   document.getElementById("settings-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("user-name-input").addEventListener("input", function(){ saveStr("db2.userName", this.value.trim()); });
@@ -1169,7 +1256,8 @@
     classicbrown: { bg:"#EDE4D6", bg2:"#DDD0BC", ink:"#2B211B", accent:"#6B4F3F", label:"Classic Brown" },
     cocoa: { bg:"#17120F", bg2:"#211A15", ink:"#EDE4D8", accent:"#C79868", label:"Cocoa" },
     dusk: { bg:"#1C1B18", bg2:"#26241F", ink:"#EDE7D9", accent:"#8FAE7C", label:"Dusk" },
-    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" }
+    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
+    mochacoast: { bg:"#EAE0D0", bg2:"#F5EFE4", ink:"#4A362A", accent:"#8B6F47", label:"Mocha Coast" }
   };
   var THEME_TILTS = [-4, 3, -2, 4, -3, 2, -4];
   function renderThemePicker(){
@@ -1227,6 +1315,25 @@
     o.addEventListener("click", function(){ applyFont(o.getAttribute("data-font-opt")); });
   });
   applyFont(currentFont);
+
+  /* ---------------- font size ---------------- */
+  var FONT_SIZE_ZOOM = { small:0.92, medium:1, large:1.14 };
+  var currentFontSize = loadStr("db2.fontSize") || "medium";
+  function applyFontSize(s){
+    currentFontSize = s;
+    document.documentElement.style.setProperty("--text-zoom", FONT_SIZE_ZOOM[s] || 1);
+    saveStr("db2.fontSize", s);
+    syncFontSizeButtons();
+  }
+  function syncFontSizeButtons(){
+    document.querySelectorAll("#fontsize-row .theme-opt").forEach(function(o){
+      o.classList.toggle("active", o.getAttribute("data-fontsize-opt")===currentFontSize);
+    });
+  }
+  document.querySelectorAll("#fontsize-row .theme-opt").forEach(function(o){
+    o.addEventListener("click", function(){ applyFontSize(o.getAttribute("data-fontsize-opt")); });
+  });
+  applyFontSize(currentFontSize);
 
   /* ---------------- FAB ---------------- */
   document.getElementById("fab-add").addEventListener("click", function(){
@@ -1760,6 +1867,37 @@
     setTimeout(function(){ document.getElementById("goal-input").focus(); }, 200);
   }
   function closeGoalSheetFn(){ goalSheet.classList.remove("open"); editingGoalId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open")) overlay.classList.remove("open"); }
+
+  /* ---------------- swipe-down-to-dismiss for sheets ---------------- */
+  (function(){
+    var sheetCloseFns = {};
+    function wireSwipeToDismiss(sheetEl, closeFn){
+      var startY = 0, deltaY = 0, dragging = false;
+      var handle = sheetEl.querySelector(".sheet-handle");
+      function start(y){ dragging = true; startY = y; deltaY = 0; sheetEl.style.transition = "none"; }
+      function move(y){
+        if(!dragging) return;
+        deltaY = Math.max(0, y - startY);
+        sheetEl.style.transform = "translateY("+deltaY+"px)";
+      }
+      function end(){
+        if(!dragging) return;
+        dragging = false;
+        sheetEl.style.transition = "transform .25s cubic-bezier(.32,.72,0,1)";
+        if(deltaY > 90){ sheetEl.style.transform = "translateY(100%)"; setTimeout(function(){ closeFn(); sheetEl.style.transform = ""; }, 200); }
+        else { sheetEl.style.transform = ""; }
+      }
+      [handle, sheetEl.querySelector(".sheet-title")].forEach(function(zone){
+        if(!zone) return;
+        zone.addEventListener("touchstart", function(e){ start(e.touches[0].clientY); }, { passive:true });
+        zone.addEventListener("touchmove", function(e){ move(e.touches[0].clientY); }, { passive:true });
+        zone.addEventListener("touchend", end, { passive:true });
+      });
+    }
+    wireSwipeToDismiss(taskSheet, closeTaskSheet);
+    wireSwipeToDismiss(habitSheet, closeHabitSheetFn);
+    wireSwipeToDismiss(goalSheet, closeGoalSheetFn);
+  })();
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-plus").addEventListener("click", function(){ goalProgress=Math.min(100,goalProgress+10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-progress").addEventListener("input", function(){ var v=parseInt(this.value,10); goalProgress = isNaN(v)?0:Math.max(0,Math.min(100,v)); });
