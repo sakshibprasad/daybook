@@ -267,11 +267,11 @@
   @keyframes calDayFlash{ 0%{ box-shadow:0 0 0 2px var(--moss); } 100%{ box-shadow:0 0 0 0 transparent; } }
   .cal-quickadd-wrap{ position:fixed; left:14px; right:14px; bottom:calc(78px + env(safe-area-inset-bottom)); max-width:452px; margin:0 auto; z-index:18; }
   .cal-quickadd{
-    width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:14px;
     background:var(--paper-2); border:1px solid var(--line); border-radius:26px; padding:13px 18px;
     box-shadow:var(--shadow); cursor:pointer;
   }
-  .cal-quickadd-text{ font-size:14px; color:var(--ink-soft); text-align:left; }
+  .cal-quickadd-text{ font-size:14px; color:var(--ink-soft); text-align:left; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .cal-quickadd-plus{ flex:0 0 auto; width:26px; height:26px; border-radius:50%; background:var(--moss); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; }
 
   /* ---------------- habits ---------------- */
@@ -1889,15 +1889,26 @@
     }
     grid.innerHTML = html;
     grid.querySelectorAll(".cal-chip").forEach(function(chip){
+      var pressTimer = null, longPressed = false;
+      chip.addEventListener("touchstart", function(){
+        longPressed = false;
+        pressTimer = setTimeout(function(){
+          longPressed = true;
+          if(navigator.vibrate) navigator.vibrate(12);
+          if(chip.classList.contains("cal-chip-habit")){
+            var h = habits.find(function(x){ return x.id===chip.getAttribute("data-habit-id"); });
+            if(h) openHabitSheet(h);
+          } else {
+            var t = tasks.find(function(x){ return x.id===chip.getAttribute("data-task-id"); });
+            if(t) openTaskSheet(t);
+          }
+        }, 550);
+      }, { passive:true });
+      chip.addEventListener("touchend", function(){ clearTimeout(pressTimer); }, { passive:true });
+      chip.addEventListener("touchmove", function(){ clearTimeout(pressTimer); }, { passive:true });
       chip.addEventListener("click", function(e){
-        e.stopPropagation();
-        if(chip.classList.contains("cal-chip-habit")){
-          var h = habits.find(function(x){ return x.id===chip.getAttribute("data-habit-id"); });
-          if(h) openHabitSheet(h);
-        } else {
-          var t = tasks.find(function(x){ return x.id===chip.getAttribute("data-task-id"); });
-          if(t) openTaskSheet(t);
-        }
+        if(longPressed){ longPressed = false; e.stopPropagation(); return; }
+        // short tap: let it bubble up to the cell's own click handler - just selects the day, same as tapping anywhere else in the cell
       });
     });
     grid.querySelectorAll(".cal-chip-more").forEach(function(more){
