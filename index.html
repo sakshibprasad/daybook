@@ -1813,13 +1813,32 @@
     var catName = activeCat ? (catLabel(activeCat.getAttribute("data-cat"))||"") : "";
     var icsContent = buildICS(text, dateVal, timeVal, catName);
     var blob = new Blob([icsContent], { type:"text/calendar" });
-    var file = new File([blob], "daybook-event.ics", { type:"text/calendar" });
-    if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
-      navigator.share({ files:[file], title:text }).catch(function(){});
-    } else {
+
+    function downloadFallback(){
       var url = URL.createObjectURL(blob);
-      var a = document.createElement("a"); a.href=url; a.download="daybook-event.ics"; a.click();
-      URL.revokeObjectURL(url);
+      var a = document.createElement("a");
+      a.href = url; a.download = "daybook-event.ics"; a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      showToast("Calendar file downloaded — open it to add the event.");
+    }
+
+    var canFileShare = false;
+    var file = null;
+    try{
+      file = new File([blob], "daybook-event.ics", { type:"text/calendar" });
+      canFileShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files:[file] }));
+    }catch(e){ canFileShare = false; }
+
+    if(canFileShare){
+      navigator.share({ files:[file], title:text }).catch(function(err){
+        if(err && err.name === "AbortError") return; // user cancelled the share sheet - not a failure
+        downloadFallback();
+      });
+    } else {
+      downloadFallback();
     }
   });
 
