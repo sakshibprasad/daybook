@@ -1,6 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="aurora">
+<html lang="en">
 <head>
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem("db2.theme") || "aurora";
+      if(t !== "paper") document.documentElement.setAttribute("data-theme", t);
+    }catch(e){ document.documentElement.setAttribute("data-theme", "aurora"); }
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Daybook</title>
@@ -65,13 +73,13 @@
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
   html[data-font="fraunces"]{ --font-display:'Fraunces', serif; }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); }
+  html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); min-height:100vh; min-height:100dvh; }
   body{ overscroll-behavior-y:none; }
   input,textarea,button{ font-family:inherit; }
   ::selection{ background:var(--moss-soft); }
   :focus-visible{ outline:2px solid var(--moss); outline-offset:2px; }
 
-  .app{ max-width:480px; margin:0 auto; min-height:100vh; position:relative; padding-bottom:90px; }
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; position:relative; padding-bottom:90px; }
   @media (min-width:700px){
     .app,.bottom-nav,.sheet{ max-width:640px; }
     .section,.topbar,.home-wrap{ padding-left:36px; padding-right:36px; }
@@ -408,16 +416,16 @@
   /* ---------- splash screen ---------- */
   #splash-screen{
     position:fixed; inset:0; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
-    background:linear-gradient(160deg, #C9AC8C 0%, #D9C0A2 100%);
+    background:linear-gradient(160deg, var(--paper) 0%, var(--paper-2) 100%);
     transition:opacity .5s ease, visibility .5s ease;
   }
   #splash-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
   #splash-word{
-    font-family:'Caveat', cursive; font-weight:700; font-size:88px; color:#FBF6EE; line-height:1;
+    font-family:'Caveat', cursive; font-weight:700; font-size:88px; color:var(--ink); line-height:1;
     animation:splashIn .7s cubic-bezier(.22,1,.36,1) both;
   }
   #splash-check{
-    width:56px; height:56px; border-radius:50%; border:3px solid #FBF6EE; color:#FBF6EE;
+    width:56px; height:56px; border-radius:50%; border:3px solid var(--moss); color:var(--moss);
     display:flex; align-items:center; justify-content:center;
     animation:splashIn .7s cubic-bezier(.22,1,.36,1) .15s both;
   }
