@@ -1448,8 +1448,7 @@
   }
 
   function driveAutoPush(){
-    if(!driveConnected) return;
-    if(!driveAccessToken){ driveGetToken(driveAutoPush); return; }
+    if(!driveConnected || !driveAccessToken) return;
     driveSyncState = "syncing"; syncDriveUI();
     var payload = JSON.stringify({ tasks:tasks, habits:habits, goals:goals, categories:categories, userName: loadStr("db2.userName"), exportedAt: localDataModifiedAt });
     driveFetchFileId().then(function(fileId){
@@ -1468,8 +1467,7 @@
   }
 
   function driveAutoPull(onDone){
-    if(!driveConnected) { if(onDone) onDone(); return; }
-    if(!driveAccessToken){ driveGetToken(function(){ driveAutoPull(onDone); }); return; }
+    if(!driveConnected || !driveAccessToken) { if(onDone) onDone(); return; }
     driveFetchFileId().then(function(fileId){
       if(!fileId){ if(onDone) onDone(); return null; }
       return fetch("https://www.googleapis.com/drive/v3/files/"+fileId+"?alt=media", { headers:{ Authorization: "Bearer "+driveAccessToken } }).then(function(r){ return r.json(); });
@@ -1491,8 +1489,7 @@
     }).catch(function(){ if(onDone) onDone(); });
   }
   syncDriveUI();
-  if(driveConnected) driveAutoPull();
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden && driveConnected) driveAutoPull(); });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden && driveConnected && driveAccessToken) driveAutoPull(); });
 
   /* ---------------- Google Tasks sync (automatic, two-way) ---------------- */
   var TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
@@ -1567,9 +1564,7 @@
   }
 
   function gtasksAutoPush(){
-    if(!gtasksConnected) return;
-    if(!gtasksAccessToken){ gtasksGetToken(function(){ gtasksEnsureList(gtasksAutoPush); }); return; }
-    if(!gtasksListId){ gtasksEnsureList(gtasksAutoPush); return; }
+    if(!gtasksConnected || !gtasksAccessToken || !gtasksListId) return;
     gtasksSyncState = "syncing"; syncGTasksUI();
     var toSync = tasks.filter(function(t){ return t.type==="once"; });
     var chain = Promise.resolve();
@@ -1597,9 +1592,7 @@
   }
 
   function gtasksAutoPull(onDone){
-    if(!gtasksConnected){ if(onDone) onDone(); return; }
-    if(!gtasksAccessToken){ gtasksGetToken(function(){ gtasksEnsureList(function(){ gtasksAutoPull(onDone); }); }); return; }
-    if(!gtasksListId){ gtasksEnsureList(function(){ gtasksAutoPull(onDone); }); return; }
+    if(!gtasksConnected || !gtasksAccessToken || !gtasksListId) { if(onDone) onDone(); return; }
     fetch("https://www.googleapis.com/tasks/v1/lists/"+gtasksListId+"/tasks?showCompleted=true&showHidden=true", { headers:{ Authorization:"Bearer "+gtasksAccessToken } })
       .then(function(r){ return r.json(); }).then(function(d){
         var remoteTasks = d.items || [];
@@ -1624,8 +1617,23 @@
       }).catch(function(){ if(onDone) onDone(); });
   }
   syncGTasksUI();
-  if(gtasksConnected) gtasksEnsureList(function(){ gtasksAutoPull(); });
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden && gtasksConnected) gtasksEnsureList(function(){ gtasksAutoPull(); }); });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden && gtasksConnected && gtasksAccessToken) gtasksAutoPull(); });
+
+  /* ---------------- re-establish sync on the user's first genuine tap each session ----------------
+     Acquiring a token automatically (on load, on a timer) isn't triggered by a real user gesture,
+     so browsers block the normal popup and Google falls back to redirecting the whole page - jarring.
+     Doing it inside a real click handler avoids that entirely. */
+  var driveFirstTapDone = false, gtasksFirstTapDone = false;
+  document.addEventListener("click", function(){
+    if(driveConnected && !driveAccessToken && !driveFirstTapDone){
+      driveFirstTapDone = true;
+      driveGetToken(function(){ driveAutoPull(); });
+    }
+    if(gtasksConnected && !gtasksAccessToken && !gtasksFirstTapDone){
+      gtasksFirstTapDone = true;
+      gtasksGetToken(function(){ gtasksEnsureList(function(){ gtasksAutoPull(); }); });
+    }
+  });
 
   document.getElementById("settings-btn").addEventListener("click", function(){
     switchTab("settings");
