@@ -171,7 +171,7 @@
   #home-today-list .ledger-text{ font-family:var(--font-secondary); font-size:calc(21px * var(--text-zoom, 1)); line-height:1.2; }
   .ledger-meta{ display:flex; gap:8px; margin-top:5px; }
   .ledger-tag{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); background:var(--paper-2); padding:2px 8px; border-radius:20px; letter-spacing:0.02em; }
-  .ledger-tag.cat{ background:var(--moss-soft); color:var(--moss); }
+  .ledger-tag.cat{ color:#fff; }
   .ledger-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); opacity:0.35; font-size:16px; cursor:pointer; padding:2px 4px; transition:opacity .15s ease; }
   .ledger-item:active .ledger-del{ opacity:0.7; }
 
@@ -256,9 +256,15 @@
   .cal-cell.other-month{ opacity:0.35; }
   .cal-chip{
     width:100%; font-size:8.5px; line-height:1.3; padding:1.5px 4px; border-radius:4px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; box-sizing:border-box;
   }
-  .cal-chip-more{ font-size:8px; color:var(--ink-soft); padding-left:2px; }
+  .cal-chip-habit{ border:1px dashed rgba(255,255,255,0.6); }
+  .cal-chip-more{ font-size:8px; color:var(--ink-soft); padding-left:2px; cursor:pointer; }
+  .cal-legend{ display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+  .cal-legend-item{ display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink-soft); }
+  .cal-legend-dot{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+  .cal-day-flash{ animation:calDayFlash .9s ease; }
+  @keyframes calDayFlash{ 0%{ box-shadow:0 0 0 2px var(--moss); } 100%{ box-shadow:0 0 0 0 transparent; } }
   .cal-quickadd-wrap{ position:fixed; left:14px; right:14px; bottom:calc(78px + env(safe-area-inset-bottom)); max-width:452px; margin:0 auto; z-index:18; }
   .cal-quickadd{
     width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -578,6 +584,7 @@
       <div class="card">
         <div class="cal-grid" id="cal-dow-row"></div>
         <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-legend" id="cal-legend"></div>
       </div>
       <div class="card">
         <div class="label-row"><span class="label" id="cal-day-label">Today</span></div>
@@ -1005,7 +1012,7 @@
   function taskRowHtml(t){
     var done = doneFor(t);
     var catName = t.category ? catLabel(t.category) : null;
-    var catTag = catName ? '<span class="ledger-tag cat">'+catName+'</span>' : '';
+    var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(t.category)+';">'+catName+'</span>' : '';
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
     return '<li class="ledger-item'+(done?" done":"")+'" data-id="'+t.id+'">' +
@@ -1385,15 +1392,31 @@
     return Math.floor(hrs/24)+" day"+(Math.floor(hrs/24)===1?"":"s")+" ago";
   }
 
+  function waitForGoogleIdentity(onReady, onGiveUp){
+    if(window.google && google.accounts && google.accounts.oauth2){ onReady(); return; }
+    var attempts = 0;
+    var poll = setInterval(function(){
+      attempts++;
+      if(window.google && google.accounts && google.accounts.oauth2){
+        clearInterval(poll);
+        onReady();
+      } else if(attempts >= 20){ // ~6 seconds
+        clearInterval(poll);
+        onGiveUp();
+      }
+    }, 300);
+  }
+
   function driveGetToken(callback){
-    if(!window.google || !google.accounts || !google.accounts.oauth2){ showToast("Google Sign-In hasn't loaded yet — try again in a moment."); return; }
-    if(!driveTokenClient){
-      driveTokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID, scope: DRIVE_SCOPE,
-        callback: function(resp){ if(resp && resp.access_token){ driveAccessToken = resp.access_token; callback(); } }
-      });
-    }
-    driveTokenClient.requestAccessToken({ prompt: driveAccessToken ? "" : (driveConnected ? "" : "consent") });
+    waitForGoogleIdentity(function(){
+      if(!driveTokenClient){
+        driveTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID, scope: DRIVE_SCOPE,
+          callback: function(resp){ if(resp && resp.access_token){ driveAccessToken = resp.access_token; callback(); } }
+        });
+      }
+      driveTokenClient.requestAccessToken({ prompt: driveAccessToken ? "" : (driveConnected ? "" : "consent") });
+    }, function(){ showToast("Couldn't reach Google Sign-In — check your connection and try again."); });
   }
 
   document.getElementById("drive-connect").addEventListener("click", function(){
@@ -1497,14 +1520,15 @@
   }
 
   function gtasksGetToken(callback){
-    if(!window.google || !google.accounts || !google.accounts.oauth2){ showToast("Google Sign-In hasn't loaded yet — try again in a moment."); return; }
-    if(!gtasksTokenClient){
-      gtasksTokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID, scope: TASKS_SCOPE,
-        callback: function(resp){ if(resp && resp.access_token){ gtasksAccessToken = resp.access_token; callback(); } }
-      });
-    }
-    gtasksTokenClient.requestAccessToken({ prompt: gtasksAccessToken ? "" : (gtasksConnected ? "" : "consent") });
+    waitForGoogleIdentity(function(){
+      if(!gtasksTokenClient){
+        gtasksTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID, scope: TASKS_SCOPE,
+          callback: function(resp){ if(resp && resp.access_token){ gtasksAccessToken = resp.access_token; callback(); } }
+        });
+      }
+      gtasksTokenClient.requestAccessToken({ prompt: gtasksAccessToken ? "" : (gtasksConnected ? "" : "consent") });
+    }, function(){ showToast("Couldn't reach Google Sign-In — check your connection and try again."); });
   }
 
   document.getElementById("gtasks-connect").addEventListener("click", function(){
@@ -1745,7 +1769,7 @@
     var streak = computeStreak(h);
     var timeTag = h.time ? '<span class="ledger-tag">'+fmtTime(h.time)+'</span>' : '';
     var catName = h.category ? catLabel(h.category) : null;
-    var catTag = catName ? '<span class="ledger-tag cat">'+escapeHtml(catName)+'</span>' : '';
+    var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(h.category)+';">'+escapeHtml(catName)+'</span>' : '';
     return '<li class="ledger-item habit-row'+(done?" done":"")+'" data-id="'+h.id+'">' +
       '<button class="ledger-check" data-id="'+h.id+'" style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
@@ -1833,6 +1857,7 @@
       var prevDate = new Date(year, month, 1-(startOffset-i));
       html += '<div class="cal-cell other-month">'+prevDate.getDate()+'</div>';
     }
+    var visibleChipCount = window.matchMedia("(min-width:600px)").matches ? 3 : 2;
     for(var day=1; day<=daysInMonth; day++){
       var d = new Date(year, month, day);
       var key = dateKey(d);
@@ -1840,12 +1865,24 @@
       var isSel = key===selKey();
       var dayTasks = tasks.filter(function(t){ return t.type==="once" && t.dueDate===key; })
         .sort(function(a,b){ return b.createdAt-a.createdAt; });
-      var chipsHtml = dayTasks.slice(0,2).map(function(t){
-        var color = t.category ? catColor(t.category) : "var(--ink-soft)";
-        var label = t.dueTime ? fmtTime(t.dueTime)+" "+t.text : t.text;
-        return '<span class="cal-chip" style="background:'+color+';" data-task-id="'+t.id+'">'+escapeHtml(label)+'</span>';
+      var dayHabits = habits.filter(function(h){ return isScheduledOn(h, d); });
+      var dayItems = dayTasks.map(function(t){ return { kind:"task", item:t, sortAt:t.createdAt }; })
+        .concat(dayHabits.map(function(h){ return { kind:"habit", item:h, sortAt:h.createdAt }; }))
+        .sort(function(a,b){ return b.sortAt-a.sortAt; });
+      var chipsHtml = dayItems.slice(0,visibleChipCount).map(function(x){
+        if(x.kind==="task"){
+          var t = x.item;
+          var color = t.category ? catColor(t.category) : "var(--ink-soft)";
+          var label = t.dueTime ? fmtTime(t.dueTime)+" "+t.text : t.text;
+          return '<span class="cal-chip" style="background:'+color+';" data-task-id="'+t.id+'">'+escapeHtml(label)+'</span>';
+        } else {
+          var h = x.item;
+          var hcolor = h.category ? catColor(h.category) : "var(--ink-soft)";
+          var hlabel = (h.time ? fmtTime(h.time)+" " : "")+h.name;
+          return '<span class="cal-chip cal-chip-habit" style="background:'+hcolor+';" data-habit-id="'+h.id+'">'+escapeHtml(hlabel)+'</span>';
+        }
       }).join("");
-      var moreHtml = dayTasks.length > 2 ? '<span class="cal-chip-more">+'+(dayTasks.length-2)+' more</span>' : "";
+      var moreHtml = dayItems.length > visibleChipCount ? '<span class="cal-chip-more" data-more-key="'+key+'">+'+(dayItems.length-visibleChipCount)+' more</span>' : "";
       html += '<div class="cal-cell'+(isToday?" today":"")+(isSel&&!isToday?" selected":"")+'" data-key="'+key+'">'+
         '<span class="cal-cell-num">'+day+'</span>'+chipsHtml+moreHtml+
       '</div>';
@@ -1854,8 +1891,27 @@
     grid.querySelectorAll(".cal-chip").forEach(function(chip){
       chip.addEventListener("click", function(e){
         e.stopPropagation();
-        var t = tasks.find(function(x){ return x.id===chip.getAttribute("data-task-id"); });
-        if(t) openTaskSheet(t);
+        if(chip.classList.contains("cal-chip-habit")){
+          var h = habits.find(function(x){ return x.id===chip.getAttribute("data-habit-id"); });
+          if(h) openHabitSheet(h);
+        } else {
+          var t = tasks.find(function(x){ return x.id===chip.getAttribute("data-task-id"); });
+          if(t) openTaskSheet(t);
+        }
+      });
+    });
+    grid.querySelectorAll(".cal-chip-more").forEach(function(more){
+      more.addEventListener("click", function(e){
+        e.stopPropagation();
+        var parts = more.getAttribute("data-more-key").split("-");
+        selectedDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+        renderCalendar(); renderCalDay();
+        var dayCard = document.getElementById("cal-day-list").closest(".card");
+        if(dayCard){
+          dayCard.scrollIntoView({ behavior:"smooth", block:"start" });
+          dayCard.classList.add("cal-day-flash");
+          setTimeout(function(){ dayCard.classList.remove("cal-day-flash"); }, 900);
+        }
       });
     });
     grid.querySelectorAll(".cal-cell[data-key]").forEach(function(cell){
@@ -1865,7 +1921,20 @@
         renderCalendar(); renderCalDay();
       });
     });
+    renderCalLegend();
     renderCalDay();
+  }
+  function renderCalLegend(){
+    var legendEl = document.getElementById("cal-legend");
+    var usedCatIds = {};
+    tasks.forEach(function(t){ if(t.category) usedCatIds[t.category] = true; });
+    habits.forEach(function(h){ if(h.category) usedCatIds[h.category] = true; });
+    var usedCats = categories.filter(function(c){ return usedCatIds[c.id]; });
+    if(!usedCats.length){ legendEl.innerHTML = ""; legendEl.style.display = "none"; return; }
+    legendEl.style.display = "flex";
+    legendEl.innerHTML = usedCats.map(function(c){
+      return '<span class="cal-legend-item"><span class="cal-legend-dot" style="background:'+catColor(c.id)+';"></span>'+escapeHtml(c.label)+'</span>';
+    }).join("");
   }
   function renderCalDay(){
     var isToday = selKey()===todayKey;
@@ -1880,6 +1949,7 @@
   document.getElementById("cal-quickadd").addEventListener("click", function(){ openTaskSheet(null, "once"); });
   document.getElementById("month-prev").addEventListener("click", function(){ selectedMonthDate.setMonth(selectedMonthDate.getMonth()-1); renderCalendar(); });
   document.getElementById("month-next").addEventListener("click", function(){ selectedMonthDate.setMonth(selectedMonthDate.getMonth()+1); renderCalendar(); });
+  window.addEventListener("resize", function(){ if(currentTab==="month") renderCalendar(); });
 
   /* ---------------- HABITS ---------------- */
   function isScheduledOn(h, d){
@@ -1985,7 +2055,7 @@
       var isOpen = !!openDropdowns[h.id];
       var timeTag = h.time ? '<span class="ledger-tag">'+fmtTime(h.time)+'</span>' : '';
       var catName = h.category ? catLabel(h.category) : null;
-      var catTag = catName ? '<span class="ledger-tag cat">'+escapeHtml(catName)+'</span>' : '';
+      var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(h.category)+';">'+escapeHtml(catName)+'</span>' : '';
       return '<li class="ledger-item habit-row'+(isToday?"":" off-today")+'" data-id="'+h.id+'">' +
         '<button class="ledger-check" data-id="'+h.id+'" '+(isToday?"":"disabled")+' style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
         '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
