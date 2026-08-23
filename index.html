@@ -1369,7 +1369,7 @@
   function syncDriveUI(){
     var connectBtn = document.getElementById("drive-connect");
     var status = document.getElementById("drive-status");
-    if(driveConnected){
+    if(driveConnected && driveAccessToken){
       connectBtn.textContent = "Disconnect Google Drive";
       status.style.display = "block";
       if(driveSyncState === "syncing") status.textContent = "Syncing…";
@@ -1378,6 +1378,10 @@
         var lastSync = loadStr("db2.driveLastSync");
         status.textContent = lastSync ? "Synced " + timeAgo(parseInt(lastSync,10)) : "Connected — syncing now…";
       }
+    } else if(driveConnected){
+      connectBtn.textContent = "Tap to resume syncing";
+      status.style.display = "block";
+      status.textContent = "Paused for this session — tap to reconnect.";
     } else {
       connectBtn.textContent = "Connect Google Drive";
       status.style.display = "none";
@@ -1420,18 +1424,19 @@
   }
 
   document.getElementById("drive-connect").addEventListener("click", function(){
-    if(driveConnected){
+    if(driveConnected && driveAccessToken){
       driveConnected = false; driveAccessToken = null;
       saveStr("db2.driveConnected", "0");
       syncDriveUI();
       showToast("Disconnected from Google Drive.");
       return;
     }
+    var wasAlreadyConnected = driveConnected;
     driveGetToken(function(){
       driveConnected = true;
       saveStr("db2.driveConnected", "1");
       syncDriveUI();
-      showToast("Connected — syncing now.");
+      showToast(wasAlreadyConnected ? "Syncing resumed." : "Connected — syncing now.");
       driveAutoPull(function(){ driveAutoPush(); });
     });
   });
@@ -1501,7 +1506,7 @@
   function syncGTasksUI(){
     var connectBtn = document.getElementById("gtasks-connect");
     var status = document.getElementById("gtasks-status");
-    if(gtasksConnected){
+    if(gtasksConnected && gtasksAccessToken){
       connectBtn.textContent = "Disconnect Google Tasks";
       status.style.display = "block";
       if(gtasksSyncState === "syncing") status.textContent = "Syncing…";
@@ -1510,6 +1515,10 @@
         var lastSync = loadStr("db2.gtasksLastSync");
         status.textContent = lastSync ? "Synced " + timeAgo(parseInt(lastSync,10)) : "Connected — syncing now…";
       }
+    } else if(gtasksConnected){
+      connectBtn.textContent = "Tap to resume syncing";
+      status.style.display = "block";
+      status.textContent = "Paused for this session — tap to reconnect.";
     } else {
       connectBtn.textContent = "Connect Google Tasks";
       status.style.display = "none";
@@ -1529,18 +1538,19 @@
   }
 
   document.getElementById("gtasks-connect").addEventListener("click", function(){
-    if(gtasksConnected){
+    if(gtasksConnected && gtasksAccessToken){
       gtasksConnected = false; gtasksAccessToken = null;
       saveStr("db2.gtasksConnected", "0");
       syncGTasksUI();
       showToast("Disconnected from Google Tasks.");
       return;
     }
+    var wasAlreadyConnected = gtasksConnected;
     gtasksGetToken(function(){
       gtasksConnected = true;
       saveStr("db2.gtasksConnected", "1");
       syncGTasksUI();
-      showToast("Connected — syncing now.");
+      showToast(wasAlreadyConnected ? "Syncing resumed." : "Connected — syncing now.");
       gtasksEnsureList(function(){ gtasksAutoPull(function(){ gtasksAutoPush(); }); });
     });
   });
@@ -1618,22 +1628,6 @@
   }
   syncGTasksUI();
   document.addEventListener("visibilitychange", function(){ if(!document.hidden && gtasksConnected && gtasksAccessToken) gtasksAutoPull(); });
-
-  /* ---------------- re-establish sync on the user's first genuine tap each session ----------------
-     Acquiring a token automatically (on load, on a timer) isn't triggered by a real user gesture,
-     so browsers block the normal popup and Google falls back to redirecting the whole page - jarring.
-     Doing it inside a real click handler avoids that entirely. */
-  var driveFirstTapDone = false, gtasksFirstTapDone = false;
-  document.addEventListener("click", function(){
-    if(driveConnected && !driveAccessToken && !driveFirstTapDone){
-      driveFirstTapDone = true;
-      driveGetToken(function(){ driveAutoPull(); });
-    }
-    if(gtasksConnected && !gtasksAccessToken && !gtasksFirstTapDone){
-      gtasksFirstTapDone = true;
-      gtasksGetToken(function(){ gtasksEnsureList(function(){ gtasksAutoPull(); }); });
-    }
-  });
 
   document.getElementById("settings-btn").addEventListener("click", function(){
     switchTab("settings");
