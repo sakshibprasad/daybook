@@ -722,18 +722,6 @@
         <button class="pill-btn" id="sound-toggle" style="width:100%; padding:10px;">Turn off tap sound</button>
       </div>
       <div class="card">
-        <div class="label-row"><span class="label">Google Drive Sync</span></div>
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Connect once per device, then it syncs on its own — automatically whenever you make a change, and automatically when you reopen the app. No manual step after connecting.</div>
-        <button class="pill-btn" id="drive-connect" style="width:100%; padding:10px;">Connect Google Drive</button>
-        <div id="drive-status" style="font-size:12px; color:var(--ink-soft); margin-top:10px; display:none;"></div>
-      </div>
-      <div class="card">
-        <div class="label-row"><span class="label">Google Tasks Sync</span></div>
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Sync your to-dos to a "Daybook" list in Google Tasks, so they show up in Google's own Tasks app — including on iPhone. Two-way: changes on either side sync automatically.</div>
-        <button class="pill-btn" id="gtasks-connect" style="width:100%; padding:10px;">Connect Google Tasks</button>
-        <div id="gtasks-status" style="font-size:12px; color:var(--ink-soft); margin-top:10px; display:none;"></div>
-      </div>
-      <div class="card">
         <div class="label-row"><span class="label">Data</span></div>
         <div style="font-size:13px; color:var(--ink-soft); margin-bottom:10px; line-height:1.5;">Everything lives only on this device. Export a copy so a reinstall can't lose it.</div>
         <div id="export-reminder" style="font-size:12px; color:var(--danger); margin-bottom:10px; display:none;"></div>
@@ -877,7 +865,7 @@
   var tasks = load("db2.tasks", []);
   var habits = load("db2.habits", []);
   var goals = load("db2.goals", []);
-  function saveTasks(){ save("db2.tasks", tasks); markSyncDirty(); }
+  function saveTasks(){ save("db2.tasks", tasks); }
   function rolloverOverdueTasks(){
     var changed = false;
     tasks.forEach(function(t){
@@ -889,26 +877,15 @@
     if(changed) saveTasks();
     return changed;
   }
-  function saveHabits(){ save("db2.habits", habits); markSyncDirty(); }
-  function saveGoals(){ save("db2.goals", goals); markSyncDirty(); }
+  function saveHabits(){ save("db2.habits", habits); }
+  function saveGoals(){ save("db2.goals", goals); }
 
   var categories = load("db2.categories", [
     { id:"personal", label:"Personal" }, { id:"work", label:"Work" },
     { id:"errands", label:"Errands" }, { id:"health", label:"Health" }
   ]);
-  function saveCategories(){ save("db2.categories", categories); markSyncDirty(); }
+  function saveCategories(){ save("db2.categories", categories); }
 
-  /* ---------------- sync state (shared by Drive sync + Google Tasks sync) ---------------- */
-  var localDataModifiedAt = parseInt(loadStr("db2.localDataModifiedAt") || "0", 10);
-  var driveConnected = loadStr("db2.driveConnected") === "1";
-  var gtasksConnected = loadStr("db2.gtasksConnected") === "1";
-  var driveSyncTimer = null, gtasksSyncTimer = null;
-  function markSyncDirty(){
-    localDataModifiedAt = Date.now();
-    saveStr("db2.localDataModifiedAt", String(localDataModifiedAt));
-    if(driveConnected && typeof scheduleDrivePush === "function") scheduleDrivePush();
-    if(gtasksConnected && typeof scheduleGTasksPush === "function") scheduleGTasksPush();
-  }
   function catLabel(id){ var c = categories.find(function(x){ return x.id===id; }); return c ? c.label : null; }
   var CAL_PALETTE = ["#6B8E9C","#B0603E","#7C8E6C","#8C6AA8","#C77C54","#5B7A9C","#A8556E"];
   function catColor(id){
@@ -1357,277 +1334,6 @@
     if(soundOn) playTick(880, 0.06);
   });
   syncSoundUI();
-
-  /* ---------------- Google Drive sync (automatic) ---------------- */
-  var GOOGLE_CLIENT_ID = "434549614473-voh4vipv1hmq34074jomub0stgnah1ku.apps.googleusercontent.com";
-  var DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
-  var DRIVE_FILENAME = "daybook-sync.json";
-  var driveAccessToken = null;
-  var driveTokenClient = null;
-  var driveSyncState = "idle"; // idle | syncing | error
-
-  function syncDriveUI(){
-    var connectBtn = document.getElementById("drive-connect");
-    var status = document.getElementById("drive-status");
-    if(driveConnected && driveAccessToken){
-      connectBtn.textContent = "Disconnect Google Drive";
-      status.style.display = "block";
-      if(driveSyncState === "syncing") status.textContent = "Syncing…";
-      else if(driveSyncState === "error") status.textContent = "Last sync failed — will retry on next change.";
-      else {
-        var lastSync = loadStr("db2.driveLastSync");
-        status.textContent = lastSync ? "Synced " + timeAgo(parseInt(lastSync,10)) : "Connected — syncing now…";
-      }
-    } else if(driveConnected){
-      connectBtn.textContent = "Tap to resume syncing";
-      status.style.display = "block";
-      status.textContent = "Paused for this session — tap to reconnect.";
-    } else {
-      connectBtn.textContent = "Connect Google Drive";
-      status.style.display = "none";
-    }
-  }
-  function timeAgo(ts){
-    var mins = Math.floor((Date.now()-ts)/60000);
-    if(mins < 1) return "just now";
-    if(mins < 60) return mins+" min ago";
-    var hrs = Math.floor(mins/60);
-    if(hrs < 24) return hrs+" hr ago";
-    return Math.floor(hrs/24)+" day"+(Math.floor(hrs/24)===1?"":"s")+" ago";
-  }
-
-  function waitForGoogleIdentity(onReady, onGiveUp){
-    if(window.google && google.accounts && google.accounts.oauth2){ onReady(); return; }
-    var attempts = 0;
-    var poll = setInterval(function(){
-      attempts++;
-      if(window.google && google.accounts && google.accounts.oauth2){
-        clearInterval(poll);
-        onReady();
-      } else if(attempts >= 20){ // ~6 seconds
-        clearInterval(poll);
-        onGiveUp();
-      }
-    }, 300);
-  }
-
-  function driveGetToken(callback){
-    waitForGoogleIdentity(function(){
-      if(!driveTokenClient){
-        driveTokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID, scope: DRIVE_SCOPE,
-          callback: function(resp){ if(resp && resp.access_token){ driveAccessToken = resp.access_token; callback(); } }
-        });
-      }
-      driveTokenClient.requestAccessToken({ prompt: driveAccessToken ? "" : (driveConnected ? "" : "consent") });
-    }, function(){ showToast("Couldn't reach Google Sign-In — check your connection and try again."); });
-  }
-
-  document.getElementById("drive-connect").addEventListener("click", function(){
-    if(driveConnected && driveAccessToken){
-      driveConnected = false; driveAccessToken = null;
-      saveStr("db2.driveConnected", "0");
-      syncDriveUI();
-      showToast("Disconnected from Google Drive.");
-      return;
-    }
-    var wasAlreadyConnected = driveConnected;
-    driveGetToken(function(){
-      driveConnected = true;
-      saveStr("db2.driveConnected", "1");
-      syncDriveUI();
-      showToast(wasAlreadyConnected ? "Syncing resumed." : "Connected — syncing now.");
-      driveAutoPull(function(){ driveAutoPush(); });
-    });
-  });
-
-  function driveFetchFileId(){
-    return fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%27"+DRIVE_FILENAME+"%27&fields=files(id)", {
-      headers:{ Authorization: "Bearer "+driveAccessToken }
-    }).then(function(r){ return r.json(); }).then(function(d){ return (d.files && d.files.length) ? d.files[0].id : null; });
-  }
-
-  function scheduleDrivePush(){
-    clearTimeout(driveSyncTimer);
-    driveSyncTimer = setTimeout(driveAutoPush, 4000);
-  }
-
-  function driveAutoPush(){
-    if(!driveConnected || !driveAccessToken) return;
-    driveSyncState = "syncing"; syncDriveUI();
-    var payload = JSON.stringify({ tasks:tasks, habits:habits, goals:goals, categories:categories, userName: loadStr("db2.userName"), exportedAt: localDataModifiedAt });
-    driveFetchFileId().then(function(fileId){
-      var metadata = { name: DRIVE_FILENAME, parents: fileId ? undefined : ["appDataFolder"] };
-      var boundary = "daybook-boundary";
-      var body = "--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+JSON.stringify(metadata)+"\r\n"+
-        "--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+payload+"\r\n--"+boundary+"--";
-      var url = fileId ? "https://www.googleapis.com/upload/drive/v3/files/"+fileId+"?uploadType=multipart" : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-      return fetch(url, { method: fileId ? "PATCH" : "POST", headers:{ Authorization: "Bearer "+driveAccessToken, "Content-Type": "multipart/related; boundary="+boundary }, body: body });
-    }).then(function(r){
-      if(!r.ok) throw new Error("Upload failed");
-      driveSyncState = "idle";
-      saveStr("db2.driveLastSync", String(Date.now()));
-      syncDriveUI();
-    }).catch(function(){ driveSyncState = "error"; syncDriveUI(); });
-  }
-
-  function driveAutoPull(onDone){
-    if(!driveConnected || !driveAccessToken) { if(onDone) onDone(); return; }
-    driveFetchFileId().then(function(fileId){
-      if(!fileId){ if(onDone) onDone(); return null; }
-      return fetch("https://www.googleapis.com/drive/v3/files/"+fileId+"?alt=media", { headers:{ Authorization: "Bearer "+driveAccessToken } }).then(function(r){ return r.json(); });
-    }).then(function(data){
-      if(!data){ return; }
-      if(!data.exportedAt || data.exportedAt <= localDataModifiedAt){ if(onDone) onDone(); return; }
-      if(data.tasks) tasks = data.tasks;
-      if(data.habits) habits = data.habits;
-      if(data.goals) goals = data.goals;
-      if(data.categories) categories = data.categories;
-      if(data.userName) saveStr("db2.userName", data.userName);
-      save("db2.tasks", tasks); save("db2.habits", habits); save("db2.goals", goals); save("db2.categories", categories);
-      localDataModifiedAt = data.exportedAt;
-      saveStr("db2.localDataModifiedAt", String(localDataModifiedAt));
-      renderAll();
-      saveStr("db2.driveLastSync", String(Date.now()));
-      syncDriveUI();
-      if(onDone) onDone();
-    }).catch(function(){ if(onDone) onDone(); });
-  }
-  syncDriveUI();
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden && driveConnected && driveAccessToken) driveAutoPull(); });
-
-  /* ---------------- Google Tasks sync (automatic, two-way) ---------------- */
-  var TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
-  var gtasksAccessToken = null;
-  var gtasksTokenClient = null;
-  var gtasksListId = loadStr("db2.gtasksListId") || null;
-  var gtasksSyncState = "idle";
-
-  function syncGTasksUI(){
-    var connectBtn = document.getElementById("gtasks-connect");
-    var status = document.getElementById("gtasks-status");
-    if(gtasksConnected && gtasksAccessToken){
-      connectBtn.textContent = "Disconnect Google Tasks";
-      status.style.display = "block";
-      if(gtasksSyncState === "syncing") status.textContent = "Syncing…";
-      else if(gtasksSyncState === "error") status.textContent = "Last sync failed — will retry on next change.";
-      else {
-        var lastSync = loadStr("db2.gtasksLastSync");
-        status.textContent = lastSync ? "Synced " + timeAgo(parseInt(lastSync,10)) : "Connected — syncing now…";
-      }
-    } else if(gtasksConnected){
-      connectBtn.textContent = "Tap to resume syncing";
-      status.style.display = "block";
-      status.textContent = "Paused for this session — tap to reconnect.";
-    } else {
-      connectBtn.textContent = "Connect Google Tasks";
-      status.style.display = "none";
-    }
-  }
-
-  function gtasksGetToken(callback){
-    waitForGoogleIdentity(function(){
-      if(!gtasksTokenClient){
-        gtasksTokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID, scope: TASKS_SCOPE,
-          callback: function(resp){ if(resp && resp.access_token){ gtasksAccessToken = resp.access_token; callback(); } }
-        });
-      }
-      gtasksTokenClient.requestAccessToken({ prompt: gtasksAccessToken ? "" : (gtasksConnected ? "" : "consent") });
-    }, function(){ showToast("Couldn't reach Google Sign-In — check your connection and try again."); });
-  }
-
-  document.getElementById("gtasks-connect").addEventListener("click", function(){
-    if(gtasksConnected && gtasksAccessToken){
-      gtasksConnected = false; gtasksAccessToken = null;
-      saveStr("db2.gtasksConnected", "0");
-      syncGTasksUI();
-      showToast("Disconnected from Google Tasks.");
-      return;
-    }
-    var wasAlreadyConnected = gtasksConnected;
-    gtasksGetToken(function(){
-      gtasksConnected = true;
-      saveStr("db2.gtasksConnected", "1");
-      syncGTasksUI();
-      showToast(wasAlreadyConnected ? "Syncing resumed." : "Connected — syncing now.");
-      gtasksEnsureList(function(){ gtasksAutoPull(function(){ gtasksAutoPush(); }); });
-    });
-  });
-
-  function gtasksEnsureList(callback){
-    if(gtasksListId){ callback(); return; }
-    fetch("https://www.googleapis.com/tasks/v1/users/@me/lists", { headers:{ Authorization:"Bearer "+gtasksAccessToken } })
-      .then(function(r){ return r.json(); }).then(function(d){
-        var existing = (d.items||[]).find(function(l){ return l.title === "Daybook"; });
-        if(existing){ gtasksListId = existing.id; saveStr("db2.gtasksListId", gtasksListId); callback(); return; }
-        return fetch("https://www.googleapis.com/tasks/v1/users/@me/lists", {
-          method:"POST", headers:{ Authorization:"Bearer "+gtasksAccessToken, "Content-Type":"application/json" },
-          body: JSON.stringify({ title:"Daybook" })
-        }).then(function(r){ return r.json(); }).then(function(list){ gtasksListId = list.id; saveStr("db2.gtasksListId", gtasksListId); callback(); });
-      });
-  }
-
-  function scheduleGTasksPush(){
-    clearTimeout(gtasksSyncTimer);
-    gtasksSyncTimer = setTimeout(gtasksAutoPush, 4000);
-  }
-
-  function gtasksAutoPush(){
-    if(!gtasksConnected || !gtasksAccessToken || !gtasksListId) return;
-    gtasksSyncState = "syncing"; syncGTasksUI();
-    var toSync = tasks.filter(function(t){ return t.type==="once"; });
-    var chain = Promise.resolve();
-    toSync.forEach(function(t){
-      chain = chain.then(function(){
-        var body = { title: t.text, status: t.doneOnce ? "completed" : "needsAction" };
-        if(t.dueDate) body.due = t.dueDate+"T00:00:00.000Z";
-        if(t.gTaskId){
-          return fetch("https://www.googleapis.com/tasks/v1/lists/"+gtasksListId+"/tasks/"+t.gTaskId, {
-            method:"PATCH", headers:{ Authorization:"Bearer "+gtasksAccessToken, "Content-Type":"application/json" }, body: JSON.stringify(body)
-          }).catch(function(){});
-        } else {
-          return fetch("https://www.googleapis.com/tasks/v1/lists/"+gtasksListId+"/tasks", {
-            method:"POST", headers:{ Authorization:"Bearer "+gtasksAccessToken, "Content-Type":"application/json" }, body: JSON.stringify(body)
-          }).then(function(r){ return r.json(); }).then(function(created){ if(created.id){ t.gTaskId = created.id; } }).catch(function(){});
-        }
-      });
-    });
-    chain.then(function(){
-      saveTasks();
-      gtasksSyncState = "idle";
-      saveStr("db2.gtasksLastSync", String(Date.now()));
-      syncGTasksUI();
-    }).catch(function(){ gtasksSyncState = "error"; syncGTasksUI(); });
-  }
-
-  function gtasksAutoPull(onDone){
-    if(!gtasksConnected || !gtasksAccessToken || !gtasksListId) { if(onDone) onDone(); return; }
-    fetch("https://www.googleapis.com/tasks/v1/lists/"+gtasksListId+"/tasks?showCompleted=true&showHidden=true", { headers:{ Authorization:"Bearer "+gtasksAccessToken } })
-      .then(function(r){ return r.json(); }).then(function(d){
-        var remoteTasks = d.items || [];
-        var changed = false;
-        remoteTasks.forEach(function(rt){
-          var local = tasks.find(function(t){ return t.gTaskId === rt.id; });
-          if(local){
-            var remoteDone = rt.status === "completed";
-            if(local.doneOnce !== remoteDone){ local.doneOnce = remoteDone; local.completedAt = remoteDone ? Date.now() : null; changed = true; }
-            if(local.text !== rt.title){ local.text = rt.title; changed = true; }
-          } else {
-            tasks.unshift({ id:uid(), text:rt.title||"Untitled", type:"once", category:null,
-              dueDate: rt.due ? rt.due.slice(0,10) : todayKey, doneOnce: rt.status==="completed",
-              completedAt: rt.status==="completed" ? Date.now() : null, completed:{}, createdAt:Date.now(), gTaskId: rt.id });
-            changed = true;
-          }
-        });
-        if(changed){ save("db2.tasks", tasks); renderAll(); }
-        saveStr("db2.gtasksLastSync", String(Date.now()));
-        syncGTasksUI();
-        if(onDone) onDone();
-      }).catch(function(){ if(onDone) onDone(); });
-  }
-  syncGTasksUI();
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden && gtasksConnected && gtasksAccessToken) gtasksAutoPull(); });
 
   document.getElementById("settings-btn").addEventListener("click", function(){
     switchTab("settings");
@@ -2579,6 +2285,5 @@
   }
 })();
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
