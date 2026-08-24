@@ -576,7 +576,7 @@
     </div>
     <div class="section">
       <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder. Tap a task to edit it.</div>
-      <ul class="ledger-list" id="work-list"></ul>
+      <div id="work-groups"></div>
     </div>
   </div>
 
@@ -991,6 +991,10 @@
   ]);
   function saveShoppingForOptions(){ save("db2.shoppingFor", shoppingForOptions); }
   function shoppingForLabel(id){ var f = shoppingForOptions.find(function(x){ return x.id===id; }); return f ? f.label : null; }
+
+  var workCategories = load("db2.workCategories", []);
+  function saveWorkCategories(){ save("db2.workCategories", workCategories); }
+  function workCatLabel(id){ var c = workCategories.find(function(x){ return x.id===id; }); return c ? c.label : null; }
 
   var categories = load("db2.categories", [
     { id:"personal", label:"Personal" }, { id:"work", label:"Work" },
@@ -2231,24 +2235,45 @@
 
   /* ---------------- WORK ---------------- */
   function renderWorkPage(){
-    var wrap = document.getElementById("work-list");
+    var wrap = document.getElementById("work-groups");
     if(!wrap) return;
-    var workTasks = tasks.filter(function(t){ return t.list==="work"; })
-      .sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt); });
-    wrap.innerHTML = workTasks.length ? workTasks.map(taskRowHtml).join("") : '<div class="empty-note">Nothing here yet. Tap + to add a work task.</div>';
-    var openCount = tasks.filter(function(t){ return t.list==="work" && !doneFor(t); }).length;
+    var workTasks = tasks.filter(function(t){ return t.list==="work"; });
+    var openCount = workTasks.filter(function(t){ return !doneFor(t); }).length;
     var countEl = document.getElementById("work-count");
     if(countEl) countEl.textContent = openCount || "—";
-    wireLedgerReorder("work-list", function(orderedIds){
-      var base = Date.now();
-      orderedIds.forEach(function(id, i){
-        var t = tasks.find(function(x){ return x.id===id; });
-        if(t) t.order = base - i;
+    if(!workTasks.length){ wrap.innerHTML = '<div class="empty-note">Nothing here yet. Tap + to add a work task.</div>'; return; }
+    var groups = {}; // catId (or "" for uncategorized) -> tasks[]
+    var order = [];
+    workTasks.forEach(function(t){
+      var key = t.category || "";
+      if(!groups[key]){ groups[key] = []; order.push(key); }
+      groups[key].push(t);
+    });
+    // uncategorized last, categories in the order workCategories itself lists them
+    order.sort(function(a,b){
+      if(a==="") return 1; if(b==="") return -1;
+      return workCategories.findIndex(function(c){return c.id===a;}) - workCategories.findIndex(function(c){return c.id===b;});
+    });
+    wrap.innerHTML = order.map(function(key){
+      var label = key ? (workCatLabel(key) || "Other") : "Uncategorized";
+      var sorted = groups[key].slice().sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt); });
+      var listId = "work-cat-"+(key||"none");
+      return '<div class="card"><div class="label-row"><span class="label">'+escapeHtml(label)+'</span></div>' +
+        '<ul class="ledger-list" id="'+listId+'">'+sorted.map(taskRowHtml).join("")+'</ul></div>';
+    }).join("");
+    order.forEach(function(key){
+      var listId = "work-cat-"+(key||"none");
+      wireTaskList(document.getElementById(listId));
+      wireLedgerReorder(listId, function(orderedIds){
+        var base = Date.now();
+        orderedIds.forEach(function(id, i){
+          var t = tasks.find(function(x){ return x.id===id; });
+          if(t) t.order = base - i;
+        });
+        saveTasks();
       });
-      saveTasks();
     });
   }
-  wireTaskList(document.getElementById("work-list"));
   document.getElementById("work-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("link-work").addEventListener("click", function(){ switchTab("work"); });
 
@@ -2431,15 +2456,61 @@
       document.getElementById(addInputId).focus();
     });
   }
-  function renderCatRow(){
-    renderCatRowFor("task-cat-row", "cat-new-btn");
-    wireCatRowInteractionsFor("task-cat-row", "cat-new-btn", "cat-add-inline", "cat-add-input");
+  function activeTaskCatSource(){ return taskList==="work" ? workCategories : categories; }
+  function renderTaskCatRow(){
+    var row = document.getElementById("task-cat-row");
+    var src = activeTaskCatSource();
+    var html = src.map(function(c){ return '<div class="cat-opt" data-cat="'+c.id+'">'+escapeHtml(c.label)+'</div>'; }).join("");
+    html += '<div class="cat-opt cat-new" id="cat-new-btn">+ New</div>';
+    row.innerHTML = html;
+    row.querySelectorAll(".cat-opt[data-cat]").forEach(function(opt){
+      var pressTimer = null, longPressed = false;
+      opt.addEventListener("touchstart", function(){
+        longPressed = false;
+        pressTimer = setTimeout(function(){
+          longPressed = true;
+          if(navigator.vibrate) navigator.vibrate(12);
+          deleteTaskCatWithUndo(opt.getAttribute("data-cat"));
+        }, 550);
+      }, { passive:true });
+      opt.addEventListener("touchend", function(){ clearTimeout(pressTimer); }, { passive:true });
+      opt.addEventListener("touchmove", function(){ clearTimeout(pressTimer); }, { passive:true });
+      opt.addEventListener("click", function(){
+        if(longPressed){ longPressed=false; return; }
+        var wasActive = opt.classList.contains("active");
+        row.querySelectorAll(".cat-opt[data-cat]").forEach(function(x){ x.classList.remove("active"); });
+        if(!wasActive) opt.classList.add("active");
+      });
+    });
+    document.getElementById("cat-new-btn").addEventListener("click", function(){
+      document.getElementById("cat-add-inline").style.display = "flex";
+      document.getElementById("cat-add-input").focus();
+    });
+  }
+  function deleteTaskCatWithUndo(id){
+    var isWork = taskList==="work";
+    var src = activeTaskCatSource();
+    var removed = src.find(function(c){ return c.id===id; });
+    if(!removed) return;
+    var idx = src.indexOf(removed);
+    src.splice(idx,1);
+    if(isWork) saveWorkCategories(); else saveCategories();
+    var affected = tasks.filter(function(t){ return t.category===id; }).length;
+    if(affected) tasks.forEach(function(t){ if(t.category===id) t.category=null; });
+    if(affected) saveTasks();
+    renderTaskCatRow();
+    var msg = affected>0 ? '"'+removed.label+'" deleted — '+affected+' task'+(affected===1?"":"s")+' left uncategorized.' : '"'+removed.label+'" deleted.';
+    showToast(msg, function(){
+      src.splice(idx,0,removed);
+      if(isWork) saveWorkCategories(); else saveCategories();
+      renderTaskCatRow();
+    });
   }
   function renderHabitCatRow(){
     renderCatRowFor("habit-cat-row", "habit-cat-new-btn");
     wireCatRowInteractionsFor("habit-cat-row", "habit-cat-new-btn", "habit-cat-add-inline", "habit-cat-add-input");
   }
-  function deleteCategoryWithUndo(id, rerenderRowId, rerenderBtnId){
+  function deleteCategoryWithUndo(id){
     var removed = categories.find(function(c){ return c.id===id; });
     if(!removed) return;
     var affectedTasks = tasks.filter(function(t){ return t.category===id; }).length;
@@ -2447,24 +2518,24 @@
     var affectedCount = affectedTasks + affectedHabits;
     categories = categories.filter(function(c){ return c.id!==id; });
     saveCategories();
-    if(rerenderRowId==="habit-cat-row") renderHabitCatRow(); else renderCatRow();
+    renderHabitCatRow();
     var msg = affectedCount > 0
       ? '"'+removed.label+'" deleted — '+affectedCount+' item'+(affectedCount===1?"":"s")+' left uncategorized.'
       : '"'+removed.label+'" deleted.';
     showToast(msg, function(){
       categories.push(removed); saveCategories();
-      if(rerenderRowId==="habit-cat-row") renderHabitCatRow(); else renderCatRow();
+      renderHabitCatRow();
     });
   }
   document.getElementById("cat-add-confirm").addEventListener("click", function(){
     var name = document.getElementById("cat-add-input").value.trim();
     if(!name) return;
     var id = "c"+uid();
-    categories.push({ id:id, label:name });
-    saveCategories();
+    if(taskList==="work"){ workCategories.push({ id:id, label:name }); saveWorkCategories(); }
+    else { categories.push({ id:id, label:name }); saveCategories(); }
     document.getElementById("cat-add-input").value = "";
     document.getElementById("cat-add-inline").style.display = "none";
-    renderCatRow();
+    renderTaskCatRow();
     var opt = document.querySelector('#task-cat-row .cat-opt[data-cat="'+id+'"]');
     if(opt) opt.classList.add("active");
   });
@@ -2496,11 +2567,12 @@
     document.getElementById("task-date-time-row").style.display = taskType==="once" ? "flex" : "none";
     document.getElementById("task-date-input").value = existing && existing.dueDate ? existing.dueDate : (opts.dueDate || selKey());
     document.getElementById("task-time-input").value = existing && existing.dueTime ? existing.dueTime : "";
-    renderCatRow();
+    renderTaskCatRow();
     document.getElementById("cat-add-inline").style.display = "none";
     document.querySelectorAll("#task-cat-row .cat-opt[data-cat]").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-cat")===(existing?existing.category:null)); });
     document.querySelectorAll("#task-priority-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-priority")===taskPriority); });
     document.querySelectorAll("#task-list-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-list")===taskList); });
+    document.getElementById("task-list-row").style.display = (currentTab==="home") ? "flex" : "none"; // the Personal/Work choice only makes sense to offer from Home - elsewhere the tab itself already implies which one
     overlay.classList.add("open"); taskSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("task-input").focus(); }, 200);
   }
@@ -2525,6 +2597,8 @@
     o.addEventListener("click", function(){
       document.querySelectorAll("#task-list-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
       o.classList.add("active"); taskList = o.getAttribute("data-list");
+      renderTaskCatRow(); // Personal and Work use different category sets, so refresh the row and clear any selection from the other set
+      document.getElementById("cat-add-inline").style.display = "none";
     });
   });
   document.getElementById("task-cancel").addEventListener("click", closeTaskSheet);
@@ -2548,7 +2622,10 @@
     } else {
       tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, priority: taskPriority || null, list: taskList || "personal", parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
     }
-    saveTasks(); closeTaskSheet(); renderAll();
+    var wasHome = currentTab==="home";
+    saveTasks(); closeTaskSheet();
+    if(wasHome && taskList==="work") switchTab("work"); // added from Home as a Work task - jump straight there so it's obvious where it went, instead of just vanishing off Home's list
+    else renderAll();
   });
   document.getElementById("task-delete").addEventListener("click", function(){
     var id = editingTaskId; closeTaskSheet(); if(id) deleteTask(id);
