@@ -987,14 +987,15 @@
   }
   function organizeRowHtml(t, isChild){
     var childCount = isChild ? 0 : taskChildren(t.id).length;
+    var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
     return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(t.doneOnce?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
-      '<div class="ledger-text" style="flex:1 1 auto; min-width:0;">'+escapeHtml(t.text)+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
+      '<div class="ledger-text" style="flex:1 1 auto; min-width:0;">'+escapeHtml(t.text)+' '+recurTag+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
       '<button class="organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Top-level" : "Subtask")+'</button>' +
     '</li>';
   }
   function renderOrganizePage(){
     var wrap = document.getElementById("organize-list");
-    var topLevel = tasks.filter(function(t){ return t.type==="once" && !t.parentId; })
+    var topLevel = tasks.filter(function(t){ return !t.parentId; })
       .sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); });
     if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">No tasks yet.</div>'; return; }
     var html = "";
@@ -1039,7 +1040,7 @@
       showToast('"'+t.text+'" is now a top-level task.');
       return;
     }
-    var candidates = tasks.filter(function(x){ return x.type==="once" && !x.parentId && x.id!==taskId; });
+    var candidates = tasks.filter(function(x){ return !x.parentId && x.id!==taskId; });
     if(!candidates.length){ showToast("No other tasks to nest this under yet."); return; }
     var options = candidates.map(function(c){ return escapeHtml(c.text); });
     var choice = prompt("Make subtask of which task? Type the exact name:\n\n"+options.join("\n"));
