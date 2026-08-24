@@ -482,11 +482,6 @@
       <div class="home-week-summary" id="home-week-summary"></div>
 
       <div class="home-tile-grid">
-        <button class="home-tile" id="link-week" data-tile-id="week">
-          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h5"/></svg></span>
-          <span class="home-tile-label">Week</span>
-          <span class="home-tile-count" id="week-count">—</span>
-        </button>
         <button class="home-tile" id="link-habits" data-tile-id="habits">
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 7-2.9 7-6.8 0-2.7-1.8-4.6-2.9-6.5-.3 2-1.4 2.9-2.4 1.9 1-2.9-.9-5.7-3.3-6.6.5 2.9-1 4.8-2.9 6.6-1.4 1.4-1.9 3.3-1.9 4.6 0 3.9 2.9 6.8 6.4 6.8z"/></svg></span>
           <span class="home-tile-label">Habits</span>
@@ -539,10 +534,7 @@
 
   <!-- SHOPPING -->
   <div class="view" id="view-shopping">
-    <div class="topbar bordered with-back">
-      <button class="back-btn" id="shopping-back" aria-label="Back">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+    <div class="topbar bordered">
       <div class="topbar-title">Shopping</div>
     </div>
     <div class="section">
@@ -550,50 +542,55 @@
     </div>
   </div>
 
-  <!-- WEEK -->
-  <div class="view" id="view-week">
-    <div class="topbar">
-      <div class="topbar-title">Week</div>
-    </div>
-    <div class="date-nav">
-      <button class="date-nav-btn" id="week-prev">‹</button>
-      <span class="date-nav-label" id="week-label"></span>
-      <button class="date-nav-btn" id="week-next">›</button>
-    </div>
-    <div class="section">
-      <div class="card">
-        <div class="label-row"><span class="label">This week</span></div>
-        <ul class="ledger-list" id="week-list"></ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- MONTH -->
+  <!-- MONTH (also hosts the Week sub-view) -->
   <div class="view" id="view-month">
     <div class="topbar">
-      <div class="topbar-title">Month</div>
+      <div class="topbar-title">Calendar</div>
     </div>
-    <div class="date-nav">
-      <button class="date-nav-btn" id="month-prev">‹</button>
-      <span class="date-nav-label" id="month-label"></span>
-      <button class="date-nav-btn" id="month-next">›</button>
-    </div>
-    <div class="section">
-      <div class="card">
-        <div class="cal-grid" id="cal-dow-row"></div>
-        <div class="cal-grid" id="cal-grid"></div>
-        <div class="cal-legend" id="cal-legend"></div>
-      </div>
-      <div class="card">
-        <div class="label-row"><span class="label" id="cal-day-label">Today</span></div>
-        <ul class="ledger-list" id="cal-day-list"></ul>
+    <div class="section" style="padding-bottom:0;">
+      <div class="type-row" id="month-subview-toggle">
+        <div class="type-opt active" data-subview="month">Month</div>
+        <div class="type-opt" data-subview="week">Week</div>
       </div>
     </div>
-    <div class="cal-quickadd-wrap">
-      <button class="cal-quickadd" id="cal-quickadd">
-        <span class="cal-quickadd-text" id="cal-quickadd-text">Add a task for this day</span>
-        <span class="cal-quickadd-plus">+</span>
-      </button>
+
+    <div id="month-subview-month">
+      <div class="date-nav">
+        <button class="date-nav-btn" id="month-prev">‹</button>
+        <span class="date-nav-label" id="month-label"></span>
+        <button class="date-nav-btn" id="month-next">›</button>
+      </div>
+      <div class="section">
+        <div class="card">
+          <div class="cal-grid" id="cal-dow-row"></div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-legend" id="cal-legend"></div>
+        </div>
+        <div class="card">
+          <div class="label-row"><span class="label" id="cal-day-label">Today</span></div>
+          <ul class="ledger-list" id="cal-day-list"></ul>
+        </div>
+      </div>
+      <div class="cal-quickadd-wrap">
+        <button class="cal-quickadd" id="cal-quickadd">
+          <span class="cal-quickadd-text" id="cal-quickadd-text">Add a task for this day</span>
+          <span class="cal-quickadd-plus">+</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="month-subview-week" style="display:none;">
+      <div class="date-nav">
+        <button class="date-nav-btn" id="week-prev">‹</button>
+        <span class="date-nav-label" id="week-label"></span>
+        <button class="date-nav-btn" id="week-next">›</button>
+      </div>
+      <div class="section">
+        <div class="card">
+          <div class="label-row"><span class="label">This week</span></div>
+          <ul class="ledger-list" id="week-list"></ul>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -754,10 +751,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5h4V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
     <span class="nav-lb">Home</span>
   </button>
-  <button class="nav-item" data-tab="week">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h5"/></svg>
-    <span class="nav-lb">Week</span>
-  </button>
   <button class="nav-item" data-tab="month">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="0.9" fill="currentColor" stroke="none"/></svg>
     <span class="nav-lb">Month</span>
@@ -773,6 +766,10 @@
   <button class="nav-item" data-tab="organize">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
     <span class="nav-lb">Organize</span>
+  </button>
+  <button class="nav-item" data-tab="shopping">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+    <span class="nav-lb">Shopping</span>
   </button>
 </nav>
 
@@ -877,9 +874,10 @@
     <div class="type-opt active" data-want="need">Need</div>
     <div class="type-opt" data-want="want">Want</div>
   </div>
-  <div class="type-row" id="shopping-for-row">
-    <div class="type-opt active" data-for="myself">For myself</div>
-    <div class="type-opt" data-for="gift">Gift</div>
+  <div class="cat-row" id="shopping-for-row"></div>
+  <div class="cat-add-inline" id="shopping-for-add-inline" style="display:none;">
+    <input type="text" id="shopping-for-add-input" placeholder="e.g. Kids, Office…" maxlength="20">
+    <button id="shopping-for-add-confirm">Add</button>
   </div>
   <div class="type-row" id="shopping-priority-row">
     <div class="type-opt" data-priority="">None</div>
@@ -945,6 +943,12 @@
 
   var shoppingItems = load("db2.shopping", []);
   function saveShopping(){ save("db2.shopping", shoppingItems); }
+  var shoppingForOptions = load("db2.shoppingFor", [
+    { id:"myself", label:"Myself" }, { id:"gift", label:"Gift" },
+    { id:"home", label:"Home" }, { id:"pets", label:"Pets" }, { id:"family", label:"Family" }
+  ]);
+  function saveShoppingForOptions(){ save("db2.shoppingFor", shoppingForOptions); }
+  function shoppingForLabel(id){ var f = shoppingForOptions.find(function(x){ return x.id===id; }); return f ? f.label : null; }
 
   var categories = load("db2.categories", [
     { id:"personal", label:"Personal" }, { id:"work", label:"Work" },
@@ -1319,14 +1323,13 @@
     currentTab = tab;
     saveStr("db2.currentTab", tab);
     window.scrollTo(0,0); // views vary a lot in height (e.g. Organize can be much shorter than Home) - always land at the top of the new view
-    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="shopping"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
+    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
     document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===tab); });
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
     if(el) el.classList.add("active");
-    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="month");
-    if(tab==="month") renderCalendar();
-    if(tab==="week") renderWeek();
+    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity");
+    if(tab==="month") renderMonthTab();
     if(tab==="habits") renderHabits();
     if(tab==="goals") renderGoalsView();
     if(tab==="home"){ selectedDate = new Date(realNow); renderHome(); }
@@ -1338,7 +1341,6 @@
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
   });
-  document.getElementById("link-week").addEventListener("click", function(){ switchTab("week"); });
   document.getElementById("link-habits").addEventListener("click", function(){ switchTab("habits"); });
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
   document.getElementById("link-categories").addEventListener("click", function(){ switchTab("categories"); });
@@ -1644,8 +1646,7 @@
   /* ---------------- FAB ---------------- */
   document.getElementById("fab-add").addEventListener("click", function(){
     if(currentTab==="home"){ selectedDate = new Date(realNow); openTaskSheet(null, "once"); }
-    else if(currentTab==="week") openTaskSheet(null, "weekly");
-    else if(currentTab==="month") openTaskSheet(null, "once");
+    else if(currentTab==="month") openTaskSheet(null, monthSubview==="week" ? "weekly" : "once");
     else if(currentTab==="habits") openHabitSheet(null);
     else if(currentTab==="goals") openGoalSheet(null, "short");
     else if(currentTab==="organize") openTaskSheet(null, "once", { dueDate: dateKey(organizeSelectedDate) });
@@ -1738,8 +1739,6 @@
 
     renderNextUp();
 
-    var weeklyOpen = tasks.filter(function(t){ return t.type==="weekly" && !doneFor(t); }).length;
-    document.getElementById("week-count").textContent = weeklyOpen || "—";
     var habitsToday = habits.filter(function(h){ return isScheduledOn(h, realNow); });
     var habitsDone = habitsToday.filter(function(h){ return h.completed && h.completed[todayKey]; }).length;
     document.getElementById("habits-count").textContent = habitsToday.length ? (habitsDone+"/"+habitsToday.length) : "—";
@@ -1753,6 +1752,25 @@
   }
 
   /* ---------------- WEEK render ---------------- */
+  /* ---------------- MONTH tab (hosts Week as a sub-view) ---------------- */
+  var monthSubview = loadStr("db2.monthSubview") || "month";
+  function applyMonthSubview(){
+    document.querySelectorAll("#month-subview-toggle .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-subview")===monthSubview); });
+    document.getElementById("month-subview-month").style.display = monthSubview==="month" ? "" : "none";
+    document.getElementById("month-subview-week").style.display = monthSubview==="week" ? "" : "none";
+    if(currentTab==="month") document.getElementById("fab-wrap").classList.toggle("hide", monthSubview==="month");
+  }
+  function renderMonthTab(){
+    applyMonthSubview();
+    if(monthSubview==="week") renderWeek(); else renderCalendar();
+  }
+  document.querySelectorAll("#month-subview-toggle .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      monthSubview = o.getAttribute("data-subview");
+      saveStr("db2.monthSubview", monthSubview);
+      renderMonthTab();
+    });
+  });
   function renderWeek(){
     var s = startOfWeek(selectedDate), e = new Date(s); e.setDate(s.getDate()+6);
     document.getElementById("week-label").textContent = fmtShort(s)+" – "+fmtShort(e);
@@ -2139,7 +2157,7 @@
 
   /* ---------------- SHOPPING ---------------- */
   function wantTag(w){ return w==="want" ? '<span class="ledger-tag">Want</span>' : '<span class="ledger-tag">Need</span>'; }
-  function forTag(f){ return f==="gift" ? '<span class="ledger-tag">Gift</span>' : '<span class="ledger-tag">Myself</span>'; }
+  function forTag(f){ var lbl = shoppingForLabel(f); return lbl ? '<span class="ledger-tag">'+escapeHtml(lbl)+'</span>' : ''; }
   function shoppingRowHtml(item){
     return '<li class="ledger-item'+(item.bought?" done":"")+'" data-id="'+item.id+'">' +
       '<button class="ledger-check" data-id="'+item.id+'">'+checkSvg+'</button>' +
@@ -2175,22 +2193,77 @@
     if(del){ deleteShoppingItem(del.getAttribute("data-id")); return; }
     if(body){ var it2 = shoppingItems.find(function(x){ return x.id===body.getAttribute("data-edit"); }); if(it2) openShoppingSheet(it2); return; }
   });
-  document.getElementById("shopping-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("link-shopping").addEventListener("click", function(){ switchTab("shopping"); });
 
   /* ---------------- SHOPPING SHEET ---------------- */
   var shoppingSheet = document.getElementById("shopping-sheet");
   var editingShoppingId = null, shoppingWant = "need", shoppingFor = "myself", shoppingPriority = "";
+  function renderShoppingForRow(){
+    var row = document.getElementById("shopping-for-row");
+    var html = shoppingForOptions.map(function(f){ return '<div class="cat-opt" data-for="'+f.id+'">'+escapeHtml(f.label)+'</div>'; }).join("");
+    html += '<div class="cat-opt cat-new" id="shopping-for-new-btn">+ New</div>';
+    row.innerHTML = html;
+    row.querySelectorAll(".cat-opt[data-for]").forEach(function(opt){
+      opt.classList.toggle("active", opt.getAttribute("data-for")===shoppingFor);
+      var pressTimer = null, longPressed = false;
+      opt.addEventListener("touchstart", function(){
+        longPressed = false;
+        pressTimer = setTimeout(function(){
+          longPressed = true;
+          if(navigator.vibrate) navigator.vibrate(12);
+          deleteShoppingForWithUndo(opt.getAttribute("data-for"));
+        }, 550);
+      }, { passive:true });
+      opt.addEventListener("touchend", function(){ clearTimeout(pressTimer); }, { passive:true });
+      opt.addEventListener("touchmove", function(){ clearTimeout(pressTimer); }, { passive:true });
+      opt.addEventListener("click", function(){
+        if(longPressed){ longPressed=false; return; }
+        row.querySelectorAll(".cat-opt[data-for]").forEach(function(x){ x.classList.remove("active"); });
+        opt.classList.add("active"); shoppingFor = opt.getAttribute("data-for");
+      });
+    });
+    document.getElementById("shopping-for-new-btn").addEventListener("click", function(){
+      document.getElementById("shopping-for-add-inline").style.display = "flex";
+      document.getElementById("shopping-for-add-input").focus();
+    });
+  }
+  function deleteShoppingForWithUndo(id){
+    var removed = shoppingForOptions.find(function(f){ return f.id===id; });
+    if(!removed) return;
+    var idx = shoppingForOptions.indexOf(removed);
+    shoppingForOptions.splice(idx,1);
+    shoppingItems.forEach(function(it){ if(it.forWhom===id) it.forWhom=null; });
+    saveShoppingForOptions(); saveShopping();
+    if(shoppingFor===id) shoppingFor = shoppingForOptions.length ? shoppingForOptions[0].id : "";
+    renderShoppingForRow(); renderShoppingPage();
+    showToast('"'+removed.label+'" removed.', function(){
+      shoppingForOptions.splice(idx,0,removed); saveShoppingForOptions();
+      renderShoppingForRow(); renderShoppingPage();
+    });
+  }
+  document.getElementById("shopping-for-add-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("shopping-for-add-confirm").click(); });
+  document.getElementById("shopping-for-add-confirm").addEventListener("click", function(){
+    var name = document.getElementById("shopping-for-add-input").value.trim();
+    if(!name) return;
+    var id = uid();
+    shoppingForOptions.push({ id:id, label:name });
+    saveShoppingForOptions();
+    shoppingFor = id;
+    document.getElementById("shopping-for-add-input").value = "";
+    document.getElementById("shopping-for-add-inline").style.display = "none";
+    renderShoppingForRow();
+  });
   function openShoppingSheet(existing){
     editingShoppingId = existing ? existing.id : null;
     shoppingWant = existing ? (existing.want||"need") : "need";
-    shoppingFor = existing ? (existing.forWhom||"myself") : "myself";
+    shoppingFor = existing ? (existing.forWhom||(shoppingForOptions.length?shoppingForOptions[0].id:"")) : (shoppingForOptions.length?shoppingForOptions[0].id:"");
     shoppingPriority = existing ? (existing.priority||"") : "";
     document.getElementById("shopping-sheet-title").textContent = existing ? "Edit item" : "New item";
     document.getElementById("shopping-input").value = existing ? existing.text : "";
     document.getElementById("shopping-delete").style.display = existing ? "block" : "none";
     document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-want")===shoppingWant); });
-    document.querySelectorAll("#shopping-for-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-for")===shoppingFor); });
+    document.getElementById("shopping-for-add-inline").style.display = "none";
+    renderShoppingForRow();
     document.querySelectorAll("#shopping-priority-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-priority")===shoppingPriority); });
     overlay.classList.add("open"); shoppingSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("shopping-input").focus(); }, 200);
@@ -2200,12 +2273,6 @@
     o.addEventListener("click", function(){
       document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
       o.classList.add("active"); shoppingWant = o.getAttribute("data-want");
-    });
-  });
-  document.querySelectorAll("#shopping-for-row .type-opt").forEach(function(o){
-    o.addEventListener("click", function(){
-      document.querySelectorAll("#shopping-for-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
-      o.classList.add("active"); shoppingFor = o.getAttribute("data-for");
     });
   });
   document.querySelectorAll("#shopping-priority-row .type-opt").forEach(function(o){
@@ -2556,11 +2623,11 @@
   /* ---------------- master render ---------------- */
   function renderAll(){
     renderHome();
-    if(currentTab==="week") renderWeek();
-    if(currentTab==="month") renderCalendar();
+    if(currentTab==="month") renderMonthTab();
     if(currentTab==="habits") renderHabits();
     if(currentTab==="goals") renderGoalsView();
     if(currentTab==="organize") renderOrganizePage();
+    if(currentTab==="shopping") renderShoppingPage();
   }
 
   /* ---------------- Organize page reorder + drag-left-to-nest (TickTick-style) ---------------- */
@@ -2707,7 +2774,7 @@
   function initTileReorder(){
     var grid = document.querySelector(".home-tile-grid");
     if(!grid) return;
-    var savedOrder = load("db2.tileOrder", ["week","habits","goals","categories","activity","organize","shopping"]);
+    var savedOrder = load("db2.tileOrder", ["habits","goals","categories","activity","organize","shopping"]);
     savedOrder.forEach(function(id){
       var tile = grid.querySelector('.home-tile[data-tile-id="'+id+'"]');
       if(tile) grid.appendChild(tile);
