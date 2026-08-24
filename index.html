@@ -124,6 +124,9 @@
 
   .home-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:26px; padding-bottom:10px; border-bottom:1px solid var(--line); }
   .home-week-summary{ font-size:11.5px; color:var(--ink-soft); margin-top:14px; text-align:center; }
+  .work-summary-card{ background:var(--paper-2); border-radius:14px; padding:13px 16px; margin-top:12px; cursor:pointer; border-left:3px solid var(--moss); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .work-summary-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); }
+  .work-summary-text{ font-size:14px; color:var(--ink); font-weight:600; margin-top:2px; }
 
   .stat-row{ display:flex; gap:10px; margin-top:20px; }
   .stat-card{ flex:1; background:var(--paper-2); border-radius:16px; padding:16px; }
@@ -495,6 +498,13 @@
       <ul class="ledger-list" id="home-today-list"></ul>
       <div class="home-section-label" id="home-habits-label" style="display:none;">Habits</div>
       <ul class="ledger-list" id="home-habits-list"></ul>
+      <div class="work-summary-card" id="work-summary-card" style="display:none;">
+        <div>
+          <div class="work-summary-label">Work</div>
+          <div class="work-summary-text" id="work-summary-text"></div>
+        </div>
+        <span class="next-up-arrow">↗</span>
+      </div>
       <div class="home-week-summary" id="home-week-summary"></div>
 
       <div class="home-tile-grid">
@@ -1712,6 +1722,7 @@
     else if(currentTab==="shopping") openShoppingSheet(null);
     else if(currentTab==="work") openTaskSheet(null, "once", { list:"work" });
   });
+  document.getElementById("work-summary-card").addEventListener("click", function(){ switchTab("work"); });
 
   /* ---------------- HOME render ---------------- */
   function computeNextUp(){
@@ -1739,7 +1750,7 @@
     document.getElementById("next-up-footer-left").textContent = "Today";
     card.onclick = function(){ openTaskSheet(t); };
   }
-  function habitRowHtmlHome(h){
+  function habitRowHtmlHome(h, hideDelete){
     var isToday = isScheduledOn(h, realNow);
     var done = h.completed && h.completed[todayKey];
     var streak = computeStreak(h);
@@ -1750,7 +1761,7 @@
       '<button class="ledger-check" data-id="'+h.id+'" style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
       '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">Habit</span>'+catTag+(streak?'<span class="streak-badge">🔥'+streak+'</span>':'')+'</div></div>' +
-      '<button class="ledger-del" data-id="'+h.id+'">×</button>' +
+      (hideDelete ? '' : '<button class="ledger-del" data-id="'+h.id+'">×</button>') +
     '</li>';
   }
   function renderHome(){
@@ -1795,12 +1806,23 @@
       tasksLabel.style.display = taskRows.length ? "" : "none";
       taskList.innerHTML = taskRows.length ? taskRows.map(function(x){ return taskRowHtml(x.item); }).join("") : "";
       habitsLabel.style.display = habitRows.length ? "" : "none";
-      habitList.innerHTML = habitRows.length ? habitRows.map(function(x){ return habitRowHtmlHome(x.item); }).join("") : "";
+      habitList.innerHTML = habitRows.length ? habitRows.map(function(x){ return habitRowHtmlHome(x.item, true); }).join("") : "";
     }
 
     var weekStartMs = startOfWeek(realNow).getTime();
     var doneThisWeek = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt && t.completedAt >= weekStartMs; }).length;
     document.getElementById("home-week-summary").textContent = doneThisWeek ? doneThisWeek+" completed this week" : "";
+
+    var workAll = tasks.filter(function(t){ return t.list==="work"; });
+    var workCard = document.getElementById("work-summary-card");
+    if(workAll.length){
+      var workDone = workAll.filter(doneFor).length;
+      var workRemaining = workAll.length - workDone;
+      document.getElementById("work-summary-text").textContent = workDone+"/"+workAll.length+" done. "+workRemaining+" remaining.";
+      workCard.style.display = "flex";
+    } else {
+      workCard.style.display = "none";
+    }
 
     var todays = todaysTasks; // kept for the stat line below, tasks-only count as before
     var doneTaskCount = taskRows.filter(function(x){ return x.done; }).length;
