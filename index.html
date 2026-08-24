@@ -136,6 +136,9 @@
 
   .ledger-list{ list-style:none; margin:0; padding:0; }
   .ledger-item{ display:flex; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); position:relative; }
+  .ledger-item.subtask-row{ padding-left:26px; position:relative; }
+  .ledger-item.subtask-row::before{ content:""; position:absolute; left:8px; top:0; bottom:0; width:1px; background:var(--line); }
+  .ledger-item.subtask-row .ledger-text{ font-size:calc(13.5px * var(--text-zoom, 1)); }
   #home-today-list.ledger-list{ display:flex; flex-direction:column; gap:8px; }
   #home-today-list .ledger-item{
     border-bottom:none; background:var(--paper-2); border-radius:14px; padding:14px 15px;
@@ -171,6 +174,8 @@
   .home-tile-icon svg{ width:16px; height:16px; }
   .home-tile-label{ flex:1; font-size:13px; color:var(--ink); font-weight:500; }
   .home-tile-count{ font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); }
+  .organize-nest-btn{ flex:0 0 auto; background:var(--paper-2); border:1px solid var(--line); border-radius:14px; padding:6px 12px; font-size:12px; color:var(--ink); cursor:pointer; }
+  .organize-child-count{ font-size:11.5px; color:var(--ink-soft); font-weight:400; }
 
   /* ---------------- generic card / label pattern used on other tabs ---------------- */
   .card{ background:var(--paper); border-bottom:1px solid var(--line); padding:22px 2px; }
@@ -494,6 +499,24 @@
           <span class="home-tile-label">Activity</span>
           <span class="home-tile-count" id="activity-count">—</span>
         </button>
+        <button class="home-tile" id="link-organize" data-tile-id="organize">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+          <span class="home-tile-label">Organize</span>
+          <span class="home-tile-count" id="organize-count">—</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="view" id="view-organize">
+      <div class="topbar bordered with-back">
+        <button class="back-btn" id="organize-back" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="topbar-title">Organize</div>
+      </div>
+      <div class="section">
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder. Drop directly onto another task to make it a subtask.</div>
+        <ul class="ledger-list" id="organize-list"></ul>
       </div>
     </div>
   </div>
@@ -951,13 +974,91 @@
     showToast("Task deleted.", function(){ tasks.splice(idx,0,removed); saveTasks(); renderAll(); });
   }
 
+  function taskOrderKey(t){ return t.order!==undefined ? t.order : t.createdAt; }
+  function taskChildren(id){ return tasks.filter(function(c){ return c.parentId===id; }).sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); }); }
+  function expandWithSubtasks(topLevelList){
+    var result = [];
+    topLevelList.forEach(function(t){
+      if(t.parentId) return; // subtasks are only added via their parent below, never listed independently
+      result.push(t);
+      taskChildren(t.id).forEach(function(c){ result.push(c); });
+    });
+    return result;
+  }
+  function organizeRowHtml(t, isChild){
+    var childCount = isChild ? 0 : taskChildren(t.id).length;
+    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(t.doneOnce?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
+      '<div class="ledger-text" style="flex:1 1 auto; min-width:0;">'+escapeHtml(t.text)+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
+      '<button class="organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Top-level" : "Subtask")+'</button>' +
+    '</li>';
+  }
+  function renderOrganizePage(){
+    var wrap = document.getElementById("organize-list");
+    var topLevel = tasks.filter(function(t){ return t.type==="once" && !t.parentId; })
+      .sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); });
+    if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">No tasks yet.</div>'; return; }
+    var html = "";
+    topLevel.forEach(function(t){
+      html += organizeRowHtml(t, false);
+      taskChildren(t.id).forEach(function(c){ html += organizeRowHtml(c, true); });
+    });
+    wrap.innerHTML = html;
+    wireLedgerReorder("organize-list", function(orderedIds){
+      // reorder only affects relative order within each level (top-level vs subtasks-of-same-parent);
+      // items keep whatever parent they currently have, this just resequences siblings
+      var byParent = {};
+      orderedIds.forEach(function(id){
+        var t = tasks.find(function(x){ return x.id===id; });
+        if(!t) return;
+        var key = t.parentId || "__top__";
+        byParent[key] = byParent[key] || [];
+        byParent[key].push(t);
+      });
+      Object.keys(byParent).forEach(function(key){
+        var group = byParent[key];
+        var n = group.length;
+        group.forEach(function(t, i){ t.order = n - i; });
+      });
+      saveTasks();
+    });
+    wrap.querySelectorAll(".organize-nest-btn").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        openNestPicker(btn.getAttribute("data-id"));
+      });
+    });
+  }
+  function openNestPicker(taskId){
+    var t = tasks.find(function(x){ return x.id===taskId; });
+    if(!t) return;
+    if(t.parentId){
+      // already a subtask - one tap promotes it back to top-level
+      t.parentId = null;
+      t.order = Date.now();
+      saveTasks(); renderOrganizePage(); renderHome();
+      showToast('"'+t.text+'" is now a top-level task.');
+      return;
+    }
+    var candidates = tasks.filter(function(x){ return x.type==="once" && !x.parentId && x.id!==taskId; });
+    if(!candidates.length){ showToast("No other tasks to nest this under yet."); return; }
+    var options = candidates.map(function(c){ return escapeHtml(c.text); });
+    var choice = prompt("Make subtask of which task? Type the exact name:\n\n"+options.join("\n"));
+    if(!choice) return;
+    var target = candidates.find(function(c){ return c.text.trim().toLowerCase()===choice.trim().toLowerCase(); });
+    if(!target){ showToast("Didn't match a task — nothing changed."); return; }
+    t.parentId = target.id;
+    t.order = Date.now();
+    saveTasks(); renderOrganizePage(); renderHome();
+    showToast('"'+t.text+'" is now a subtask of "'+target.text+'".');
+  }
+
   function taskRowHtml(t){
     var done = doneFor(t);
     var catName = t.category ? catLabel(t.category) : null;
     var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(t.category)+';">'+catName+'</span>' : '';
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
-    return '<li class="ledger-item'+(done?" done":"")+'" data-id="'+t.id+'">' +
+    return '<li class="ledger-item'+(done?" done":"")+(t.parentId?" subtask-row":"")+'" data-id="'+t.id+'">' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+t.id+'"><div class="ledger-text">'+escapeHtml(t.text)+'</div><div class="ledger-meta">'+dateTag+recurTag+catTag+'</div></div>' +
       '<button class="ledger-del" data-id="'+t.id+'">×</button>' +
@@ -1097,12 +1198,12 @@
   function switchTab(tab){
     currentTab = tab;
     saveStr("db2.currentTab", tab);
-    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
+    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="organize"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
     document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===tab); });
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
     if(el) el.classList.add("active");
-    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="month");
+    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="month" || tab==="organize");
     if(tab==="month") renderCalendar();
     if(tab==="week") renderWeek();
     if(tab==="habits") renderHabits();
@@ -1110,6 +1211,7 @@
     if(tab==="home"){ selectedDate = new Date(realNow); renderHome(); }
     if(tab==="categories") renderCategoriesPage();
     if(tab==="activity") renderActivityPage();
+    if(tab==="organize") renderOrganizePage();
   }
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
@@ -1119,9 +1221,11 @@
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
   document.getElementById("link-categories").addEventListener("click", function(){ switchTab("categories"); });
   document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
+  document.getElementById("link-organize").addEventListener("click", function(){ switchTab("organize"); });
   document.getElementById("categories-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("category-detail-back").addEventListener("click", function(){ switchTab("categories"); });
   document.getElementById("activity-back").addEventListener("click", function(){ switchTab(lastMainTab); });
+  document.getElementById("organize-back").addEventListener("click", function(){ switchTab(lastMainTab); });
 
   var activityFilter = "week";
   document.querySelectorAll("#activity-filter-row .type-opt").forEach(function(opt){
@@ -1470,6 +1574,7 @@
     document.getElementById("home-date").textContent = new Date().toLocaleDateString(undefined,{ weekday:"long", month:"long", day:"numeric" }).toUpperCase();
 
     var todaysTasks = tasks.filter(function(t){
+      if(t.parentId) return false; // subtasks are shown nested under their parent, never independently
       if(t.type==="daily") return true;
       if(t.type!=="once") return false;
       if(t.dueDate===todayKey) return true;
@@ -1480,29 +1585,26 @@
     var combined = todaysTasks.map(function(t){ return { kind:"task", item:t, done:doneFor(t), sortKey: t.order!==undefined ? t.order : t.createdAt }; })
       .concat(todaysHabits.map(function(h){ return { kind:"habit", item:h, done: !!(h.completed && h.completed[todayKey]), sortKey: h.order!==undefined ? h.order : h.createdAt }; }))
       .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
+    var combinedExpanded = [];
+    combined.forEach(function(x){
+      combinedExpanded.push(x);
+      if(x.kind==="task"){ taskChildren(x.item.id).forEach(function(c){ combinedExpanded.push({ kind:"task", item:c, done:doneFor(c) }); }); }
+    });
+    combined = combinedExpanded;
 
     var list = document.getElementById("home-today-list");
     var EMPTY_HOME_LINES = ["Nothing yet — tap + to add something.", "A clear day so far.", "Open and waiting.", "Nothing on the page yet."];
     if(!combined.length) list.innerHTML = '<div class="empty-note">'+EMPTY_HOME_LINES[dayOfYear() % EMPTY_HOME_LINES.length]+'</div>';
     else list.innerHTML = combined.map(function(x){ return x.kind==="task" ? taskRowHtml(x.item) : habitRowHtmlHome(x.item); }).join("");
-    wireLedgerReorder("home-today-list", function(orderedIds){
-      var n = orderedIds.length;
-      orderedIds.forEach(function(id, i){
-        var t = tasks.find(function(x){ return x.id===id; });
-        if(t){ t.order = n - i; return; }
-        var h = habits.find(function(x){ return x.id===id; });
-        if(h) h.order = n - i;
-      });
-      saveTasks(); saveHabits();
-    });
 
     var weekStartMs = startOfWeek(realNow).getTime();
     var doneThisWeek = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt && t.completedAt >= weekStartMs; }).length;
     document.getElementById("home-week-summary").textContent = doneThisWeek ? doneThisWeek+" completed this week" : "";
 
     var todays = todaysTasks; // kept for the stat line below, tasks-only count as before
-    var done = todays.filter(doneFor).length;
-    document.getElementById("home-progress-count").textContent = (done+todaysHabits.filter(function(h){return h.completed&&h.completed[todayKey];}).length)+"/"+combined.length;
+    var doneTaskCount = combined.filter(function(x){ return x.kind==="task" && x.done; }).length;
+    var doneHabitCount = todaysHabits.filter(function(h){return h.completed&&h.completed[todayKey];}).length;
+    document.getElementById("home-progress-count").textContent = (doneTaskCount+doneHabitCount)+"/"+combined.length;
 
     var openTodos = todays.filter(function(t){ return !doneFor(t); }).length;
     document.getElementById("stat-todo-count").textContent = openTodos;
@@ -1522,6 +1624,8 @@
     document.getElementById("cats-count").textContent = categories.length || "—";
     var completedCount = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt; }).length;
     document.getElementById("activity-count").textContent = completedCount || "—";
+    var subtaskCount = tasks.filter(function(t){ return t.parentId; }).length;
+    document.getElementById("organize-count").textContent = subtaskCount || "—";
   }
 
   /* ---------------- WEEK render ---------------- */
@@ -2270,7 +2374,7 @@
   function initTileReorder(){
     var grid = document.querySelector(".home-tile-grid");
     if(!grid) return;
-    var savedOrder = load("db2.tileOrder", ["week","habits","goals","categories","activity"]);
+    var savedOrder = load("db2.tileOrder", ["week","habits","goals","categories","activity","organize"]);
     savedOrder.forEach(function(id){
       var tile = grid.querySelector('.home-tile[data-tile-id="'+id+'"]');
       if(tile) grid.appendChild(tile);
