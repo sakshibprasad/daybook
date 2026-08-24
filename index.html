@@ -138,6 +138,8 @@
   .next-up-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding-top:12px; border-top:1px solid var(--line); font-size:11px; color:var(--ink-soft); }
   .next-up-arrow{ color:var(--moss); font-size:14px; }
   .home-progress-label{ font-family:var(--font-display); font-size:15px; color:var(--ink-soft); }
+  .home-section-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); margin:22px 2px 10px; }
+  .home-section-label:first-of-type{ margin-top:16px; }
   .home-progress-count{ font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); }
 
   .ledger-list{ list-style:none; margin:0; padding:0; }
@@ -145,15 +147,19 @@
   .ledger-item.subtask-row{ padding-left:26px; position:relative; }
   .ledger-item.subtask-row::before{ content:""; position:absolute; left:8px; top:0; bottom:0; width:1px; background:var(--line); }
   .ledger-item.subtask-row .ledger-text{ font-size:calc(13.5px * var(--text-zoom, 1)); }
-  #home-today-list.ledger-list{ display:flex; flex-direction:column; gap:8px; }
-  #home-today-list .ledger-item{
-    border-bottom:none; background:var(--paper-2); border-radius:14px; padding:14px 15px;
+  #home-today-list.ledger-list, #home-habits-list.ledger-list{ display:flex; flex-direction:column; gap:6px; }
+  #home-today-list .ledger-item, #home-habits-list .ledger-item{
+    border-bottom:none; background:var(--paper-2); border-radius:12px; padding:9px 12px; gap:10px;
     box-shadow:0 1px 2px rgba(43,38,32,0.03); border-left:3px solid var(--moss);
   }
-  #home-today-list .ledger-item.done{ border-left-color:var(--line); }
-  #home-today-list .ledger-item.subtask-row{ margin-left:24px; width:calc(100% - 24px); border-left-color:var(--ink-soft); padding:11px 14px; }
+  #home-today-list .ledger-item .ledger-text, #home-habits-list .ledger-item .ledger-text{ font-size:calc(14px * var(--text-zoom, 1)); }
+  #home-today-list .ledger-item .ledger-check, #home-habits-list .ledger-item .ledger-check{ width:17px; height:17px; }
+  #home-today-list .ledger-item .ledger-meta, #home-habits-list .ledger-item .ledger-meta{ margin-top:3px; gap:6px; }
+  #home-today-list .ledger-item .ledger-tag, #home-habits-list .ledger-item .ledger-tag{ font-size:9px; padding:1px 7px; }
+  #home-today-list .ledger-item.done, #home-habits-list .ledger-item.done{ border-left-color:var(--line); }
+  #home-today-list .ledger-item.subtask-row{ margin-left:20px; width:calc(100% - 20px); border-left-color:var(--ink-soft); padding:8px 11px; }
   #home-today-list .ledger-item.subtask-row.done{ border-left-color:var(--line); }
-  html[data-theme="dusk"] #home-today-list .ledger-item{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
+  html[data-theme="dusk"] #home-today-list .ledger-item, html[data-theme="dusk"] #home-habits-list .ledger-item{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
   .ledger-item:last-child{ border-bottom:none; }
   .ledger-check{ flex:0 0 auto; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--ink-soft); background:none; margin-top:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:transparent; transition:transform .15s cubic-bezier(.34,1.56,.64,1), background .15s ease, border-color .15s ease; }
   .ledger-check svg{ width:11px; height:11px; }
@@ -485,7 +491,10 @@
         <span class="home-progress-label">Today</span>
         <span class="home-progress-count mono" id="home-progress-count">0/0</span>
       </div>
+      <div class="home-section-label" id="home-tasks-label" style="display:none;">Tasks</div>
       <ul class="ledger-list" id="home-today-list"></ul>
+      <div class="home-section-label" id="home-habits-label" style="display:none;">Habits</div>
+      <ul class="ledger-list" id="home-habits-list"></ul>
       <div class="home-week-summary" id="home-week-summary"></div>
 
       <div class="home-tile-grid">
@@ -503,6 +512,11 @@
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
           <span class="home-tile-label">Categories</span>
           <span class="home-tile-count" id="cats-count">—</span>
+        </button>
+        <button class="home-tile" id="link-work" data-tile-id="work">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+          <span class="home-tile-label">Work</span>
+          <span class="home-tile-count" id="work-count">—</span>
         </button>
         <button class="home-tile" id="link-activity" data-tile-id="activity">
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
@@ -534,8 +548,11 @@
         <button class="date-nav-btn organize-today-btn" id="organize-today">Today</button>
       </div>
       <div class="section">
+        <div class="home-section-label" id="organize-tasks-label" style="margin-top:0;">Tasks</div>
         <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder or drag left onto another task to nest it. Tap a task to edit it.</div>
         <ul class="ledger-list" id="organize-list"></ul>
+        <div class="home-section-label" id="organize-habits-label" style="display:none;">Habits</div>
+        <ul class="ledger-list" id="organize-habits-list"></ul>
       </div>
     </div>
 
@@ -546,6 +563,20 @@
     </div>
     <div class="section">
       <ul class="ledger-list" id="shopping-list"></ul>
+    </div>
+  </div>
+
+  <!-- WORK -->
+  <div class="view" id="view-work">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="work-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">Work</div>
+    </div>
+    <div class="section">
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder. Tap a task to edit it.</div>
+      <ul class="ledger-list" id="work-list"></ul>
     </div>
   </div>
 
@@ -814,6 +845,10 @@
     <div class="type-opt" data-priority="low">Low</div>
     <div class="type-opt" data-priority="medium">Medium</div>
     <div class="type-opt" data-priority="high">High</div>
+  </div>
+  <div class="type-row" id="task-list-row">
+    <div class="type-opt active" data-list="personal">Personal</div>
+    <div class="type-opt" data-list="work">Work</div>
   </div>
   <div class="sheet-actions">
     <button class="btn btn-ghost" id="task-cancel">Cancel</button>
@@ -1116,6 +1151,16 @@
       '<button class="ledger-del" data-id="'+t.id+'">×</button>' +
     '</li>';
   }
+  function renderOrganizeHabitsSection(isToday){
+    var wrap = document.getElementById("organize-habits-list");
+    var label = document.getElementById("organize-habits-label");
+    if(!wrap || !label) return;
+    if(!isToday){ wrap.innerHTML = ""; label.style.display = "none"; return; } // habits aren't date-scoped like tasks, so only show them on the Today view
+    var todaysHabits = habits.filter(function(h){ return isScheduledOn(h, realNow); })
+      .sort(function(a,b){ var da=!!(a.completed&&a.completed[todayKey]), db=!!(b.completed&&b.completed[todayKey]); if(da!==db) return da?1:-1; return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt); });
+    label.style.display = todaysHabits.length ? "" : "none";
+    wrap.innerHTML = todaysHabits.map(habitRowHtmlHome).join("");
+  }
   function renderOrganizePage(){
     var wrap = document.getElementById("organize-list");
     if(!wrap) return;
@@ -1124,6 +1169,7 @@
     if(labelEl) labelEl.textContent = isToday ? "Today" : organizeSelectedDate.toLocaleDateString(undefined,{ weekday:"short", month:"short", day:"numeric" });
     var todayBtn = document.getElementById("organize-today");
     if(todayBtn) todayBtn.style.visibility = isToday ? "hidden" : "visible";
+    renderOrganizeHabitsSection(isToday);
     var topLevel = topLevelTasksForDate(organizeSelectedDate).sort(function(a,b){ var da=organizeDoneFor(a), db=organizeDoneFor(b); if(da!==db) return da?1:-1; return taskOrderKey(b)-taskOrderKey(a); });
     if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">'+(isToday ? "Nothing for today. Tap + to add a task." : "Nothing for this day.")+'</div>'; return; }
     var html = "";
@@ -1164,6 +1210,7 @@
     var key = dateKey(date);
     var isToday = key===todayKey;
     return tasks.filter(function(t){
+      if(t.list==="work") return false; // Work tasks live on their own page
       if(t.parentId) return false;
       if(t.type==="daily" || t.type==="weekly" || t.type==="monthly") return true;
       if(t.type!=="once") return false;
@@ -1254,7 +1301,7 @@
       else if(body){ var t2 = tasks.find(function(x){return x.id===body.getAttribute("data-edit");}); if(t2) openTaskSheet(t2); }
     });
   }
-  ["home-today-list","week-list","cal-day-list"].forEach(function(id){ wireTaskList(document.getElementById(id)); });
+  ["home-today-list","home-habits-list","week-list","cal-day-list","organize-habits-list"].forEach(function(id){ wireTaskList(document.getElementById(id)); });
 
   /* ---------------- swipe: right to delete, left to tick ---------------- */
   (function(){
@@ -1330,7 +1377,7 @@
     currentTab = tab;
     saveStr("db2.currentTab", tab);
     window.scrollTo(0,0); // views vary a lot in height (e.g. Organize can be much shorter than Home) - always land at the top of the new view
-    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
+    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="work"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
     document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===tab); });
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
@@ -1344,6 +1391,7 @@
     if(tab==="activity") renderActivityPage();
     if(tab==="organize"){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); }
     if(tab==="shopping") renderShoppingPage();
+    if(tab==="work") renderWorkPage();
   }
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
@@ -1658,6 +1706,7 @@
     else if(currentTab==="goals") openGoalSheet(null, "short");
     else if(currentTab==="organize") openTaskSheet(null, "once", { dueDate: dateKey(organizeSelectedDate) });
     else if(currentTab==="shopping") openShoppingSheet(null);
+    else if(currentTab==="work") openTaskSheet(null, "once", { list:"work" });
   });
 
   /* ---------------- HOME render ---------------- */
@@ -1705,6 +1754,7 @@
     document.getElementById("home-date").textContent = new Date().toLocaleDateString(undefined,{ weekday:"long", month:"long", day:"numeric" }).toUpperCase();
 
     var todaysTasks = tasks.filter(function(t){
+      if(t.list==="work") return false; // Work tasks live on their own page, kept out of Home entirely
       if(t.parentId) return false; // subtasks are shown nested under their parent, never independently
       if(t.type==="daily" || t.type==="weekly" || t.type==="monthly") return true;
       if(t.type!=="once") return false;
@@ -1714,29 +1764,44 @@
       return false;
     });
     var todaysHabits = habits.filter(function(h){ return isScheduledOn(h, realNow); });
-    var combined = todaysTasks.map(function(t){ return { kind:"task", item:t, done:doneFor(t), sortKey: t.order!==undefined ? t.order : t.createdAt }; })
-      .concat(todaysHabits.map(function(h){ return { kind:"habit", item:h, done: !!(h.completed && h.completed[todayKey]), sortKey: h.order!==undefined ? h.order : h.createdAt }; }))
-      .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
-    var combinedExpanded = [];
-    combined.forEach(function(x){
-      combinedExpanded.push(x);
-      if(x.kind==="task"){ taskChildren(x.item.id).forEach(function(c){ combinedExpanded.push({ kind:"task", item:c, done:doneFor(c) }); }); }
-    });
-    combined = combinedExpanded;
 
-    var list = document.getElementById("home-today-list");
+    var taskRows = todaysTasks.map(function(t){ return { item:t, done:doneFor(t), sortKey: t.order!==undefined ? t.order : t.createdAt }; })
+      .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
+    var taskRowsExpanded = [];
+    taskRows.forEach(function(x){
+      taskRowsExpanded.push(x);
+      taskChildren(x.item.id).forEach(function(c){ taskRowsExpanded.push({ item:c, done:doneFor(c) }); });
+    });
+    taskRows = taskRowsExpanded;
+
+    var habitRows = todaysHabits.map(function(h){ return { item:h, done: !!(h.completed && h.completed[todayKey]), sortKey: h.order!==undefined ? h.order : h.createdAt }; })
+      .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
+
+    var taskList = document.getElementById("home-today-list");
+    var habitList = document.getElementById("home-habits-list");
+    var tasksLabel = document.getElementById("home-tasks-label");
+    var habitsLabel = document.getElementById("home-habits-label");
     var EMPTY_HOME_LINES = ["Nothing yet — tap + to add something.", "A clear day so far.", "Open and waiting.", "Nothing on the page yet."];
-    if(!combined.length) list.innerHTML = '<div class="empty-note">'+EMPTY_HOME_LINES[dayOfYear() % EMPTY_HOME_LINES.length]+'</div>';
-    else list.innerHTML = combined.map(function(x){ return x.kind==="task" ? taskRowHtml(x.item) : habitRowHtmlHome(x.item); }).join("");
+
+    if(!taskRows.length && !habitRows.length){
+      tasksLabel.style.display = "none"; habitsLabel.style.display = "none";
+      taskList.innerHTML = '<div class="empty-note">'+EMPTY_HOME_LINES[dayOfYear() % EMPTY_HOME_LINES.length]+'</div>';
+      habitList.innerHTML = "";
+    } else {
+      tasksLabel.style.display = taskRows.length ? "" : "none";
+      taskList.innerHTML = taskRows.length ? taskRows.map(function(x){ return taskRowHtml(x.item); }).join("") : "";
+      habitsLabel.style.display = habitRows.length ? "" : "none";
+      habitList.innerHTML = habitRows.length ? habitRows.map(function(x){ return habitRowHtmlHome(x.item); }).join("") : "";
+    }
 
     var weekStartMs = startOfWeek(realNow).getTime();
     var doneThisWeek = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt && t.completedAt >= weekStartMs; }).length;
     document.getElementById("home-week-summary").textContent = doneThisWeek ? doneThisWeek+" completed this week" : "";
 
     var todays = todaysTasks; // kept for the stat line below, tasks-only count as before
-    var doneTaskCount = combined.filter(function(x){ return x.kind==="task" && x.done; }).length;
+    var doneTaskCount = taskRows.filter(function(x){ return x.done; }).length;
     var doneHabitCount = todaysHabits.filter(function(h){return h.completed&&h.completed[todayKey];}).length;
-    document.getElementById("home-progress-count").textContent = (doneTaskCount+doneHabitCount)+"/"+combined.length;
+    document.getElementById("home-progress-count").textContent = (doneTaskCount+doneHabitCount)+"/"+(taskRows.length+habitRows.length);
 
     var openTodos = todays.filter(function(t){ return !doneFor(t); }).length;
     document.getElementById("stat-todo-count").textContent = openTodos;
@@ -1756,6 +1821,7 @@
     document.getElementById("activity-count").textContent = completedCount || "—";
     var subtaskCount = tasks.filter(function(t){ return t.parentId; }).length;
     document.getElementById("organize-count").textContent = subtaskCount || "—";
+    if(currentTab==="organize") renderOrganizeHabitsSection(dateKey(organizeSelectedDate)===todayKey); // habit changes elsewhere (Home, Habits page) always call renderHome() - keep Organize's habit section in sync too
   }
 
   /* ---------------- WEEK render ---------------- */
@@ -1783,6 +1849,7 @@
     document.getElementById("week-label").textContent = fmtShort(s)+" – "+fmtShort(e);
     var keys = []; for(var i=0;i<7;i++){ var d=new Date(s); d.setDate(s.getDate()+i); keys.push(dateKey(d)); }
     var list = tasks.filter(function(t){
+      if(t.list==="work") return false;
       return t.type==="weekly" || (t.type==="once" && t.dueDate && keys.indexOf(t.dueDate)!==-1);
     }).sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
     var wrap = document.getElementById("week-list");
@@ -1916,7 +1983,7 @@
     var isToday = selKey()===todayKey;
     var dayLabel = isToday ? "Today" : selectedDate.toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"});
     document.getElementById("cal-day-label").textContent = dayLabel;
-    var list = tasks.filter(function(t){ return t.type==="daily" || (t.type==="once" && t.dueDate===selKey()); })
+    var list = tasks.filter(function(t){ if(t.list==="work") return false; return t.type==="daily" || (t.type==="once" && t.dueDate===selKey()); })
       .sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
     var wrap = document.getElementById("cal-day-list");
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this day.</div>';
@@ -2162,6 +2229,29 @@
   document.getElementById("add-goal-short").addEventListener("click", function(){ openGoalSheet(null,"short"); });
   document.getElementById("add-goal-long").addEventListener("click", function(){ openGoalSheet(null,"long"); });
 
+  /* ---------------- WORK ---------------- */
+  function renderWorkPage(){
+    var wrap = document.getElementById("work-list");
+    if(!wrap) return;
+    var workTasks = tasks.filter(function(t){ return t.list==="work"; })
+      .sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt); });
+    wrap.innerHTML = workTasks.length ? workTasks.map(taskRowHtml).join("") : '<div class="empty-note">Nothing here yet. Tap + to add a work task.</div>';
+    var openCount = tasks.filter(function(t){ return t.list==="work" && !doneFor(t); }).length;
+    var countEl = document.getElementById("work-count");
+    if(countEl) countEl.textContent = openCount || "—";
+    wireLedgerReorder("work-list", function(orderedIds){
+      var base = Date.now();
+      orderedIds.forEach(function(id, i){
+        var t = tasks.find(function(x){ return x.id===id; });
+        if(t) t.order = base - i;
+      });
+      saveTasks();
+    });
+  }
+  wireTaskList(document.getElementById("work-list"));
+  document.getElementById("work-back").addEventListener("click", function(){ switchTab(lastMainTab); });
+  document.getElementById("link-work").addEventListener("click", function(){ switchTab("work"); });
+
   /* ---------------- SHOPPING ---------------- */
   function wantTag(w){ return w==="want" ? '<span class="ledger-tag">Want</span>' : '<span class="ledger-tag">Need</span>'; }
   function forTag(f){ var lbl = shoppingForLabel(f); return lbl ? '<span class="ledger-tag">'+escapeHtml(lbl)+'</span>' : ''; }
@@ -2308,7 +2398,7 @@
   /* ---------------- TASK SHEET ---------------- */
   var overlay = document.getElementById("overlay");
   var taskSheet = document.getElementById("task-sheet");
-  var editingTaskId = null, taskType = "once", taskPriority = "";
+  var editingTaskId = null, taskType = "once", taskPriority = "", taskList = "personal";
   function renderCatRowFor(rowId, newBtnId){
     var row = document.getElementById(rowId);
     var html = categories.map(function(c){ return '<div class="cat-opt" data-cat="'+c.id+'">'+escapeHtml(c.label)+'</div>'; }).join("");
@@ -2397,6 +2487,7 @@
     taskSheetParentId = existing ? (existing.parentId||null) : (opts.parentId||null);
     taskType = existing ? existing.type : (defaultType||"once");
     taskPriority = existing ? (existing.priority||"") : "";
+    taskList = existing ? (existing.list||"personal") : (opts.list||"personal");
     var parentTask = taskSheetParentId ? tasks.find(function(x){ return x.id===taskSheetParentId; }) : null;
     document.getElementById("task-sheet-title").textContent = existing ? "Edit task" : (parentTask ? "New subtask of \u201c"+parentTask.text+"\u201d" : "New task");
     document.getElementById("task-input").value = existing ? existing.text : "";
@@ -2409,6 +2500,7 @@
     document.getElementById("cat-add-inline").style.display = "none";
     document.querySelectorAll("#task-cat-row .cat-opt[data-cat]").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-cat")===(existing?existing.category:null)); });
     document.querySelectorAll("#task-priority-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-priority")===taskPriority); });
+    document.querySelectorAll("#task-list-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-list")===taskList); });
     overlay.classList.add("open"); taskSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("task-input").focus(); }, 200);
   }
@@ -2429,6 +2521,12 @@
       o.classList.add("active"); taskPriority = o.getAttribute("data-priority");
     });
   });
+  document.querySelectorAll("#task-list-row .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      document.querySelectorAll("#task-list-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      o.classList.add("active"); taskList = o.getAttribute("data-list");
+    });
+  });
   document.getElementById("task-cancel").addEventListener("click", closeTaskSheet);
   overlay.addEventListener("click", function(){
     closeTaskSheet(); closeHabitSheetFn(); closeGoalSheetFn(); closeShoppingSheetFn();
@@ -2443,12 +2541,12 @@
     if(editingTaskId){
       var t = tasks.find(function(x){ return x.id===editingTaskId; });
       if(t){
-        t.text=text; t.type=taskType; t.category=cat; t.priority = taskPriority || null;
+        t.text=text; t.type=taskType; t.category=cat; t.priority = taskPriority || null; t.list = taskList || "personal";
         t.dueDate = taskType==="once" ? (dateVal || selKey()) : null;
         t.dueTime = taskType==="once" ? (timeVal || null) : null;
       }
     } else {
-      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, priority: taskPriority || null, parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
+      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, priority: taskPriority || null, list: taskList || "personal", parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
     }
     saveTasks(); closeTaskSheet(); renderAll();
   });
@@ -2635,6 +2733,7 @@
     if(currentTab==="goals") renderGoalsView();
     if(currentTab==="organize") renderOrganizePage();
     if(currentTab==="shopping") renderShoppingPage();
+    if(currentTab==="work") renderWorkPage();
   }
 
   /* ---------------- Organize page reorder + drag-left-to-nest (TickTick-style) ---------------- */
@@ -2781,7 +2880,7 @@
   function initTileReorder(){
     var grid = document.querySelector(".home-tile-grid");
     if(!grid) return;
-    var savedOrder = load("db2.tileOrder", ["habits","goals","categories","activity","organize","shopping"]);
+    var savedOrder = load("db2.tileOrder", ["habits","goals","categories","work","activity","organize","shopping"]);
     savedOrder.forEach(function(id){
       var tile = grid.querySelector('.home-tile[data-tile-id="'+id+'"]');
       if(tile) grid.appendChild(tile);
