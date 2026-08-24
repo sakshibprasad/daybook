@@ -174,7 +174,8 @@
   .home-tile-icon svg{ width:16px; height:16px; }
   .home-tile-label{ flex:1; font-size:13px; color:var(--ink); font-weight:500; }
   .home-tile-count{ font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); }
-  .organize-nest-btn{ flex:0 0 auto; background:var(--paper-2); border:1px solid var(--line); border-radius:14px; padding:6px 12px; font-size:12px; color:var(--ink); cursor:pointer; }
+  .organize-actions{ display:flex; gap:16px; margin-top:8px; }
+  .organize-action-btn{ background:none; border:none; padding:0; font-size:12px; color:var(--moss); cursor:pointer; font-weight:600; font-family:var(--font-body); }
   .organize-nest-hover{ background:var(--moss-soft); box-shadow:inset 0 0 0 2px var(--moss); border-radius:10px; }
   .organize-child-count{ font-size:11.5px; color:var(--ink-soft); font-weight:400; }
 
@@ -227,6 +228,7 @@
   .theme-opt.active{ background:var(--ink); border-color:var(--ink); color:var(--paper); font-weight:600; }
   .date-nav{ display:flex; align-items:center; justify-content:center; gap:18px; padding:6px 0 20px; border-bottom:1px solid var(--line); margin-bottom:8px; }
   .date-nav-btn{ background:none; border:none; color:var(--ink-soft); font-size:18px; cursor:pointer; padding:4px 8px; }
+  .date-nav-btn.organize-today-btn{ font-size:11px; padding:3px 10px; border-radius:20px; background:var(--paper-2); border:1px solid var(--line); color:var(--ink); margin-left:4px; }
   .date-nav-label{ font-family:var(--font-mono); font-size:12.5px; color:var(--ink); letter-spacing:0.02em; }
 
   /* ---------------- month calendar ---------------- */
@@ -507,6 +509,7 @@
         </button>
       </div>
     </div>
+  </div>
 
     <div class="view" id="view-organize">
       <div class="topbar bordered with-back">
@@ -515,8 +518,14 @@
         </button>
         <div class="topbar-title">Organize</div>
       </div>
+      <div class="date-nav">
+        <button class="date-nav-btn" id="organize-prev">‹</button>
+        <span class="date-nav-label" id="organize-date-label"></span>
+        <button class="date-nav-btn" id="organize-next">›</button>
+        <button class="date-nav-btn organize-today-btn" id="organize-today">Today</button>
+      </div>
       <div class="section">
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Today's tasks. Hold and drag to reorder — drag left onto another task to make it a subtask.</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder or drag left onto another task to nest it. Tap a task to edit it.</div>
         <ul class="ledger-list" id="organize-list"></ul>
       </div>
     </div>
@@ -996,18 +1005,51 @@
     });
     return result;
   }
+  function organizeDoneFor(t){
+    // mirrors doneFor(), but keyed to the day being browsed on the Organize page rather than the shared selectedDate
+    if(t.type==="once") return !!t.doneOnce;
+    if(t.type==="daily") return !!(t.completed && t.completed[dateKey(organizeSelectedDate)]);
+    if(t.type==="weekly") return !!(t.completed && t.completed[weekKey(organizeSelectedDate)]);
+    return !!(t.completed && t.completed[monthKey(organizeSelectedDate)]);
+  }
+  function organizeToggleDone(t){
+    if(t.type==="once"){
+      t.doneOnce = !t.doneOnce;
+      t.completedAt = t.doneOnce ? Date.now() : null;
+    } else {
+      var pk = t.type==="daily" ? dateKey(organizeSelectedDate) : t.type==="weekly" ? weekKey(organizeSelectedDate) : monthKey(organizeSelectedDate);
+      t.completed = t.completed || {};
+      if(t.completed[pk]) delete t.completed[pk]; else t.completed[pk] = true;
+    }
+    saveTasks(); renderOrganizePage(); renderHome();
+  }
   function organizeRowHtml(t, isChild){
     var childCount = isChild ? 0 : taskChildren(t.id).length;
+    var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
-    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(t.doneOnce?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
-      '<div class="ledger-text" style="flex:1 1 auto; min-width:0;">'+escapeHtml(t.text)+' '+recurTag+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
-      '<button class="organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Top-level" : "Subtask")+'</button>' +
+    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(organizeDoneFor(t)?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
+      '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
+      '<div class="ledger-body" data-edit="'+t.id+'">' +
+        '<div class="ledger-text">'+escapeHtml(t.text)+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
+        (dateTag||recurTag ? '<div class="ledger-meta">'+dateTag+recurTag+'</div>' : '') +
+        '<div class="organize-actions">' +
+          (isChild ? '' : '<button class="organize-action-btn organize-add-sub" data-id="'+t.id+'">+ Add subtask</button>') +
+          '<button class="organize-action-btn organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Make top-level" : "Nest under\u2026")+'</button>' +
+        '</div>' +
+      '</div>' +
+      '<button class="ledger-del" data-id="'+t.id+'">×</button>' +
     '</li>';
   }
   function renderOrganizePage(){
     var wrap = document.getElementById("organize-list");
-    var topLevel = todaysTopLevelTasks().sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); });
-    if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">Nothing for today.</div>'; return; }
+    if(!wrap) return;
+    var isToday = dateKey(organizeSelectedDate)===todayKey;
+    var labelEl = document.getElementById("organize-date-label");
+    if(labelEl) labelEl.textContent = isToday ? "Today" : organizeSelectedDate.toLocaleDateString(undefined,{ weekday:"short", month:"short", day:"numeric" });
+    var todayBtn = document.getElementById("organize-today");
+    if(todayBtn) todayBtn.style.visibility = isToday ? "hidden" : "visible";
+    var topLevel = topLevelTasksForDate(organizeSelectedDate).sort(function(a,b){ var da=organizeDoneFor(a), db=organizeDoneFor(b); if(da!==db) return da?1:-1; return taskOrderKey(b)-taskOrderKey(a); });
+    if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">'+(isToday ? "Nothing for today. Tap + to add a task." : "Nothing for this day.")+'</div>'; return; }
     var html = "";
     topLevel.forEach(function(t){
       html += organizeRowHtml(t, false);
@@ -1040,23 +1082,25 @@
       saveTasks(); renderOrganizePage(); renderHome();
       showToast('"'+dragged.text+'" is now a subtask of "'+target.text+'".');
     });
-    wrap.querySelectorAll(".organize-nest-btn").forEach(function(btn){
-      btn.addEventListener("click", function(e){
-        e.stopPropagation();
-        openNestPicker(btn.getAttribute("data-id"));
-      });
-    });
   }
-  function todaysTopLevelTasks(){
+  var organizeSelectedDate = new Date(realNow);
+  function topLevelTasksForDate(date){
+    var key = dateKey(date);
+    var isToday = key===todayKey;
     return tasks.filter(function(t){
       if(t.parentId) return false;
-      if(t.type==="daily") return true;
+      if(t.type==="daily" || t.type==="weekly" || t.type==="monthly") return true;
       if(t.type!=="once") return false;
-      if(t.dueDate===todayKey) return true;
-      if(t.dueDate && t.dueDate<todayKey && !t.doneOnce) return true;
-      return false;
+      if(isToday){
+        if(!t.dueDate) return true; // no date set at all - treat as always-relevant on today's window
+        if(t.dueDate===todayKey) return true;
+        if(t.dueDate && t.dueDate<todayKey && !t.doneOnce) return true;
+        return false;
+      }
+      return t.dueDate===key; // browsing another day - exact match only, no carry-forward/undated here
     });
   }
+  function todaysTopLevelTasks(){ return topLevelTasksForDate(new Date(realNow)); }
   function openNestPicker(taskId){
     var t = tasks.find(function(x){ return x.id===taskId; });
     if(!t) return;
@@ -1068,7 +1112,7 @@
       showToast('"'+t.text+'" is now a top-level task.');
       return;
     }
-    var candidates = todaysTopLevelTasks().filter(function(x){ return x.id!==taskId; });
+    var candidates = topLevelTasksForDate(organizeSelectedDate).filter(function(x){ return x.id!==taskId; });
     if(!candidates.length){ showToast("No other tasks to nest this under yet."); return; }
     var body = document.getElementById("nest-picker-body");
     body.innerHTML = candidates.map(function(c){
@@ -1243,12 +1287,13 @@
   function switchTab(tab){
     currentTab = tab;
     saveStr("db2.currentTab", tab);
+    window.scrollTo(0,0); // views vary a lot in height (e.g. Organize can be much shorter than Home) - always land at the top of the new view
     if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="organize"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
     document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===tab); });
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
     if(el) el.classList.add("active");
-    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="month" || tab==="organize");
+    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="month");
     if(tab==="month") renderCalendar();
     if(tab==="week") renderWeek();
     if(tab==="habits") renderHabits();
@@ -1256,7 +1301,7 @@
     if(tab==="home"){ selectedDate = new Date(realNow); renderHome(); }
     if(tab==="categories") renderCategoriesPage();
     if(tab==="activity") renderActivityPage();
-    if(tab==="organize") renderOrganizePage();
+    if(tab==="organize"){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); }
   }
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
@@ -1572,6 +1617,7 @@
     else if(currentTab==="month") openTaskSheet(null, "once");
     else if(currentTab==="habits") openHabitSheet(null);
     else if(currentTab==="goals") openGoalSheet(null, "short");
+    else if(currentTab==="organize") openTaskSheet(null, "once", { dueDate: dateKey(organizeSelectedDate) });
   });
 
   /* ---------------- HOME render ---------------- */
@@ -1620,8 +1666,9 @@
 
     var todaysTasks = tasks.filter(function(t){
       if(t.parentId) return false; // subtasks are shown nested under their parent, never independently
-      if(t.type==="daily") return true;
+      if(t.type==="daily" || t.type==="weekly" || t.type==="monthly") return true;
       if(t.type!=="once") return false;
+      if(!t.dueDate) return true; // no date set at all - treat as always-relevant, not hidden
       if(t.dueDate===todayKey) return true;
       if(t.dueDate && t.dueDate<todayKey && !t.doneOnce) return true;
       return false;
@@ -1822,6 +1869,25 @@
   document.getElementById("month-prev").addEventListener("click", function(){ selectedMonthDate.setMonth(selectedMonthDate.getMonth()-1); renderCalendar(); });
   document.getElementById("month-next").addEventListener("click", function(){ selectedMonthDate.setMonth(selectedMonthDate.getMonth()+1); renderCalendar(); });
   window.addEventListener("resize", function(){ if(currentTab==="month") renderCalendar(); });
+  var organizePrevBtn = document.getElementById("organize-prev");
+  var organizeNextBtn = document.getElementById("organize-next");
+  var organizeTodayBtn = document.getElementById("organize-today");
+  if(organizePrevBtn) organizePrevBtn.addEventListener("click", function(){ organizeSelectedDate.setDate(organizeSelectedDate.getDate()-1); renderOrganizePage(); });
+  if(organizeNextBtn) organizeNextBtn.addEventListener("click", function(){ organizeSelectedDate.setDate(organizeSelectedDate.getDate()+1); renderOrganizePage(); });
+  if(organizeTodayBtn) organizeTodayBtn.addEventListener("click", function(){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); });
+  var organizeListEl = document.getElementById("organize-list");
+  if(organizeListEl) organizeListEl.addEventListener("click", function(e){
+    var chk = e.target.closest(".ledger-check");
+    var del = e.target.closest(".ledger-del");
+    var addSub = e.target.closest(".organize-add-sub");
+    var nestBtn = e.target.closest(".organize-nest-btn");
+    var body = e.target.closest(".ledger-body");
+    if(chk){ var t1 = tasks.find(function(x){ return x.id===chk.getAttribute("data-id"); }); if(t1) organizeToggleDone(t1); return; }
+    if(del){ deleteTask(del.getAttribute("data-id")); return; }
+    if(addSub){ e.stopPropagation(); openTaskSheet(null, "once", { parentId: addSub.getAttribute("data-id"), dueDate: dateKey(organizeSelectedDate) }); return; }
+    if(nestBtn){ e.stopPropagation(); openNestPicker(nestBtn.getAttribute("data-id")); return; }
+    if(body){ var t2 = tasks.find(function(x){ return x.id===body.getAttribute("data-edit"); }); if(t2) openTaskSheet(t2); return; }
+  });
 
   /* ---------------- HABITS ---------------- */
   function isScheduledOn(h, d){
@@ -2122,15 +2188,19 @@
     var opt = document.querySelector('#habit-cat-row .cat-opt[data-cat="'+id+'"]');
     if(opt) opt.classList.add("active");
   });
-  function openTaskSheet(existing, defaultType){
+  var taskSheetParentId = null;
+  function openTaskSheet(existing, defaultType, opts){
+    opts = opts || {};
     editingTaskId = existing ? existing.id : null;
+    taskSheetParentId = existing ? (existing.parentId||null) : (opts.parentId||null);
     taskType = existing ? existing.type : (defaultType||"once");
-    document.getElementById("task-sheet-title").textContent = existing ? "Edit task" : "New task";
+    var parentTask = taskSheetParentId ? tasks.find(function(x){ return x.id===taskSheetParentId; }) : null;
+    document.getElementById("task-sheet-title").textContent = existing ? "Edit task" : (parentTask ? "New subtask of \u201c"+parentTask.text+"\u201d" : "New task");
     document.getElementById("task-input").value = existing ? existing.text : "";
     document.getElementById("task-delete").style.display = existing ? "block" : "none";
     document.querySelectorAll("#task-type-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-type")===taskType); });
     document.getElementById("task-date-time-row").style.display = taskType==="once" ? "flex" : "none";
-    document.getElementById("task-date-input").value = existing && existing.dueDate ? existing.dueDate : selKey();
+    document.getElementById("task-date-input").value = existing && existing.dueDate ? existing.dueDate : (opts.dueDate || selKey());
     document.getElementById("task-time-input").value = existing && existing.dueTime ? existing.dueTime : "";
     renderCatRow();
     document.getElementById("cat-add-inline").style.display = "none";
@@ -2138,7 +2208,7 @@
     overlay.classList.add("open"); taskSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("task-input").focus(); }, 200);
   }
-  function closeTaskSheet(){ overlay.classList.remove("open"); taskSheet.classList.remove("open"); editingTaskId=null; }
+  function closeTaskSheet(){ overlay.classList.remove("open"); taskSheet.classList.remove("open"); editingTaskId=null; taskSheetParentId=null; }
 
 
   document.querySelectorAll("#task-type-row .type-opt").forEach(function(o){
@@ -2168,7 +2238,7 @@
         t.dueTime = taskType==="once" ? (timeVal || null) : null;
       }
     } else {
-      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
+      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
     }
     saveTasks(); closeTaskSheet(); renderAll();
   });
@@ -2353,6 +2423,7 @@
     if(currentTab==="month") renderCalendar();
     if(currentTab==="habits") renderHabits();
     if(currentTab==="goals") renderGoalsView();
+    if(currentTab==="organize") renderOrganizePage();
   }
 
   /* ---------------- Organize page reorder + drag-left-to-nest (TickTick-style) ---------------- */
