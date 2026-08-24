@@ -1071,8 +1071,8 @@
       });
       Object.keys(byParent).forEach(function(key){
         var group = byParent[key];
-        var n = group.length;
-        group.forEach(function(t, i){ t.order = n - i; });
+        var base = Date.now(); // large, timestamp-scale values so reordered tasks compare correctly against un-reordered items (which fall back to createdAt) and habits
+        group.forEach(function(t, i){ t.order = base - i; });
       });
       saveTasks();
     }, function(draggedId, targetId){
@@ -2060,6 +2060,8 @@
     });
     wireLedgerReorder("habit-list", function(orderedIds){
       habits = orderedIds.map(function(id){ return habits.find(function(h){ return h.id===id; }); }).filter(Boolean);
+      var base = Date.now();
+      habits.forEach(function(h, i){ h.order = base - i; });
       saveHabits();
     });
   }
