@@ -175,6 +175,7 @@
   .home-tile-label{ flex:1; font-size:13px; color:var(--ink); font-weight:500; }
   .home-tile-count{ font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); }
   .organize-nest-btn{ flex:0 0 auto; background:var(--paper-2); border:1px solid var(--line); border-radius:14px; padding:6px 12px; font-size:12px; color:var(--ink); cursor:pointer; }
+  .organize-nest-hover{ background:var(--moss-soft); box-shadow:inset 0 0 0 2px var(--moss); border-radius:10px; }
   .organize-child-count{ font-size:11.5px; color:var(--ink-soft); font-weight:400; }
 
   /* ---------------- generic card / label pattern used on other tabs ---------------- */
@@ -515,7 +516,7 @@
         <div class="topbar-title">Organize</div>
       </div>
       <div class="section">
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder. Drop directly onto another task to make it a subtask.</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Today's tasks. Hold and drag to reorder — drag left onto another task to make it a subtask.</div>
         <ul class="ledger-list" id="organize-list"></ul>
       </div>
     </div>
@@ -839,6 +840,16 @@
   <div id="day-preview-body"></div>
 </div>
 
+<div class="overlay" id="nest-picker-overlay"></div>
+<div class="sheet day-preview-sheet" id="nest-picker-sheet">
+  <div class="sheet-handle"></div>
+  <div class="day-preview-header">
+    <div class="sheet-title" style="margin-bottom:0;">Make subtask of…</div>
+    <button class="day-preview-close" id="nest-picker-close">Cancel</button>
+  </div>
+  <div id="nest-picker-body"></div>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -995,16 +1006,15 @@
   }
   function renderOrganizePage(){
     var wrap = document.getElementById("organize-list");
-    var topLevel = tasks.filter(function(t){ return !t.parentId; })
-      .sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); });
-    if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">No tasks yet.</div>'; return; }
+    var topLevel = todaysTopLevelTasks().sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); });
+    if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">Nothing for today.</div>'; return; }
     var html = "";
     topLevel.forEach(function(t){
       html += organizeRowHtml(t, false);
       taskChildren(t.id).forEach(function(c){ html += organizeRowHtml(c, true); });
     });
     wrap.innerHTML = html;
-    wireLedgerReorder("organize-list", function(orderedIds){
+    wireOrganizeReorder("organize-list", function(orderedIds){
       // reorder only affects relative order within each level (top-level vs subtasks-of-same-parent);
       // items keep whatever parent they currently have, this just resequences siblings
       var byParent = {};
@@ -1021,12 +1031,30 @@
         group.forEach(function(t, i){ t.order = n - i; });
       });
       saveTasks();
+    }, function(draggedId, targetId){
+      var dragged = tasks.find(function(x){ return x.id===draggedId; });
+      var target = tasks.find(function(x){ return x.id===targetId; });
+      if(!dragged || !target || dragged.id===target.id) { renderOrganizePage(); return; }
+      dragged.parentId = target.id;
+      dragged.order = Date.now();
+      saveTasks(); renderOrganizePage(); renderHome();
+      showToast('"'+dragged.text+'" is now a subtask of "'+target.text+'".');
     });
     wrap.querySelectorAll(".organize-nest-btn").forEach(function(btn){
       btn.addEventListener("click", function(e){
         e.stopPropagation();
         openNestPicker(btn.getAttribute("data-id"));
       });
+    });
+  }
+  function todaysTopLevelTasks(){
+    return tasks.filter(function(t){
+      if(t.parentId) return false;
+      if(t.type==="daily") return true;
+      if(t.type!=="once") return false;
+      if(t.dueDate===todayKey) return true;
+      if(t.dueDate && t.dueDate<todayKey && !t.doneOnce) return true;
+      return false;
     });
   }
   function openNestPicker(taskId){
@@ -1040,18 +1068,34 @@
       showToast('"'+t.text+'" is now a top-level task.');
       return;
     }
-    var candidates = tasks.filter(function(x){ return !x.parentId && x.id!==taskId; });
+    var candidates = todaysTopLevelTasks().filter(function(x){ return x.id!==taskId; });
     if(!candidates.length){ showToast("No other tasks to nest this under yet."); return; }
-    var options = candidates.map(function(c){ return escapeHtml(c.text); });
-    var choice = prompt("Make subtask of which task? Type the exact name:\n\n"+options.join("\n"));
-    if(!choice) return;
-    var target = candidates.find(function(c){ return c.text.trim().toLowerCase()===choice.trim().toLowerCase(); });
-    if(!target){ showToast("Didn't match a task — nothing changed."); return; }
-    t.parentId = target.id;
-    t.order = Date.now();
-    saveTasks(); renderOrganizePage(); renderHome();
-    showToast('"'+t.text+'" is now a subtask of "'+target.text+'".');
+    var body = document.getElementById("nest-picker-body");
+    body.innerHTML = candidates.map(function(c){
+      return '<div class="day-preview-row nest-picker-opt" data-target-id="'+c.id+'" style="cursor:pointer;">' +
+        '<div class="day-preview-text"><div class="day-preview-name">'+escapeHtml(c.text)+'</div></div>' +
+      '</div>';
+    }).join("");
+    body.querySelectorAll(".nest-picker-opt").forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var target = tasks.find(function(c){ return c.id===opt.getAttribute("data-target-id"); });
+        closeNestPicker();
+        if(!target) return;
+        t.parentId = target.id;
+        t.order = Date.now();
+        saveTasks(); renderOrganizePage(); renderHome();
+        showToast('"'+t.text+'" is now a subtask of "'+target.text+'".');
+      });
+    });
+    document.getElementById("nest-picker-overlay").classList.add("open");
+    document.getElementById("nest-picker-sheet").classList.add("open");
   }
+  function closeNestPicker(){
+    document.getElementById("nest-picker-overlay").classList.remove("open");
+    document.getElementById("nest-picker-sheet").classList.remove("open");
+  }
+  document.getElementById("nest-picker-close").addEventListener("click", closeNestPicker);
+  document.getElementById("nest-picker-overlay").addEventListener("click", closeNestPicker);
 
   function taskRowHtml(t){
     var done = doneFor(t);
@@ -2242,6 +2286,7 @@
     wireSwipeToDismiss(habitSheet, closeHabitSheetFn);
     wireSwipeToDismiss(goalSheet, closeGoalSheetFn);
     wireSwipeToDismiss(document.getElementById("day-preview-sheet"), closeDayPreview);
+    wireSwipeToDismiss(document.getElementById("nest-picker-sheet"), closeNestPicker);
   })();
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-plus").addEventListener("click", function(){ goalProgress=Math.min(100,goalProgress+10); document.getElementById("goal-progress").value=goalProgress; });
@@ -2308,6 +2353,84 @@
     if(currentTab==="month") renderCalendar();
     if(currentTab==="habits") renderHabits();
     if(currentTab==="goals") renderGoalsView();
+  }
+
+  /* ---------------- Organize page reorder + drag-left-to-nest (TickTick-style) ---------------- */
+  function wireOrganizeReorder(containerId, onReorder, onNest){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.querySelectorAll(".ledger-item").forEach(function(item){
+      var pressTimer = null, dragging = false, startY = 0, startX = 0, longPressed = false, nestTarget = null;
+      function clearNestHighlight(){
+        var prev = container.querySelectorAll(".organize-nest-hover");
+        for(var i=0;i<prev.length;i++){ prev[i].classList.remove("organize-nest-hover"); }
+        nestTarget = null;
+      }
+      function startDrag(x, y){
+        dragging = true; startX = x; startY = y;
+        item.classList.add("reorder-dragging");
+        item.style.transition = "none";
+      }
+      function moveDrag(x, y){
+        if(!dragging) return;
+        var dy = y - startY, dx = x - startX;
+        var isNesting = dx < -40;
+        item.style.transform = "translate("+(isNesting?-14:0)+"px,"+dy+"px)";
+        var siblings = Array.prototype.slice.call(container.querySelectorAll(".ledger-item"));
+        for(var i=0;i<siblings.length;i++){
+          var sib = siblings[i];
+          if(sib === item) continue;
+          var r = sib.getBoundingClientRect();
+          if(y > r.top && y < r.bottom){
+            if(isNesting){
+              if(nestTarget !== sib){ clearNestHighlight(); sib.classList.add("organize-nest-hover"); nestTarget = sib; }
+            } else {
+              if(nestTarget) clearNestHighlight();
+              var itemIdx = siblings.indexOf(item), sibIdx = siblings.indexOf(sib);
+              if(itemIdx < sibIdx) container.insertBefore(sib, item); else container.insertBefore(item, sib);
+              startY = y;
+              item.style.transform = "translate(0px,0px)";
+            }
+            break;
+          }
+        }
+      }
+      function endDrag(){
+        clearTimeout(pressTimer);
+        if(!dragging) return;
+        dragging = false;
+        item.classList.remove("reorder-dragging");
+        item.style.transition = ""; item.style.transform = "";
+        if(nestTarget){
+          var targetId = nestTarget.getAttribute("data-id");
+          clearNestHighlight();
+          onNest(item.getAttribute("data-id"), targetId);
+        } else {
+          onReorder(Array.prototype.map.call(container.querySelectorAll(".ledger-item"), function(x){ return x.getAttribute("data-id"); }));
+        }
+      }
+      item.addEventListener("touchstart", function(e){
+        longPressed = false;
+        var touch = e.touches[0];
+        startX = touch.clientX;
+        pressTimer = setTimeout(function(){
+          longPressed = true;
+          if(navigator.vibrate) navigator.vibrate(12);
+          startDrag(touch.clientX, touch.clientY);
+        }, 480);
+      }, { passive:true });
+      item.addEventListener("touchmove", function(e){
+        if(dragging){ moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
+        else if(Math.abs(e.touches[0].clientX - startX) > 8){ clearTimeout(pressTimer); }
+      }, { passive:true });
+      item.addEventListener("touchend", function(e){
+        clearTimeout(pressTimer);
+        if(longPressed){ e.preventDefault(); endDrag(); }
+      });
+      item.addEventListener("click", function(e){
+        if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
+      }, true);
+    });
   }
 
   /* ---------------- ledger list reorder (long-press + vertical drag, tasks & habits) ---------------- */
