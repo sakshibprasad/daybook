@@ -4,9 +4,9 @@
 <script>
   (function(){
     try{
-      var t = localStorage.getItem("db2.theme") || "aurora";
+      var t = localStorage.getItem("db2.theme") || "paper";
       if(t !== "paper") document.documentElement.setAttribute("data-theme", t);
-    }catch(e){ document.documentElement.setAttribute("data-theme", "aurora"); }
+    }catch(e){ document.documentElement.setAttribute("data-theme", "paper"); }
   })();
 </script>
 <meta charset="UTF-8">
@@ -19,7 +19,7 @@
 <meta name="apple-mobile-web-app-title" content="Daybook">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Alex+Brush&family=Sacramento&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5F1E6; --paper-2:#EDE7D6; --ink:#2B2620; --ink-soft:#8C8375;
@@ -28,6 +28,10 @@
     --font-display:'Libre Caslon Display', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
     --font-secondary:'Tangerine', cursive;
   }
+  html[data-secondary-font="tangerine"]{ --font-secondary:'Tangerine', cursive; }
+  html[data-secondary-font="caveat"]{ --font-secondary:'Caveat', cursive; }
+  html[data-secondary-font="alexbrush"]{ --font-secondary:'Alex Brush', cursive; }
+  html[data-secondary-font="sacramento"]{ --font-secondary:'Sacramento', cursive; }
   html[data-theme="dusk"]{
     --paper:#1C1B18; --paper-2:#26241F; --ink:#EDE7D9; --ink-soft:#8A8377;
     --line:#35322B; --moss:#8FAE7C; --moss-soft:#2C3325; --moss-2:#A6C293;
@@ -48,32 +52,10 @@
     --line:#E0D3BE; --moss:#B08968; --moss-soft:#EFE3D0; --moss-2:#C7A481;
     --danger:#A85D45; --shadow:0 2px 10px rgba(74,63,51,0.05), 0 10px 26px rgba(74,63,51,0.06);
   }
-  html[data-theme="classicbrown"]{
-    --paper:#EDE4D6; --paper-2:#DDD0BC; --ink:#2B211B; --ink-soft:#8C7C68;
-    --line:#C9B79E; --moss:#6B4F3F; --moss-soft:#E3D5C0; --moss-2:#8C6A52;
-    --danger:#A24A3A; --shadow:0 2px 10px rgba(43,33,27,0.06), 0 10px 26px rgba(43,33,27,0.07);
-  }
   html[data-theme="midnight"]{
     --paper:#101114; --paper-2:#191B1F; --ink:#E8E9EC; --ink-soft:#7C818C;
     --line:#24262B; --moss:#8CA0C9; --moss-soft:#1E2530; --moss-2:#A8BAE0;
     --danger:#D9776A; --shadow:0 2px 10px rgba(0,0,0,0.3), 0 10px 26px rgba(0,0,0,0.35);
-  }
-  html[data-theme="mochacoast"]{
-    --paper:#F5EFE4; --paper-2:#EAE0D0; --ink:#4A362A; --ink-soft:#A69684;
-    --line:#DDD0BC; --moss:#8B6F47; --moss-soft:#EDE2CE; --moss-2:#A68A5C;
-    --danger:#A24A3A; --shadow:0 2px 10px rgba(74,54,42,0.06), 0 10px 26px rgba(74,54,42,0.07);
-  }
-  html[data-theme="aurora"]{
-    --paper:#3A3438; --paper-2:rgba(20,15,13,0.55); --ink:#FBF6EE; --ink-soft:rgba(251,246,238,0.62);
-    --line:rgba(255,244,230,0.14); --moss:#E8A662; --moss-soft:rgba(232,166,98,0.2); --moss-2:#F0BC85;
-    --danger:#E88568; --shadow:0 16px 40px rgba(0,0,0,0.35);
-    --glass-light:rgba(255,244,230,0.13); --glass-dark:rgba(18,14,12,0.5);
-  }
-  html[data-theme="auroranight"]{
-    --paper:#F3ECE4; --paper-2:rgba(255,255,255,0.6); --ink:#3A2C22; --ink-soft:rgba(58,44,34,0.6);
-    --line:rgba(58,44,34,0.12); --moss:#E8916A; --moss-soft:rgba(232,145,106,0.18); --moss-2:#F0AC8A;
-    --danger:#C25A42; --shadow:0 16px 40px rgba(58,44,34,0.12);
-    --glass-light:rgba(255,255,255,0.4); --glass-dark:rgba(255,255,255,0.6);
   }
   html[data-font="caslon"]{ --font-display:'Libre Caslon Display', serif; }
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
@@ -91,14 +73,14 @@
   @media (min-width:600px){
     .app,.bottom-nav,.sheet{ max-width:640px; }
     .section,.topbar,.home-wrap{ padding-left:36px; padding-right:36px; }
-    .home-greeting-title{ font-size:36px; }
+    .home-greeting-title{ font-size:56px; }
     .cal-grid{ gap:4px; }
     .cal-cell{ font-size:14px; }
   }
   @media (min-width:980px){
     .app,.bottom-nav,.sheet{ max-width:820px; }
     .section,.topbar,.home-wrap{ padding-left:52px; padding-right:52px; }
-    .home-greeting-title{ font-size:40px; }
+    .home-greeting-title{ font-size:64px; }
     .topbar-title{ font-size:29px; }
     .cal-grid{ gap:6px; }
   }
@@ -130,7 +112,7 @@
     opacity:0.16; filter:blur(30px); pointer-events:none;
   }
   .home-hero > *{ position:relative; z-index:1; }
-  .home-greeting-title{ font-family:var(--font-display); font-weight:600; font-size:32px; line-height:1.15; color:var(--ink); }
+  .home-greeting-title{ font-family:var(--font-secondary); font-weight:400; font-size:46px; line-height:1.05; color:var(--ink); }
   .home-greeting-date{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); margin-top:8px; letter-spacing:0.03em; text-transform:uppercase; }
 
 
@@ -168,7 +150,6 @@
   .ledger-item.done .ledger-text{ color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--line); }
   .ledger-body{ flex:1; min-width:0; }
   .ledger-text{ font-size:calc(15px * var(--text-zoom, 1)); color:var(--ink); line-height:1.4; }
-  #home-today-list .ledger-text{ font-family:var(--font-secondary); font-size:calc(21px * var(--text-zoom, 1)); line-height:1.2; }
   .ledger-meta{ display:flex; gap:8px; margin-top:5px; }
   .ledger-tag{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); background:var(--paper-2); padding:2px 8px; border-radius:20px; letter-spacing:0.02em; }
   .ledger-tag.cat{ color:#fff; }
@@ -185,6 +166,7 @@
   }
   .home-tile:active{ transform:scale(0.96); }
   .home-tile.dragging{ z-index:5; position:relative; box-shadow:0 12px 28px rgba(0,0,0,0.2); }
+  .ledger-item.reorder-dragging{ z-index:15; position:relative; box-shadow:0 10px 24px rgba(0,0,0,0.18); }
   .home-tile-icon{ color:var(--moss); flex:0 0 auto; display:flex; }
   .home-tile-icon svg{ width:16px; height:16px; }
   .home-tile-label{ flex:1; font-size:13px; color:var(--ink); font-weight:500; }
@@ -258,9 +240,19 @@
     width:100%; font-size:8.5px; line-height:1.3; padding:1.5px 4px; border-radius:4px;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; box-sizing:border-box;
   }
-  .cal-chip-habit{ border:1px dashed rgba(255,255,255,0.6); }
   .cal-chip-more{ font-size:8px; color:var(--ink-soft); padding-left:2px; cursor:pointer; }
   .cal-legend{ display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+  .day-preview-sheet{ max-height:70vh; overflow-y:auto; }
+  .day-preview-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .day-preview-close{ background:none; border:none; color:var(--ink-soft); font-size:14px; cursor:pointer; padding:6px 10px; }
+  .day-preview-row{ display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .day-preview-row:last-child{ border-bottom:none; }
+  .day-preview-dot{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+  .day-preview-text{ flex:1 1 auto; min-width:0; }
+  .day-preview-name{ font-size:14.5px; color:var(--ink); }
+  .day-preview-name.done{ color:var(--ink-soft); text-decoration:line-through; }
+  .day-preview-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+  .day-preview-edit{ flex:0 0 auto; background:var(--paper-2); border:1px solid var(--line); border-radius:14px; padding:6px 14px; font-size:12.5px; color:var(--ink); cursor:pointer; }
   .cal-legend-item{ display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink-soft); }
   .cal-legend-dot{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
   .cal-day-flash{ animation:calDayFlash .9s ease; }
@@ -401,52 +393,6 @@
   }
   .toast.show{ transform:translateY(0); opacity:1; pointer-events:all; }
   .toast button{ background:none; border:none; color:var(--moss-2); font-weight:700; font-size:13px; cursor:pointer; }
-
-  /* ---------- Aurora: warm sunset-gradient dashboard, dark glass cards, app-wide ---------- */
-  html[data-theme="aurora"] body{
-    background:
-      radial-gradient(120% 70% at 50% 0%, #6B6870 0%, transparent 55%),
-      linear-gradient(180deg, #55525A 0%, #8A6E5C 38%, #C0895B 68%, #A5623F 100%);
-    background-attachment:fixed;
-  }
-  html[data-theme="auroranight"] body{
-    background:
-      radial-gradient(120% 60% at 50% 0%, #FDF6EE 0%, transparent 55%),
-      linear-gradient(180deg, #F7EFE6 0%, #F2E4D6 40%, #EFD9C4 70%, #E9C9AC 100%);
-    background-attachment:fixed;
-  }
-  html[data-theme="aurora"] .card, html[data-theme="auroranight"] .card,
-  html[data-theme="aurora"] .sheet, html[data-theme="auroranight"] .sheet,
-  html[data-theme="aurora"] .home-hero, html[data-theme="auroranight"] .home-hero,
-  html[data-theme="aurora"] #home-today-list .ledger-item, html[data-theme="auroranight"] #home-today-list .ledger-item,
-  html[data-theme="aurora"] .toast, html[data-theme="auroranight"] .toast{
-    background:var(--glass-dark); border:1px solid var(--line);
-    backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
-  }
-  html[data-theme="aurora"] .card, html[data-theme="auroranight"] .card{
-    border-radius:18px; border-bottom:1px solid var(--line); margin-bottom:12px; padding:18px;
-  }
-  html[data-theme="aurora"] #home-today-list .ledger-item, html[data-theme="auroranight"] #home-today-list .ledger-item{ border-left:3px solid var(--moss); }
-  html[data-theme="aurora"] #home-today-list .ledger-item.done, html[data-theme="auroranight"] #home-today-list .ledger-item.done{ border-left-color:var(--line); }
-  html[data-theme="aurora"] .card:last-child, html[data-theme="auroranight"] .card:last-child{ margin-bottom:0; }
-  html[data-theme="aurora"] .bottom-nav, html[data-theme="auroranight"] .bottom-nav{
-    background:var(--glass-dark); border:1px solid var(--line); box-shadow:var(--shadow);
-    backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
-  }
-  html[data-theme="aurora"] .nav-item.active{ background:#fff; color:#241E1B; }
-  html[data-theme="auroranight"] .nav-item.active{ background:#3A2C22; color:#FBF4EC; }
-  html[data-theme="aurora"] .nav-lb, html[data-theme="auroranight"] .nav-lb{ display:none; }
-  html[data-theme="aurora"] .fab{ background:#fff; color:#241E1B; }
-  html[data-theme="auroranight"] .fab{ background:#3A2C22; color:#FBF4EC; }
-  html[data-theme="aurora"] .home-tile, html[data-theme="auroranight"] .home-tile{ background:var(--glass-light); border:1px solid var(--line); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
-  html[data-theme="aurora"] .home-hero::after, html[data-theme="auroranight"] .home-hero::after{ display:none; }
-  html[data-theme="aurora"] .theme-card, html[data-theme="auroranight"] .theme-card{ box-shadow:0 6px 14px rgba(0,0,0,0.3); }
-  html[data-theme="aurora"] .stat-card, html[data-theme="auroranight"] .stat-card{ background:var(--glass-light); border:1px solid var(--line); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
-  html[data-theme="aurora"] .next-up-card, html[data-theme="auroranight"] .next-up-card{ background:var(--glass-dark); border:1px solid var(--line); border-left:3px solid var(--moss); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
-  html[data-theme="aurora"] .home-greeting-date, html[data-theme="auroranight"] .home-greeting-date{ font-family:var(--font-body); font-size:32px; font-weight:600; color:var(--ink); order:-1; margin-bottom:4px; }
-  html[data-theme="aurora"] .home-greeting, html[data-theme="auroranight"] .home-greeting{ display:flex; flex-direction:column; }
-  html[data-theme="aurora"] .home-greeting-title, html[data-theme="auroranight"] .home-greeting-title{ font-size:15px; opacity:0.75; }
-  html[data-theme="aurora"] .home-hero, html[data-theme="auroranight"] .home-hero{ background:none; border:none; box-shadow:none; backdrop-filter:none; padding:4px 2px; overflow:visible; }
 
   /* ---------- splash screen ---------- */
   #splash-screen{
@@ -709,6 +655,15 @@
         </div>
       </div>
       <div class="card">
+        <div class="label-row"><span class="label">Greeting Script</span></div>
+        <div class="theme-row" id="secondary-font-row">
+          <div class="theme-opt" data-secondary-font-opt="tangerine" style="font-family:'Tangerine',cursive; font-size:20px;">Tangerine</div>
+          <div class="theme-opt" data-secondary-font-opt="caveat" style="font-family:'Caveat',cursive; font-size:17px;">Caveat</div>
+          <div class="theme-opt" data-secondary-font-opt="alexbrush" style="font-family:'Alex Brush',cursive; font-size:19px;">Alex Brush</div>
+          <div class="theme-opt" data-secondary-font-opt="sacramento" style="font-family:'Sacramento',cursive; font-size:17px;">Sacramento</div>
+        </div>
+      </div>
+      <div class="card">
         <div class="label-row"><span class="label">Text size</span></div>
         <div class="theme-row" id="fontsize-row">
           <div class="theme-opt" data-fontsize-opt="small">Small</div>
@@ -849,6 +804,16 @@
     <button class="btn btn-primary" id="goal-save">Save</button>
   </div>
   <button class="btn-danger-text" id="goal-delete" style="display:none;">Delete goal</button>
+</div>
+
+<div class="overlay" id="day-preview-overlay"></div>
+<div class="sheet day-preview-sheet" id="day-preview-sheet">
+  <div class="sheet-handle"></div>
+  <div class="day-preview-header">
+    <div class="sheet-title" id="day-preview-title" style="margin-bottom:0;">Day</div>
+    <button class="day-preview-close" id="day-preview-close">Close</button>
+  </div>
+  <div id="day-preview-body"></div>
 </div>
 
 <script>
@@ -1113,14 +1078,14 @@
       if(!tracking) return;
       var dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
       if(!active){
-        if(Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy)*1.5) active = true;
-        else if(Math.abs(dy) > 15){ tracking = false; }
+        if(Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy)*2) active = true;
+        else if(Math.abs(dy) > 20){ tracking = false; }
       }
     }, { passive:true });
     document.addEventListener("touchend", function(e){
       if(!tracking || !active){ tracking = false; return; }
       var dx = e.changedTouches[0].clientX - startX;
-      if(Math.abs(dx) > 60){
+      if(Math.abs(dx) > 110){
         var idx = TAB_ORDER.indexOf(currentTab);
         if(dx < 0 && idx < TAB_ORDER.length-1) switchTab(TAB_ORDER[idx+1]);
         else if(dx > 0 && idx > 0) switchTab(TAB_ORDER[idx-1]);
@@ -1341,24 +1306,21 @@
     syncThemeButtons();
     syncFontButtons();
     syncFontSizeButtons();
+    syncSecondaryFontButtons();
     syncExportReminder();
   });
   document.getElementById("settings-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("user-name-input").addEventListener("input", function(){ saveStr("db2.userName", this.value.trim()); });
 
   /* ---------------- theme ---------------- */
-  var currentTheme = loadStr("db2.theme") || "aurora";
+  var currentTheme = loadStr("db2.theme") || "paper";
   var THEME_PREVIEWS = {
-    aurora: { bg:"#8A6E5C", bg2:"#12100E", ink:"#FBF6EE", accent:"#E8A662", label:"Aurora" },
-    auroranight: { bg:"#F2E4D6", bg2:"#FFFFFF", ink:"#3A2C22", accent:"#E8916A", label:"Aurora Light" },
     paper: { bg:"#F5F1E6", bg2:"#EDE7D6", ink:"#2B2620", accent:"#5B6B4F", label:"Paper" },
     clay: { bg:"#F7F0E8", bg2:"#EFE2D3", ink:"#3A2B22", accent:"#B0603E", label:"Clay" },
     linen: { bg:"#F3ECE1", bg2:"#EAE0D0", ink:"#4A3F33", accent:"#B08968", label:"Linen" },
-    classicbrown: { bg:"#EDE4D6", bg2:"#DDD0BC", ink:"#2B211B", accent:"#6B4F3F", label:"Classic Brown" },
     cocoa: { bg:"#17120F", bg2:"#211A15", ink:"#EDE4D8", accent:"#C79868", label:"Cocoa" },
     dusk: { bg:"#1C1B18", bg2:"#26241F", ink:"#EDE7D9", accent:"#8FAE7C", label:"Dusk" },
-    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
-    mochacoast: { bg:"#EAE0D0", bg2:"#F5EFE4", ink:"#4A362A", accent:"#8B6F47", label:"Mocha Coast" }
+    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" }
   };
   var THEME_TILTS = [-4, 3, -2, 4, -3, 2, -4];
   function renderThemePicker(){
@@ -1436,6 +1398,24 @@
   });
   applyFontSize(currentFontSize);
 
+  /* ---------------- secondary (script) font ---------------- */
+  var currentSecondaryFont = loadStr("db2.secondaryFont") || "tangerine";
+  function applySecondaryFont(f){
+    currentSecondaryFont = f;
+    document.documentElement.setAttribute("data-secondary-font", f);
+    saveStr("db2.secondaryFont", f);
+    syncSecondaryFontButtons();
+  }
+  function syncSecondaryFontButtons(){
+    document.querySelectorAll("#secondary-font-row .theme-opt").forEach(function(o){
+      o.classList.toggle("active", o.getAttribute("data-secondary-font-opt")===currentSecondaryFont);
+    });
+  }
+  document.querySelectorAll("#secondary-font-row .theme-opt").forEach(function(o){
+    o.addEventListener("click", function(){ applySecondaryFont(o.getAttribute("data-secondary-font-opt")); });
+  });
+  applySecondaryFont(currentSecondaryFont);
+
   /* ---------------- FAB ---------------- */
   document.getElementById("fab-add").addEventListener("click", function(){
     if(currentTab==="home"){ selectedDate = new Date(realNow); openTaskSheet(null, "once"); }
@@ -1497,14 +1477,24 @@
       return false;
     });
     var todaysHabits = habits.filter(function(h){ return isScheduledOn(h, realNow); });
-    var combined = todaysTasks.map(function(t){ return { kind:"task", item:t, done:doneFor(t), createdAt:t.createdAt }; })
-      .concat(todaysHabits.map(function(h){ return { kind:"habit", item:h, done: !!(h.completed && h.completed[todayKey]), createdAt:h.createdAt }; }))
-      .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.createdAt-a.createdAt; });
+    var combined = todaysTasks.map(function(t){ return { kind:"task", item:t, done:doneFor(t), sortKey: t.order!==undefined ? t.order : t.createdAt }; })
+      .concat(todaysHabits.map(function(h){ return { kind:"habit", item:h, done: !!(h.completed && h.completed[todayKey]), sortKey: h.order!==undefined ? h.order : h.createdAt }; }))
+      .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
 
     var list = document.getElementById("home-today-list");
     var EMPTY_HOME_LINES = ["Nothing yet — tap + to add something.", "A clear day so far.", "Open and waiting.", "Nothing on the page yet."];
     if(!combined.length) list.innerHTML = '<div class="empty-note">'+EMPTY_HOME_LINES[dayOfYear() % EMPTY_HOME_LINES.length]+'</div>';
     else list.innerHTML = combined.map(function(x){ return x.kind==="task" ? taskRowHtml(x.item) : habitRowHtmlHome(x.item); }).join("");
+    wireLedgerReorder("home-today-list", function(orderedIds){
+      var n = orderedIds.length;
+      orderedIds.forEach(function(id, i){
+        var t = tasks.find(function(x){ return x.id===id; });
+        if(t){ t.order = n - i; return; }
+        var h = habits.find(function(x){ return x.id===id; });
+        if(h) h.order = n - i;
+      });
+      saveTasks(); saveHabits();
+    });
 
     var weekStartMs = startOfWeek(realNow).getTime();
     var doneThisWeek = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt && t.completedAt >= weekStartMs; }).length;
@@ -1573,52 +1563,17 @@
       var isSel = key===selKey();
       var dayTasks = tasks.filter(function(t){ return t.type==="once" && t.dueDate===key; })
         .sort(function(a,b){ return b.createdAt-a.createdAt; });
-      var dayHabits = habits.filter(function(h){ return isScheduledOn(h, d); });
-      var dayItems = dayTasks.map(function(t){ return { kind:"task", item:t, sortAt:t.createdAt }; })
-        .concat(dayHabits.map(function(h){ return { kind:"habit", item:h, sortAt:h.createdAt }; }))
-        .sort(function(a,b){ return b.sortAt-a.sortAt; });
-      var chipsHtml = dayItems.slice(0,visibleChipCount).map(function(x){
-        if(x.kind==="task"){
-          var t = x.item;
-          var color = t.category ? catColor(t.category) : "var(--ink-soft)";
-          var label = t.dueTime ? fmtTime(t.dueTime)+" "+t.text : t.text;
-          return '<span class="cal-chip" style="background:'+color+';" data-task-id="'+t.id+'">'+escapeHtml(label)+'</span>';
-        } else {
-          var h = x.item;
-          var hcolor = h.category ? catColor(h.category) : "var(--ink-soft)";
-          var hlabel = (h.time ? fmtTime(h.time)+" " : "")+h.name;
-          return '<span class="cal-chip cal-chip-habit" style="background:'+hcolor+';" data-habit-id="'+h.id+'">'+escapeHtml(hlabel)+'</span>';
-        }
+      var chipsHtml = dayTasks.slice(0,visibleChipCount).map(function(t){
+        var color = t.category ? catColor(t.category) : "var(--ink-soft)";
+        var label = t.dueTime ? fmtTime(t.dueTime)+" "+t.text : t.text;
+        return '<span class="cal-chip" style="background:'+color+';" data-task-id="'+t.id+'">'+escapeHtml(label)+'</span>';
       }).join("");
-      var moreHtml = dayItems.length > visibleChipCount ? '<span class="cal-chip-more" data-more-key="'+key+'">+'+(dayItems.length-visibleChipCount)+' more</span>' : "";
+      var moreHtml = dayTasks.length > visibleChipCount ? '<span class="cal-chip-more" data-more-key="'+key+'">+'+(dayTasks.length-visibleChipCount)+' more</span>' : "";
       html += '<div class="cal-cell'+(isToday?" today":"")+(isSel&&!isToday?" selected":"")+'" data-key="'+key+'">'+
         '<span class="cal-cell-num">'+day+'</span>'+chipsHtml+moreHtml+
       '</div>';
     }
     grid.innerHTML = html;
-    grid.querySelectorAll(".cal-chip").forEach(function(chip){
-      var pressTimer = null, longPressed = false;
-      chip.addEventListener("touchstart", function(){
-        longPressed = false;
-        pressTimer = setTimeout(function(){
-          longPressed = true;
-          if(navigator.vibrate) navigator.vibrate(12);
-          if(chip.classList.contains("cal-chip-habit")){
-            var h = habits.find(function(x){ return x.id===chip.getAttribute("data-habit-id"); });
-            if(h) openHabitSheet(h);
-          } else {
-            var t = tasks.find(function(x){ return x.id===chip.getAttribute("data-task-id"); });
-            if(t) openTaskSheet(t);
-          }
-        }, 550);
-      }, { passive:true });
-      chip.addEventListener("touchend", function(){ clearTimeout(pressTimer); }, { passive:true });
-      chip.addEventListener("touchmove", function(){ clearTimeout(pressTimer); }, { passive:true });
-      chip.addEventListener("click", function(e){
-        if(longPressed){ longPressed = false; e.stopPropagation(); return; }
-        // short tap: let it bubble up to the cell's own click handler - just selects the day, same as tapping anywhere else in the cell
-      });
-    });
     grid.querySelectorAll(".cal-chip-more").forEach(function(more){
       more.addEventListener("click", function(e){
         e.stopPropagation();
@@ -1634,7 +1589,19 @@
       });
     });
     grid.querySelectorAll(".cal-cell[data-key]").forEach(function(cell){
+      var pressTimer = null, longPressed = false;
+      cell.addEventListener("touchstart", function(){
+        longPressed = false;
+        pressTimer = setTimeout(function(){
+          longPressed = true;
+          if(navigator.vibrate) navigator.vibrate(12);
+          openDayPreview(cell.getAttribute("data-key"));
+        }, 550);
+      }, { passive:true });
+      cell.addEventListener("touchend", function(){ clearTimeout(pressTimer); }, { passive:true });
+      cell.addEventListener("touchmove", function(){ clearTimeout(pressTimer); }, { passive:true });
       cell.addEventListener("click", function(){
+        if(longPressed){ longPressed = false; return; }
         var parts = cell.getAttribute("data-key").split("-");
         selectedDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
         renderCalendar(); renderCalDay();
@@ -1643,6 +1610,43 @@
     renderCalLegend();
     renderCalDay();
   }
+  function openDayPreview(key){
+    var parts = key.split("-");
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    var dayTasksList = tasks.filter(function(t){ return t.type==="once" && t.dueDate===key; })
+      .sort(function(a,b){ return b.createdAt-a.createdAt; });
+    document.getElementById("day-preview-title").textContent = d.toLocaleDateString(undefined,{ weekday:"long", month:"short", day:"numeric" });
+    var body = document.getElementById("day-preview-body");
+    if(!dayTasksList.length){
+      body.innerHTML = '<div class="empty-note">Nothing for this day.</div>';
+    } else {
+      body.innerHTML = dayTasksList.map(function(t){
+        var color = t.category ? catColor(t.category) : "var(--ink-soft)";
+        var catName = t.category ? catLabel(t.category) : null;
+        return '<div class="day-preview-row">' +
+          '<div class="day-preview-dot" style="background:'+color+';"></div>' +
+          '<div class="day-preview-text"><div class="day-preview-name'+(t.doneOnce?" done":"")+'">'+escapeHtml(t.text)+'</div>' +
+          '<div class="day-preview-meta">'+(t.dueTime?fmtTime(t.dueTime)+" · ":"")+(catName?escapeHtml(catName):"No category")+'</div></div>' +
+          '<button class="day-preview-edit" data-task-id="'+t.id+'">Edit</button>' +
+        '</div>';
+      }).join("");
+    }
+    document.getElementById("day-preview-overlay").classList.add("open");
+    document.getElementById("day-preview-sheet").classList.add("open");
+  }
+  function closeDayPreview(){
+    document.getElementById("day-preview-overlay").classList.remove("open");
+    document.getElementById("day-preview-sheet").classList.remove("open");
+  }
+  document.getElementById("day-preview-body").addEventListener("click", function(e){
+    var editBtn = e.target.closest(".day-preview-edit");
+    if(!editBtn) return;
+    var t = tasks.find(function(x){ return x.id===editBtn.getAttribute("data-task-id"); });
+    closeDayPreview();
+    if(t) openTaskSheet(t);
+  });
+  document.getElementById("day-preview-close").addEventListener("click", closeDayPreview);
+  document.getElementById("day-preview-overlay").addEventListener("click", closeDayPreview);
   function renderCalLegend(){
     var legendEl = document.getElementById("cal-legend");
     var usedCatIds = {};
@@ -1836,6 +1840,10 @@
         var h = habits.find(function(x){ return x.id===body.getAttribute("data-edit"); });
         if(h) openHabitSheet(h);
       });
+    });
+    wireLedgerReorder("habit-list", function(orderedIds){
+      habits = orderedIds.map(function(id){ return habits.find(function(h){ return h.id===id; }); }).filter(Boolean);
+      saveHabits();
     });
   }
 
@@ -2128,6 +2136,7 @@
     wireSwipeToDismiss(taskSheet, closeTaskSheet);
     wireSwipeToDismiss(habitSheet, closeHabitSheetFn);
     wireSwipeToDismiss(goalSheet, closeGoalSheetFn);
+    wireSwipeToDismiss(document.getElementById("day-preview-sheet"), closeDayPreview);
   })();
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-plus").addEventListener("click", function(){ goalProgress=Math.min(100,goalProgress+10); document.getElementById("goal-progress").value=goalProgress; });
@@ -2194,6 +2203,67 @@
     if(currentTab==="month") renderCalendar();
     if(currentTab==="habits") renderHabits();
     if(currentTab==="goals") renderGoalsView();
+  }
+
+  /* ---------------- ledger list reorder (long-press + vertical drag, tasks & habits) ---------------- */
+  function wireLedgerReorder(containerId, onReorder){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.querySelectorAll(".ledger-item").forEach(function(item){
+      var pressTimer = null, dragging = false, startY = 0, startX = 0, longPressed = false;
+      function startDrag(x, y){
+        dragging = true; startX = x; startY = y;
+        item.classList.add("reorder-dragging");
+        item.style.transition = "none";
+      }
+      function moveDrag(x, y){
+        if(!dragging) return;
+        var dy = y - startY;
+        item.style.transform = "translateY("+dy+"px)";
+        var siblings = Array.prototype.slice.call(container.querySelectorAll(".ledger-item"));
+        for(var i=0;i<siblings.length;i++){
+          var sib = siblings[i];
+          if(sib === item) continue;
+          var r = sib.getBoundingClientRect();
+          if(y > r.top && y < r.bottom){
+            var itemIdx = siblings.indexOf(item), sibIdx = siblings.indexOf(sib);
+            if(itemIdx < sibIdx) container.insertBefore(sib, item); else container.insertBefore(item, sib);
+            startY = y;
+            item.style.transform = "";
+            break;
+          }
+        }
+      }
+      function endDrag(){
+        clearTimeout(pressTimer);
+        if(!dragging) return;
+        dragging = false;
+        item.classList.remove("reorder-dragging");
+        item.style.transition = ""; item.style.transform = "";
+        onReorder(Array.prototype.map.call(container.querySelectorAll(".ledger-item"), function(x){ return x.getAttribute("data-id"); }));
+      }
+      item.addEventListener("touchstart", function(e){
+        longPressed = false;
+        var touch = e.touches[0];
+        startX = touch.clientX;
+        pressTimer = setTimeout(function(){
+          longPressed = true;
+          if(navigator.vibrate) navigator.vibrate(12);
+          startDrag(touch.clientX, touch.clientY);
+        }, 480);
+      }, { passive:true });
+      item.addEventListener("touchmove", function(e){
+        if(dragging){ moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
+        else if(Math.abs(e.touches[0].clientX - startX) > 8){ clearTimeout(pressTimer); } // a real horizontal swipe is starting - let swipe-to-delete/tick handle it instead
+      }, { passive:true });
+      item.addEventListener("touchend", function(e){
+        clearTimeout(pressTimer);
+        if(longPressed){ e.preventDefault(); endDrag(); }
+      });
+      item.addEventListener("click", function(e){
+        if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
+      }, true);
+    });
   }
 
   /* ---------------- Home tile reorder (long-press + drag, no extra UI chrome) ---------------- */

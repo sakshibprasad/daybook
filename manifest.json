@@ -1,12 +1,13 @@
 {
+  "id": "/index.html",
   "name": "Daybook",
   "short_name": "Daybook",
   "description": "A quiet daily planner - tasks, habits, and goals in one calm place.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#8A6E5C",
-  "theme_color": "#8A6E5C",
+  "background_color": "#F5F1E6",
+  "theme_color": "#F5F1E6",
   "orientation": "portrait",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
