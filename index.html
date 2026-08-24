@@ -158,6 +158,9 @@
   .ledger-meta{ display:flex; gap:8px; margin-top:5px; }
   .ledger-tag{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); background:var(--paper-2); padding:2px 8px; border-radius:20px; letter-spacing:0.02em; }
   .ledger-tag.cat{ color:#fff; }
+  .ledger-tag.priority-high{ background:var(--danger); color:#fff; }
+  .ledger-tag.priority-medium{ background:#B08947; color:#fff; }
+  .ledger-tag.priority-low{ background:var(--paper-2); color:var(--ink-soft); border:1px solid var(--line); }
   .ledger-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); opacity:0.35; font-size:16px; cursor:pointer; padding:2px 4px; transition:opacity .15s ease; }
   .ledger-item:active .ledger-del{ opacity:0.7; }
 
@@ -509,6 +512,11 @@
           <span class="home-tile-label">Organize</span>
           <span class="home-tile-count" id="organize-count">—</span>
         </button>
+        <button class="home-tile" id="link-shopping" data-tile-id="shopping">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>
+          <span class="home-tile-label">Shopping</span>
+          <span class="home-tile-count" id="shopping-count">—</span>
+        </button>
       </div>
     </div>
   </div>
@@ -528,6 +536,19 @@
         <ul class="ledger-list" id="organize-list"></ul>
       </div>
     </div>
+
+  <!-- SHOPPING -->
+  <div class="view" id="view-shopping">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="shopping-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">Shopping</div>
+    </div>
+    <div class="section">
+      <ul class="ledger-list" id="shopping-list"></ul>
+    </div>
+  </div>
 
   <!-- WEEK -->
   <div class="view" id="view-week">
@@ -784,6 +805,12 @@
     <input type="text" id="cat-add-input" placeholder="Category name" maxlength="20">
     <button id="cat-add-confirm">Add</button>
   </div>
+  <div class="type-row" id="task-priority-row">
+    <div class="type-opt active" data-priority="">No priority</div>
+    <div class="type-opt" data-priority="low">Low</div>
+    <div class="type-opt" data-priority="medium">Medium</div>
+    <div class="type-opt" data-priority="high">High</div>
+  </div>
   <div class="sheet-actions">
     <button class="btn btn-ghost" id="task-cancel">Cancel</button>
     <button class="btn btn-primary" id="task-save">Save</button>
@@ -841,6 +868,32 @@
   <button class="btn-danger-text" id="goal-delete" style="display:none;">Delete goal</button>
 </div>
 
+<!-- SHOPPING SHEET -->
+<div class="sheet" id="shopping-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="shopping-sheet-title">New item</div>
+  <input type="text" id="shopping-input" placeholder="e.g. Milk, Sneakers, Birthday candle…">
+  <div class="type-row" id="shopping-want-row">
+    <div class="type-opt active" data-want="need">Need</div>
+    <div class="type-opt" data-want="want">Want</div>
+  </div>
+  <div class="type-row" id="shopping-for-row">
+    <div class="type-opt active" data-for="myself">For myself</div>
+    <div class="type-opt" data-for="gift">Gift</div>
+  </div>
+  <div class="type-row" id="shopping-priority-row">
+    <div class="type-opt" data-priority="">None</div>
+    <div class="type-opt" data-priority="low">Low</div>
+    <div class="type-opt" data-priority="medium">Medium</div>
+    <div class="type-opt" data-priority="high">High</div>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="shopping-cancel">Cancel</button>
+    <button class="btn btn-primary" id="shopping-save">Save</button>
+  </div>
+  <button class="btn-danger-text" id="shopping-delete" style="display:none;">Delete item</button>
+</div>
+
 <div class="overlay" id="day-preview-overlay"></div>
 <div class="sheet day-preview-sheet" id="day-preview-sheet">
   <div class="sheet-handle"></div>
@@ -889,6 +942,9 @@
   }
   function saveHabits(){ save("db2.habits", habits); }
   function saveGoals(){ save("db2.goals", goals); }
+
+  var shoppingItems = load("db2.shopping", []);
+  function saveShopping(){ save("db2.shopping", shoppingItems); }
 
   var categories = load("db2.categories", [
     { id:"personal", label:"Personal" }, { id:"work", label:"Work" },
@@ -1025,15 +1081,22 @@
     }
     saveTasks(); renderOrganizePage(); renderHome();
   }
+  function priorityTag(p){
+    if(p==="high") return '<span class="ledger-tag priority-high">High</span>';
+    if(p==="medium") return '<span class="ledger-tag priority-medium">Medium</span>';
+    if(p==="low") return '<span class="ledger-tag priority-low">Low</span>';
+    return '';
+  }
   function organizeRowHtml(t, isChild){
     var childCount = isChild ? 0 : taskChildren(t.id).length;
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
+    var prTag = priorityTag(t.priority);
     return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(organizeDoneFor(t)?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+t.id+'">' +
         '<div class="ledger-text">'+escapeHtml(t.text)+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
-        (dateTag||recurTag ? '<div class="ledger-meta">'+dateTag+recurTag+'</div>' : '') +
+        (dateTag||recurTag||prTag ? '<div class="ledger-meta">'+dateTag+recurTag+prTag+'</div>' : '') +
         '<div class="organize-actions">' +
           (isChild ? '' : '<button class="organize-action-btn organize-add-sub" data-id="'+t.id+'">+ Add subtask</button>') +
           '<button class="organize-action-btn organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Make top-level" : "Nest under\u2026")+'</button>' +
@@ -1151,7 +1214,7 @@
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
     return '<li class="ledger-item'+(done?" done":"")+(t.parentId?" subtask-row":"")+'" data-id="'+t.id+'">' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
-      '<div class="ledger-body" data-edit="'+t.id+'"><div class="ledger-text">'+escapeHtml(t.text)+'</div><div class="ledger-meta">'+dateTag+recurTag+catTag+'</div></div>' +
+      '<div class="ledger-body" data-edit="'+t.id+'"><div class="ledger-text">'+escapeHtml(t.text)+'</div><div class="ledger-meta">'+dateTag+recurTag+priorityTag(t.priority)+catTag+'</div></div>' +
       '<button class="ledger-del" data-id="'+t.id+'">×</button>' +
     '</li>';
   }
@@ -1256,7 +1319,7 @@
     currentTab = tab;
     saveStr("db2.currentTab", tab);
     window.scrollTo(0,0); // views vary a lot in height (e.g. Organize can be much shorter than Home) - always land at the top of the new view
-    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
+    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="shopping"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
     document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===tab); });
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
@@ -1270,6 +1333,7 @@
     if(tab==="categories") renderCategoriesPage();
     if(tab==="activity") renderActivityPage();
     if(tab==="organize"){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); }
+    if(tab==="shopping") renderShoppingPage();
   }
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
@@ -1585,6 +1649,7 @@
     else if(currentTab==="habits") openHabitSheet(null);
     else if(currentTab==="goals") openGoalSheet(null, "short");
     else if(currentTab==="organize") openTaskSheet(null, "once", { dueDate: dateKey(organizeSelectedDate) });
+    else if(currentTab==="shopping") openShoppingSheet(null);
   });
 
   /* ---------------- HOME render ---------------- */
@@ -2072,10 +2137,104 @@
   document.getElementById("add-goal-short").addEventListener("click", function(){ openGoalSheet(null,"short"); });
   document.getElementById("add-goal-long").addEventListener("click", function(){ openGoalSheet(null,"long"); });
 
+  /* ---------------- SHOPPING ---------------- */
+  function wantTag(w){ return w==="want" ? '<span class="ledger-tag">Want</span>' : '<span class="ledger-tag">Need</span>'; }
+  function forTag(f){ return f==="gift" ? '<span class="ledger-tag">Gift</span>' : '<span class="ledger-tag">Myself</span>'; }
+  function shoppingRowHtml(item){
+    return '<li class="ledger-item'+(item.bought?" done":"")+'" data-id="'+item.id+'">' +
+      '<button class="ledger-check" data-id="'+item.id+'">'+checkSvg+'</button>' +
+      '<div class="ledger-body" data-edit="'+item.id+'"><div class="ledger-text">'+escapeHtml(item.text)+'</div>' +
+      '<div class="ledger-meta">'+wantTag(item.want)+forTag(item.forWhom)+priorityTag(item.priority)+'</div></div>' +
+      '<button class="ledger-del" data-id="'+item.id+'">×</button>' +
+    '</li>';
+  }
+  function renderShoppingPage(){
+    var wrap = document.getElementById("shopping-list");
+    if(!wrap) return;
+    var list = shoppingItems.slice().sort(function(a,b){
+      if(!!a.bought !== !!b.bought) return a.bought ? 1 : -1;
+      return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt);
+    });
+    wrap.innerHTML = list.length ? list.map(shoppingRowHtml).join("") : '<div class="empty-note">Nothing on the list yet. Tap + to add something.</div>';
+    var openCount = shoppingItems.filter(function(i){ return !i.bought; }).length;
+    var countEl = document.getElementById("shopping-count");
+    if(countEl) countEl.textContent = openCount || "—";
+  }
+  function deleteShoppingItem(id){
+    var idx = shoppingItems.findIndex(function(i){ return i.id===id; });
+    if(idx===-1) return;
+    var removed = shoppingItems[idx];
+    shoppingItems.splice(idx,1); saveShopping(); renderShoppingPage();
+    showToast("Item deleted.", function(){ shoppingItems.splice(idx,0,removed); saveShopping(); renderShoppingPage(); });
+  }
+  document.getElementById("shopping-list").addEventListener("click", function(e){
+    var chk = e.target.closest(".ledger-check");
+    var del = e.target.closest(".ledger-del");
+    var body = e.target.closest(".ledger-body");
+    if(chk){ var it = shoppingItems.find(function(x){ return x.id===chk.getAttribute("data-id"); }); if(it){ it.bought = !it.bought; saveShopping(); renderShoppingPage(); } return; }
+    if(del){ deleteShoppingItem(del.getAttribute("data-id")); return; }
+    if(body){ var it2 = shoppingItems.find(function(x){ return x.id===body.getAttribute("data-edit"); }); if(it2) openShoppingSheet(it2); return; }
+  });
+  document.getElementById("shopping-back").addEventListener("click", function(){ switchTab(lastMainTab); });
+  document.getElementById("link-shopping").addEventListener("click", function(){ switchTab("shopping"); });
+
+  /* ---------------- SHOPPING SHEET ---------------- */
+  var shoppingSheet = document.getElementById("shopping-sheet");
+  var editingShoppingId = null, shoppingWant = "need", shoppingFor = "myself", shoppingPriority = "";
+  function openShoppingSheet(existing){
+    editingShoppingId = existing ? existing.id : null;
+    shoppingWant = existing ? (existing.want||"need") : "need";
+    shoppingFor = existing ? (existing.forWhom||"myself") : "myself";
+    shoppingPriority = existing ? (existing.priority||"") : "";
+    document.getElementById("shopping-sheet-title").textContent = existing ? "Edit item" : "New item";
+    document.getElementById("shopping-input").value = existing ? existing.text : "";
+    document.getElementById("shopping-delete").style.display = existing ? "block" : "none";
+    document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-want")===shoppingWant); });
+    document.querySelectorAll("#shopping-for-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-for")===shoppingFor); });
+    document.querySelectorAll("#shopping-priority-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-priority")===shoppingPriority); });
+    overlay.classList.add("open"); shoppingSheet.classList.add("open");
+    setTimeout(function(){ document.getElementById("shopping-input").focus(); }, 200);
+  }
+  function closeShoppingSheetFn(){ shoppingSheet.classList.remove("open"); editingShoppingId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); }
+  document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      o.classList.add("active"); shoppingWant = o.getAttribute("data-want");
+    });
+  });
+  document.querySelectorAll("#shopping-for-row .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      document.querySelectorAll("#shopping-for-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      o.classList.add("active"); shoppingFor = o.getAttribute("data-for");
+    });
+  });
+  document.querySelectorAll("#shopping-priority-row .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      document.querySelectorAll("#shopping-priority-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      o.classList.add("active"); shoppingPriority = o.getAttribute("data-priority");
+    });
+  });
+  document.getElementById("shopping-cancel").addEventListener("click", closeShoppingSheetFn);
+  document.getElementById("shopping-save").addEventListener("click", function(){
+    var text = document.getElementById("shopping-input").value.trim();
+    if(!text) return;
+    if(editingShoppingId){
+      var it = shoppingItems.find(function(x){ return x.id===editingShoppingId; });
+      if(it){ it.text=text; it.want=shoppingWant; it.forWhom=shoppingFor; it.priority=shoppingPriority||null; }
+    } else {
+      shoppingItems.unshift({ id:uid(), text:text, want:shoppingWant, forWhom:shoppingFor, priority:shoppingPriority||null, bought:false, createdAt:Date.now() });
+    }
+    saveShopping(); closeShoppingSheetFn(); renderShoppingPage();
+  });
+  document.getElementById("shopping-delete").addEventListener("click", function(){
+    var id = editingShoppingId; closeShoppingSheetFn(); if(id) deleteShoppingItem(id);
+  });
+  document.getElementById("shopping-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("shopping-save").click(); });
+
   /* ---------------- TASK SHEET ---------------- */
   var overlay = document.getElementById("overlay");
   var taskSheet = document.getElementById("task-sheet");
-  var editingTaskId = null, taskType = "once";
+  var editingTaskId = null, taskType = "once", taskPriority = "";
   function renderCatRowFor(rowId, newBtnId){
     var row = document.getElementById(rowId);
     var html = categories.map(function(c){ return '<div class="cat-opt" data-cat="'+c.id+'">'+escapeHtml(c.label)+'</div>'; }).join("");
@@ -2163,6 +2322,7 @@
     editingTaskId = existing ? existing.id : null;
     taskSheetParentId = existing ? (existing.parentId||null) : (opts.parentId||null);
     taskType = existing ? existing.type : (defaultType||"once");
+    taskPriority = existing ? (existing.priority||"") : "";
     var parentTask = taskSheetParentId ? tasks.find(function(x){ return x.id===taskSheetParentId; }) : null;
     document.getElementById("task-sheet-title").textContent = existing ? "Edit task" : (parentTask ? "New subtask of \u201c"+parentTask.text+"\u201d" : "New task");
     document.getElementById("task-input").value = existing ? existing.text : "";
@@ -2174,6 +2334,7 @@
     renderCatRow();
     document.getElementById("cat-add-inline").style.display = "none";
     document.querySelectorAll("#task-cat-row .cat-opt[data-cat]").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-cat")===(existing?existing.category:null)); });
+    document.querySelectorAll("#task-priority-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-priority")===taskPriority); });
     overlay.classList.add("open"); taskSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("task-input").focus(); }, 200);
   }
@@ -2188,9 +2349,15 @@
       if(taskType==="once" && !document.getElementById("task-date-input").value) document.getElementById("task-date-input").value = selKey();
     });
   });
+  document.querySelectorAll("#task-priority-row .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      document.querySelectorAll("#task-priority-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      o.classList.add("active"); taskPriority = o.getAttribute("data-priority");
+    });
+  });
   document.getElementById("task-cancel").addEventListener("click", closeTaskSheet);
   overlay.addEventListener("click", function(){
-    closeTaskSheet(); closeHabitSheetFn(); closeGoalSheetFn();
+    closeTaskSheet(); closeHabitSheetFn(); closeGoalSheetFn(); closeShoppingSheetFn();
   });
   document.getElementById("task-save").addEventListener("click", function(){
     var text = document.getElementById("task-input").value.trim();
@@ -2202,12 +2369,12 @@
     if(editingTaskId){
       var t = tasks.find(function(x){ return x.id===editingTaskId; });
       if(t){
-        t.text=text; t.type=taskType; t.category=cat;
+        t.text=text; t.type=taskType; t.category=cat; t.priority = taskPriority || null;
         t.dueDate = taskType==="once" ? (dateVal || selKey()) : null;
         t.dueTime = taskType==="once" ? (timeVal || null) : null;
       }
     } else {
-      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
+      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, priority: taskPriority || null, parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
     }
     saveTasks(); closeTaskSheet(); renderAll();
   });
@@ -2326,6 +2493,7 @@
     wireSwipeToDismiss(goalSheet, closeGoalSheetFn);
     wireSwipeToDismiss(document.getElementById("day-preview-sheet"), closeDayPreview);
     wireSwipeToDismiss(document.getElementById("nest-picker-sheet"), closeNestPicker);
+    wireSwipeToDismiss(shoppingSheet, closeShoppingSheetFn);
   })();
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-plus").addEventListener("click", function(){ goalProgress=Math.min(100,goalProgress+10); document.getElementById("goal-progress").value=goalProgress; });
@@ -2452,7 +2620,7 @@
       item.addEventListener("touchstart", function(e){
         longPressed = false;
         var touch = e.touches[0];
-        startX = touch.clientX;
+        startX = touch.clientX; startY = touch.clientY;
         pressTimer = setTimeout(function(){
           longPressed = true;
           if(navigator.vibrate) navigator.vibrate(12);
@@ -2460,9 +2628,9 @@
         }, 480);
       }, { passive:true });
       item.addEventListener("touchmove", function(e){
-        if(dragging){ moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
-        else if(Math.abs(e.touches[0].clientX - startX) > 8){ clearTimeout(pressTimer); }
-      }, { passive:true });
+        if(dragging){ e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
+        else if(Math.abs(e.touches[0].clientX - startX) > 8 || Math.abs(e.touches[0].clientY - startY) > 8){ clearTimeout(pressTimer); } // the finger is moving before the hold completed - this is a scroll, not a drag; let it scroll normally
+      }, { passive:false });
       item.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
         if(longPressed){ e.preventDefault(); endDrag(); }
@@ -2513,7 +2681,7 @@
       item.addEventListener("touchstart", function(e){
         longPressed = false;
         var touch = e.touches[0];
-        startX = touch.clientX;
+        startX = touch.clientX; startY = touch.clientY;
         pressTimer = setTimeout(function(){
           longPressed = true;
           if(navigator.vibrate) navigator.vibrate(12);
@@ -2521,9 +2689,10 @@
         }, 480);
       }, { passive:true });
       item.addEventListener("touchmove", function(e){
-        if(dragging){ moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
+        if(dragging){ e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
         else if(Math.abs(e.touches[0].clientX - startX) > 8){ clearTimeout(pressTimer); } // a real horizontal swipe is starting - let swipe-to-delete/tick handle it instead
-      }, { passive:true });
+        else if(Math.abs(e.touches[0].clientY - startY) > 8){ clearTimeout(pressTimer); } // finger moved before the hold completed - this is a scroll, let it scroll normally
+      }, { passive:false });
       item.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
         if(longPressed){ e.preventDefault(); endDrag(); }
@@ -2538,7 +2707,7 @@
   function initTileReorder(){
     var grid = document.querySelector(".home-tile-grid");
     if(!grid) return;
-    var savedOrder = load("db2.tileOrder", ["week","habits","goals","categories","activity","organize"]);
+    var savedOrder = load("db2.tileOrder", ["week","habits","goals","categories","activity","organize","shopping"]);
     savedOrder.forEach(function(id){
       var tile = grid.querySelector('.home-tile[data-tile-id="'+id+'"]');
       if(tile) grid.appendChild(tile);
@@ -2594,9 +2763,9 @@
         }, 480);
       }, { passive:true });
       tile.addEventListener("touchmove", function(e){
-        if(dragging){ moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
+        if(dragging){ e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
         else { clearTimeout(pressTimer); }
-      }, { passive:true });
+      }, { passive:false });
       tile.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
         if(longPressed){ e.preventDefault(); endDrag(); }
