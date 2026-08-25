@@ -127,6 +127,8 @@
   .work-summary-card{ background:var(--paper-2); border-radius:14px; padding:13px 16px; margin-top:12px; cursor:pointer; border-left:3px solid var(--moss); display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .work-summary-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); }
   .work-summary-text{ font-size:14px; color:var(--ink); font-weight:600; margin-top:2px; }
+  .work-summary-preview{ margin-top:6px; }
+  .work-summary-preview div{ font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.5; }
 
   .stat-row{ display:flex; gap:10px; margin-top:20px; }
   .stat-card{ flex:1; background:var(--paper-2); border-radius:16px; padding:16px; }
@@ -440,6 +442,11 @@
     animation:splashIn .32s cubic-bezier(.22,1,.36,1) .08s both;
   }
   #splash-check svg{ width:26px; height:26px; }
+  #splash-quote{
+    font-family:var(--font-body); font-size:13px; font-style:italic; color:var(--ink-soft); text-align:center;
+    max-width:280px; padding:0 30px; line-height:1.5;
+    animation:splashIn .32s cubic-bezier(.22,1,.36,1) .16s both;
+  }
   @keyframes splashIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
 </style>
 </head>
@@ -449,6 +456,7 @@
   <div id="splash-check">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>
   </div>
+  <div id="splash-quote"></div>
 </div>
 <div class="app">
 
@@ -496,15 +504,16 @@
       </div>
       <div class="home-section-label" id="home-tasks-label" style="display:none;">Tasks</div>
       <ul class="ledger-list" id="home-today-list"></ul>
-      <div class="home-section-label" id="home-habits-label" style="display:none;">Habits</div>
-      <ul class="ledger-list" id="home-habits-list"></ul>
       <div class="work-summary-card" id="work-summary-card" style="display:none;">
-        <div>
+        <div style="flex:1; min-width:0;">
           <div class="work-summary-label">Work</div>
           <div class="work-summary-text" id="work-summary-text"></div>
+          <div class="work-summary-preview" id="work-summary-preview"></div>
         </div>
         <span class="next-up-arrow">↗</span>
       </div>
+      <div class="home-section-label" id="home-habits-label" style="display:none;">Habits</div>
+      <ul class="ledger-list" id="home-habits-list"></ul>
       <div class="home-week-summary" id="home-week-summary"></div>
 
       <div class="home-tile-grid">
@@ -1274,6 +1283,7 @@
   function closeNestPicker(){
     document.getElementById("nest-picker-overlay").classList.remove("open");
     document.getElementById("nest-picker-sheet").classList.remove("open");
+    window.scrollTo(0,0);
   }
   document.getElementById("nest-picker-close").addEventListener("click", closeNestPicker);
   document.getElementById("nest-picker-overlay").addEventListener("click", closeNestPicker);
@@ -1819,6 +1829,14 @@
       var workDone = workAll.filter(doneFor).length;
       var workRemaining = workAll.length - workDone;
       document.getElementById("work-summary-text").textContent = workDone+"/"+workAll.length+" done. "+workRemaining+" remaining.";
+      var openWork = workAll.filter(function(t){ return !doneFor(t); })
+        .sort(function(a,b){ return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt); });
+      var PREVIEW_MAX = 3;
+      var previewEl = document.getElementById("work-summary-preview");
+      var shown = openWork.slice(0, PREVIEW_MAX).map(function(t){ return '<div>'+escapeHtml(t.text)+'</div>'; }).join("");
+      var extra = openWork.length - PREVIEW_MAX;
+      if(extra > 0) shown += '<div>+'+extra+' more</div>';
+      previewEl.innerHTML = shown;
       workCard.style.display = "flex";
     } else {
       workCard.style.display = "none";
@@ -1983,6 +2001,7 @@
   function closeDayPreview(){
     document.getElementById("day-preview-overlay").classList.remove("open");
     document.getElementById("day-preview-sheet").classList.remove("open");
+    window.scrollTo(0,0);
   }
   document.getElementById("day-preview-body").addEventListener("click", function(e){
     var editBtn = e.target.closest(".day-preview-edit");
@@ -2412,7 +2431,7 @@
     overlay.classList.add("open"); shoppingSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("shopping-input").focus(); }, 200);
   }
-  function closeShoppingSheetFn(){ shoppingSheet.classList.remove("open"); editingShoppingId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); }
+  function closeShoppingSheetFn(){ shoppingSheet.classList.remove("open"); editingShoppingId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
   document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(o){
     o.addEventListener("click", function(){
       document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
@@ -2598,7 +2617,7 @@
     overlay.classList.add("open"); taskSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("task-input").focus(); }, 200);
   }
-  function closeTaskSheet(){ overlay.classList.remove("open"); taskSheet.classList.remove("open"); editingTaskId=null; taskSheetParentId=null; }
+  function closeTaskSheet(){ overlay.classList.remove("open"); taskSheet.classList.remove("open"); editingTaskId=null; taskSheetParentId=null; window.scrollTo(0,0); }
 
 
   document.querySelectorAll("#task-type-row .type-opt").forEach(function(o){
@@ -2679,7 +2698,7 @@
       o.classList.toggle("active", habitDays.indexOf(parseInt(o.getAttribute("data-d"),10))!==-1);
     });
   }
-  function closeHabitSheetFn(){ habitSheet.classList.remove("open"); editingHabitId=null; if(!taskSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); }
+  function closeHabitSheetFn(){ habitSheet.classList.remove("open"); editingHabitId=null; if(!taskSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
   document.querySelectorAll("#habit-sheet .type-opt").forEach(function(o){
     o.addEventListener("click", function(){
       document.querySelectorAll("#habit-sheet .type-opt").forEach(function(x){ x.classList.remove("active"); });
@@ -2731,7 +2750,7 @@
     overlay.classList.add("open"); goalSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("goal-input").focus(); }, 200);
   }
-  function closeGoalSheetFn(){ goalSheet.classList.remove("open"); editingGoalId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open")) overlay.classList.remove("open"); }
+  function closeGoalSheetFn(){ goalSheet.classList.remove("open"); editingGoalId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
 
   /* ---------------- swipe-down-to-dismiss for sheets ---------------- */
   (function(){
@@ -2766,6 +2785,20 @@
     wireSwipeToDismiss(document.getElementById("nest-picker-sheet"), closeNestPicker);
     wireSwipeToDismiss(shoppingSheet, closeShoppingSheetFn);
   })();
+  document.querySelectorAll(".sheet-handle").forEach(function(handle){
+    handle.style.cursor = "pointer";
+    handle.addEventListener("click", function(){
+      var sheetEl = handle.closest(".sheet");
+      if(!sheetEl) return;
+      var id = sheetEl.id;
+      if(id==="task-sheet") closeTaskSheet();
+      else if(id==="habit-sheet") closeHabitSheetFn();
+      else if(id==="goal-sheet") closeGoalSheetFn();
+      else if(id==="shopping-sheet") closeShoppingSheetFn();
+      else if(id==="day-preview-sheet") closeDayPreview();
+      else if(id==="nest-picker-sheet") closeNestPicker();
+    });
+  });
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-plus").addEventListener("click", function(){ goalProgress=Math.min(100,goalProgress+10); document.getElementById("goal-progress").value=goalProgress; });
   document.getElementById("goal-progress").addEventListener("input", function(){ var v=parseInt(this.value,10); goalProgress = isNaN(v)?0:Math.max(0,Math.min(100,v)); });
@@ -3057,7 +3090,27 @@
   syncFontButtons();
 
   var splashEl = document.getElementById("splash-screen");
-  setTimeout(function(){ if(splashEl) splashEl.classList.add("hide"); }, 480);
+  var SPLASH_QUOTES = [
+    "One task at a time, one day at a time.",
+    "Small steps, done daily, add up to everything.",
+    "The list gets shorter every time you begin.",
+    "Today's plan is just a kindness to tomorrow's you.",
+    "Progress, not perfection.",
+    "Write it down so your mind can let it go.",
+    "A clear list makes room for a clear head.",
+    "Done is better than perfect.",
+    "Start with the small thing — momentum follows.",
+    "Every checkmark is a little proof you showed up.",
+    "The day is long enough for what matters.",
+    "Plans are just wishes with a due date.",
+    "Cross one thing off. That's enough for now.",
+    "Order isn't the goal — ease is.",
+    "You don't have to see the whole day, just the next task.",
+    "A tidy list, a tidier mind."
+  ];
+  var quoteEl = document.getElementById("splash-quote");
+  if(quoteEl) quoteEl.textContent = SPLASH_QUOTES[Math.floor(Math.random()*SPLASH_QUOTES.length)];
+  setTimeout(function(){ if(splashEl) splashEl.classList.add("hide"); }, 1300);
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
