@@ -741,6 +741,18 @@
       <div class="topbar-title">Settings</div>
     </div>
     <div class="section">
+      <div class="card" id="account-card">
+        <div class="label-row"><span class="label">Account</span></div>
+        <div id="account-signed-out">
+          <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Sign in to link this device to your account.</div>
+          <button class="pill-btn" id="google-signin-btn" style="width:100%; padding:10px;">Sign in with Google</button>
+          <div id="account-error" style="font-size:12px; color:var(--danger); margin-top:10px; display:none;"></div>
+        </div>
+        <div id="account-signed-in" style="display:none;">
+          <div style="font-size:13px; color:var(--ink); margin-bottom:12px;" id="account-email"></div>
+          <button class="pill-btn" id="account-signout-btn" style="width:100%; padding:10px;">Sign out</button>
+        </div>
+      </div>
       <div class="card">
         <div class="label-row"><span class="label">Your name</span></div>
         <input type="text" class="field-plain" id="user-name-input" placeholder="Add your name">
@@ -3115,6 +3127,62 @@
     window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
   }
 })();
+</script>
+
+<!-- Firebase Auth (Google sign-in). Kept as its own module script, separate from the
+     main app script above, since it uses ES module imports and the app's data/rendering
+     logic doesn't depend on it - signing in only links the device to an account, it
+     doesn't gate access to the app or change how tasks/habits/etc are stored. -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDqaxmrzyCrG1mbeJJh_7wHnRbco5NAeRs",
+    authDomain: "dailycheckin-dc2d7.firebaseapp.com",
+    projectId: "dailycheckin-dc2d7",
+    storageBucket: "dailycheckin-dc2d7.firebasestorage.app",
+    messagingSenderId: "915397098752",
+    appId: "1:915397098752:web:8f707bbee645b9a4bdc7e5",
+    measurementId: "G-SWS4WSBLY1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  try { getAnalytics(app); } catch(e) { /* analytics can fail quietly (e.g. blocked by an ad/privacy blocker) - not critical, ignore */ }
+
+  const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence).catch(function(){ /* if this fails the SDK falls back to its own default, which is already local persistence */ });
+  const provider = new GoogleAuthProvider();
+
+  function renderAccountUI(user){
+    var signedOutEl = document.getElementById("account-signed-out");
+    var signedInEl = document.getElementById("account-signed-in");
+    if(!signedOutEl || !signedInEl) return;
+    if(user){
+      signedOutEl.style.display = "none";
+      signedInEl.style.display = "block";
+      var emailEl = document.getElementById("account-email");
+      if(emailEl) emailEl.textContent = "Signed in as " + (user.email || user.displayName || "your account");
+    } else {
+      signedOutEl.style.display = "block";
+      signedInEl.style.display = "none";
+    }
+  }
+
+  onAuthStateChanged(auth, function(user){ renderAccountUI(user); });
+
+  var signInBtn = document.getElementById("google-signin-btn");
+  if(signInBtn) signInBtn.addEventListener("click", function(){
+    var errEl = document.getElementById("account-error");
+    if(errEl) errEl.style.display = "none";
+    signInWithPopup(auth, provider).catch(function(err){
+      if(errEl){ errEl.textContent = "Sign-in failed: " + err.message; errEl.style.display = "block"; }
+    });
+  });
+
+  var signOutBtn = document.getElementById("account-signout-btn");
+  if(signOutBtn) signOutBtn.addEventListener("click", function(){ signOut(auth); });
 </script>
 </body>
 </html>
