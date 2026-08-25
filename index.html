@@ -3140,7 +3140,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDqaxmrzyCrG1mbeJJh_7wHnRbco5NAeRs",
@@ -3171,6 +3171,8 @@
   var pendingData = {};
   var pushTimer = null;
   var suppressPush = false; // true while we're writing pulled cloud data into localStorage, so that doesn't immediately get pushed back up
+  var deviceId = Math.random().toString(36).slice(2) + Date.now().toString(36); // per-session id, so this device can recognize and ignore its own writes echoing back through the real-time listener
+  var unsubscribeListener = null;
 
   function setSyncStatus(text){
     var el = document.getElementById("account-sync-status");
@@ -3182,7 +3184,8 @@
     setSyncStatus("Syncing…");
     clearTimeout(pushTimer);
     pushTimer = setTimeout(function(){
-      setDoc(doc(db, "users", currentUser.uid), pendingData, { merge: true })
+      var payload = Object.assign({}, pendingData, { updatedBy: deviceId, updatedAt: Date.now() });
+      setDoc(doc(db, "users", currentUser.uid), payload, { merge: true })
         .then(function(){ setSyncStatus("Synced"); })
         .catch(function(){ setSyncStatus("Sync failed - will retry on next change"); });
     }, 900);
@@ -3195,7 +3198,7 @@
     schedulePush();
   };
 
-  function pullCloudDataAndReload(cloudData){
+  function applyRemoteDataInPlace(cloudData){
     suppressPush = true;
     SYNC_KEYS.forEach(function(key){
       if(!(key in cloudData)) return;
@@ -3204,7 +3207,26 @@
         localStorage.setItem(key, typeof v === "string" ? v : JSON.stringify(v));
       }catch(e){}
     });
-    location.reload();
+    location.reload(); // simplest reliable way to get every in-memory variable and every rendered view to pick up the new data
+  }
+
+  function pullCloudDataAndReload(cloudData){
+    applyRemoteDataInPlace(cloudData);
+  }
+
+  function startRealtimeListener(uidForDoc){
+    if(unsubscribeListener) unsubscribeListener();
+    unsubscribeListener = onSnapshot(doc(db, "users", uidForDoc), function(snap){
+      if(!snap.exists()) return;
+      if(snap.metadata.hasPendingWrites) return; // this is our own write still in flight, not yet confirmed by the server - ignore, we already have this data locally
+      var data = snap.data();
+      if(data.updatedBy === deviceId) return; // this is our own write echoing back after being confirmed - we already applied it locally when we made it, no need to re-apply
+      // a genuine change from another device - pull it in
+      setSyncStatus("New data from another device…");
+      applyRemoteDataInPlace(data);
+    }, function(){
+      // listener error (e.g. permissions or offline) - not critical, ongoing local use and the next explicit push/pull still work
+    });
   }
 
   function pushLocalDataAsInitialCloudCopy(uidForDoc){
@@ -3236,6 +3258,7 @@
   onAuthStateChanged(auth, function(user){
     currentUser = user;
     renderAccountUI(user);
+    if(unsubscribeListener){ unsubscribeListener(); unsubscribeListener = null; }
     if(!user) return;
 
     if(justSignedIn){
@@ -3245,7 +3268,7 @@
         if(snap.exists() && Object.keys(snap.data()).length){
           pullCloudDataAndReload(snap.data()); // this reloads the page, so nothing after this line runs
         } else {
-          pushLocalDataAsInitialCloudCopy(user.uid).then(function(){ setSyncStatus("Synced"); });
+          pushLocalDataAsInitialCloudCopy(user.uid).then(function(){ setSyncStatus("Synced"); startRealtimeListener(user.uid); });
         }
       }).catch(function(){ setSyncStatus("Couldn't reach the cloud - your data is still safe on this device"); });
     } else {
@@ -3257,9 +3280,10 @@
       getDoc(doc(db, "users", user.uid)).then(function(snap){
         if(!snap.exists() || !Object.keys(snap.data()).length){
           setSyncStatus("Backing up existing data…");
-          pushLocalDataAsInitialCloudCopy(user.uid).then(function(){ setSyncStatus("Synced"); });
+          pushLocalDataAsInitialCloudCopy(user.uid).then(function(){ setSyncStatus("Synced"); startRealtimeListener(user.uid); });
         } else {
           setSyncStatus("Synced");
+          startRealtimeListener(user.uid);
         }
       }).catch(function(){ setSyncStatus("Couldn't reach the cloud - your data is still safe on this device"); });
     }
