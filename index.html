@@ -328,7 +328,7 @@
   .heat-cell.heat-missed{ background:var(--danger); opacity:0.4; }
   .heat-cell.heat-future{ background:transparent; border:1px solid var(--line); }
   .heat-cell.heat-empty{ background:transparent; }
-  .streak-badge{ font-family:var(--font-mono); font-size:9.5px; color:var(--moss); opacity:0.85; }
+  .consistency-badge{ font-family:var(--font-mono); font-size:10px; color:var(--moss); opacity:0.85; font-weight:600; background:var(--moss-soft); padding:1px 6px; border-radius:8px; }
 
   /* ---------------- goals ---------------- */
   .goal-row{ display:flex; align-items:center; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); cursor:pointer; }
@@ -1775,14 +1775,14 @@
   function habitRowHtmlHome(h, hideDelete){
     var isToday = isScheduledOn(h, realNow);
     var done = h.completed && h.completed[todayKey];
-    var streak = computeStreak(h);
+    var consistency = computeConsistency(h);
     var timeTag = h.time ? '<span class="ledger-tag">'+fmtTime(h.time)+'</span>' : '';
     var catName = h.category ? catLabel(h.category) : null;
     var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(h.category)+';">'+escapeHtml(catName)+'</span>' : '';
     return '<li class="ledger-item habit-row'+(done?" done":"")+'" data-id="'+h.id+'">' +
       '<button class="ledger-check" data-id="'+h.id+'" style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
-      '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">Habit</span>'+catTag+(streak?'<span class="streak-badge">🔥'+streak+'</span>':'')+'</div></div>' +
+      '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">Habit</span>'+catTag+(consistency.scheduled?'<span class="consistency-badge">'+consistency.done+'/'+consistency.scheduled+'</span>':'')+'</div></div>' +
       (hideDelete ? '' : '<button class="ledger-del" data-id="'+h.id+'">×</button>') +
     '</li>';
   }
@@ -2075,18 +2075,23 @@
     if(h.schedule.type==="daily") return true;
     return h.schedule.days.indexOf(mondayIndex(d)) !== -1;
   }
-  function computeStreak(h){
-    var n=0, d=new Date(realNow);
-    if(!isScheduledOn(h,d) || (h.completed && h.completed[dateKey(d)])){
-      while(true){
-        if(isScheduledOn(h,d)){
-          if(h.completed && h.completed[dateKey(d)]) n++; else break;
-        }
-        d.setDate(d.getDate()-1);
-        if(n>365) break;
+  function computeConsistency(h){
+    var start = new Date(h.createdAt);
+    start.setHours(0,0,0,0);
+    var end = new Date(realNow);
+    end.setHours(0,0,0,0);
+    var scheduled = 0, done = 0;
+    var d = new Date(start);
+    var guard = 0;
+    while(d.getTime() <= end.getTime() && guard < 3660){ // ~10yr safety cap
+      if(isScheduledOn(h, d)){
+        scheduled++;
+        if(h.completed && h.completed[dateKey(d)]) done++;
       }
+      d.setDate(d.getDate()+1);
+      guard++;
     }
-    return n;
+    return { done: done, scheduled: scheduled };
   }
   function scheduleLabel(h){
     if(h.schedule.type==="daily") return "Daily";
@@ -2168,7 +2173,7 @@
     wrap.innerHTML = habits.map(function(h){
       var isToday = isScheduledOn(h, realNow);
       var done = h.completed && h.completed[todayKey];
-      var streak = computeStreak(h);
+      var consistency = computeConsistency(h);
       var wStats = weekStats(h), mStats = monthStats(h);
       var vm = getViewedMonth(h.id);
       var isOpen = !!openDropdowns[h.id];
@@ -2178,7 +2183,7 @@
       return '<li class="ledger-item habit-row'+(isToday?"":" off-today")+'" data-id="'+h.id+'">' +
         '<button class="ledger-check" data-id="'+h.id+'" '+(isToday?"":"disabled")+' style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
         '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
-        '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">'+scheduleLabel(h)+'</span>'+catTag+(streak?'<span class="streak-badge">🔥'+streak+'</span>':'')+(isToday?'':'<span class="ledger-tag off">Not today</span>')+'</div>' +
+        '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">'+scheduleLabel(h)+'</span>'+catTag+(consistency.scheduled?'<span class="consistency-badge">'+consistency.done+'/'+consistency.scheduled+'</span>':'')+(isToday?'':'<span class="ledger-tag off">Not today</span>')+'</div>' +
         '<div class="habit-dropdown'+(isOpen?" open":"")+'" id="dropdown-'+h.id+'">' +
           '<div class="habit-perf-row"><span class="habit-perf-label">This week</span><span class="habit-perf-stat">'+wStats.done+'/'+wStats.scheduled+'</span></div>' +
           weekDotsHtml(h) +
