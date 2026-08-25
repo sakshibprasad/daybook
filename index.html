@@ -3180,14 +3180,23 @@
     if(el) el.textContent = text;
   }
 
+  function getLastSyncAt(){
+    var v = localStorage.getItem("db2.lastCloudSyncAt");
+    return v ? Number(v) : 0;
+  }
+  function setLastSyncAt(t){
+    try{ localStorage.setItem("db2.lastCloudSyncAt", String(t)); }catch(e){}
+  }
+
   function schedulePush(){
     if(!currentUser || suppressPush) return;
     setSyncStatus("Syncing…");
     clearTimeout(pushTimer);
     pushTimer = setTimeout(function(){
-      var payload = Object.assign({}, pendingData, { updatedBy: deviceId, updatedAt: Date.now() });
+      var ts = Date.now();
+      var payload = Object.assign({}, pendingData, { updatedBy: deviceId, updatedAt: ts });
       setDoc(doc(db, "users", currentUser.uid), payload, { merge: true })
-        .then(function(){ setSyncStatus("Synced"); })
+        .then(function(){ setLastSyncAt(ts); setSyncStatus("Synced"); })
         .catch(function(){ setSyncStatus("Sync failed - will retry on next change"); });
     }, 900);
   }
@@ -3208,6 +3217,7 @@
         localStorage.setItem(key, typeof v === "string" ? v : JSON.stringify(v));
       }catch(e){}
     });
+    if(cloudData.updatedAt) setLastSyncAt(cloudData.updatedAt);
     location.reload(); // simplest reliable way to get every in-memory variable and every rendered view to pick up the new data
   }
 
@@ -3217,14 +3227,13 @@
 
   function startRealtimeListener(uidForDoc){
     if(unsubscribeListener) unsubscribeListener();
-    var isFirstSnapshot = true; // the listener always fires once immediately with the current state right when you subscribe - that's not a new change, it's what's already there (we just loaded/pushed/pulled it), so it must never trigger a reload
     unsubscribeListener = onSnapshot(doc(db, "users", uidForDoc), function(snap){
-      if(isFirstSnapshot){ isFirstSnapshot = false; return; }
       if(!snap.exists()) return;
       if(snap.metadata.hasPendingWrites) return; // this is our own write still in flight, not yet confirmed by the server - ignore, we already have this data locally
       var data = snap.data();
       if(data.updatedBy === deviceId) return; // this is our own write echoing back after being confirmed - we already applied it locally when we made it, no need to re-apply
-      // a genuine change from another device - pull it in
+      if(!data.updatedAt || data.updatedAt <= getLastSyncAt()) return; // not newer than what we already have - this is what makes the snapshot that fires immediately on subscribe harmless, since normally it just matches what we already have, while still letting us catch up correctly if the cloud turns out to have genuinely newer data than we do (e.g. we were closed while another device made changes)
+      // a genuine, newer change from another device - pull it in
       setSyncStatus("New data from another device…");
       applyRemoteDataInPlace(data);
     }, function(){
@@ -3239,8 +3248,11 @@
       if(raw === null) return;
       try{ initial[key] = JSON.parse(raw); }catch(e){ initial[key] = raw; }
     });
+    var ts = Date.now();
+    initial.updatedBy = deviceId;
+    initial.updatedAt = ts;
     pendingData = initial;
-    return setDoc(doc(db, "users", uidForDoc), initial);
+    return setDoc(doc(db, "users", uidForDoc), initial).then(function(){ setLastSyncAt(ts); });
   }
 
   function renderAccountUI(user){
