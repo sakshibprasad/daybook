@@ -3216,7 +3216,9 @@
 
   function startRealtimeListener(uidForDoc){
     if(unsubscribeListener) unsubscribeListener();
+    var isFirstSnapshot = true; // the listener always fires once immediately with the current state right when you subscribe - that's not a new change, it's what's already there (we just loaded/pushed/pulled it), so it must never trigger a reload
     unsubscribeListener = onSnapshot(doc(db, "users", uidForDoc), function(snap){
+      if(isFirstSnapshot){ isFirstSnapshot = false; return; }
       if(!snap.exists()) return;
       if(snap.metadata.hasPendingWrites) return; // this is our own write still in flight, not yet confirmed by the server - ignore, we already have this data locally
       var data = snap.data();
