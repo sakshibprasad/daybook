@@ -3158,6 +3158,7 @@
   const auth = getAuth(app);
   setPersistence(auth, browserLocalPersistence).catch(function(){ /* if this fails the SDK falls back to its own default, which is already local persistence */ });
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" }); // always show the account picker instead of silently reusing whatever Google account is already logged into this browser
   const db = getFirestore(app);
 
   // The keys that actually matter to sync - excludes purely session/navigation state
