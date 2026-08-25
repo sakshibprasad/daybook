@@ -744,12 +744,13 @@
       <div class="card" id="account-card">
         <div class="label-row"><span class="label">Account</span></div>
         <div id="account-signed-out">
-          <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Sign in to link this device to your account.</div>
+          <div style="font-size:13px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">Sign in to back up your data and use it on other devices.</div>
           <button class="pill-btn" id="google-signin-btn" style="width:100%; padding:10px;">Sign in with Google</button>
           <div id="account-error" style="font-size:12px; color:var(--danger); margin-top:10px; display:none;"></div>
         </div>
         <div id="account-signed-in" style="display:none;">
-          <div style="font-size:13px; color:var(--ink); margin-bottom:12px;" id="account-email"></div>
+          <div style="font-size:13px; color:var(--ink); margin-bottom:6px;" id="account-email"></div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px;" id="account-sync-status">Synced</div>
           <button class="pill-btn" id="account-signout-btn" style="width:100%; padding:10px;">Sign out</button>
         </div>
       </div>
@@ -990,9 +991,9 @@
 
   /* ---------------- storage (fresh keys - clean slate) ---------------- */
   function load(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
-  function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} if(window.__cloudSyncNotify) window.__cloudSyncNotify(k, v); }
   function loadStr(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-  function saveStr(k,v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  function saveStr(k,v){ try{ localStorage.setItem(k, v); }catch(e){} if(window.__cloudSyncNotify) window.__cloudSyncNotify(k, v); }
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 
   var tasks = load("db2.tasks", []);
@@ -3129,14 +3130,17 @@
 })();
 </script>
 
-<!-- Firebase Auth (Google sign-in). Kept as its own module script, separate from the
-     main app script above, since it uses ES module imports and the app's data/rendering
-     logic doesn't depend on it - signing in only links the device to an account, it
-     doesn't gate access to the app or change how tasks/habits/etc are stored. -->
+<!-- Firebase Auth + Firestore sync (Google sign-in). Kept as its own module script, separate
+     from the main app script above, since it uses ES module imports. The app works fully
+     offline via localStorage regardless of sign-in state - this script only pushes local
+     changes to Firestore (keyed by the signed-in user's uid) and, on a fresh sign-in on a
+     new device, pulls that user's existing cloud copy down and reloads so the rest of the
+     app picks it up normally. -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDqaxmrzyCrG1mbeJJh_7wHnRbco5NAeRs",
@@ -3154,6 +3158,65 @@
   const auth = getAuth(app);
   setPersistence(auth, browserLocalPersistence).catch(function(){ /* if this fails the SDK falls back to its own default, which is already local persistence */ });
   const provider = new GoogleAuthProvider();
+  const db = getFirestore(app);
+
+  // The keys that actually matter to sync - excludes purely session/navigation state
+  // (which tab you were on, etc.) that shouldn't follow you between devices.
+  var SYNC_KEYS = ["db2.tasks","db2.habits","db2.goals","db2.categories","db2.shopping",
+    "db2.shoppingFor","db2.workCategories","db2.userName","db2.theme","db2.font",
+    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder"];
+
+  var currentUser = null;
+  var justSignedIn = false;
+  var pendingData = {};
+  var pushTimer = null;
+  var suppressPush = false; // true while we're writing pulled cloud data into localStorage, so that doesn't immediately get pushed back up
+
+  function setSyncStatus(text){
+    var el = document.getElementById("account-sync-status");
+    if(el) el.textContent = text;
+  }
+
+  function schedulePush(){
+    if(!currentUser || suppressPush) return;
+    setSyncStatus("Syncing…");
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(function(){
+      setDoc(doc(db, "users", currentUser.uid), pendingData, { merge: true })
+        .then(function(){ setSyncStatus("Synced"); })
+        .catch(function(){ setSyncStatus("Sync failed - will retry on next change"); });
+    }, 900);
+  }
+
+  // Called by the main app's save()/saveStr() every time anything is written to localStorage
+  window.__cloudSyncNotify = function(key, value){
+    if(SYNC_KEYS.indexOf(key) === -1) return;
+    pendingData[key] = value;
+    schedulePush();
+  };
+
+  function pullCloudDataAndReload(cloudData){
+    suppressPush = true;
+    SYNC_KEYS.forEach(function(key){
+      if(!(key in cloudData)) return;
+      var v = cloudData[key];
+      try{
+        localStorage.setItem(key, typeof v === "string" ? v : JSON.stringify(v));
+      }catch(e){}
+    });
+    location.reload();
+  }
+
+  function pushLocalDataAsInitialCloudCopy(uidForDoc){
+    var initial = {};
+    SYNC_KEYS.forEach(function(key){
+      var raw = localStorage.getItem(key);
+      if(raw === null) return;
+      try{ initial[key] = JSON.parse(raw); }catch(e){ initial[key] = raw; }
+    });
+    pendingData = initial;
+    return setDoc(doc(db, "users", uidForDoc), initial);
+  }
 
   function renderAccountUI(user){
     var signedOutEl = document.getElementById("account-signed-out");
@@ -3170,13 +3233,45 @@
     }
   }
 
-  onAuthStateChanged(auth, function(user){ renderAccountUI(user); });
+  onAuthStateChanged(auth, function(user){
+    currentUser = user;
+    renderAccountUI(user);
+    if(!user) return;
+
+    if(justSignedIn){
+      justSignedIn = false;
+      setSyncStatus("Checking for existing data…");
+      getDoc(doc(db, "users", user.uid)).then(function(snap){
+        if(snap.exists() && Object.keys(snap.data()).length){
+          pullCloudDataAndReload(snap.data()); // this reloads the page, so nothing after this line runs
+        } else {
+          pushLocalDataAsInitialCloudCopy(user.uid).then(function(){ setSyncStatus("Synced"); });
+        }
+      }).catch(function(){ setSyncStatus("Couldn't reach the cloud - your data is still safe on this device"); });
+    } else {
+      // an already-persisted session restoring on page load. Normally we just start syncing forward
+      // from here without touching local data - but if this device was signed in before the cloud
+      // database existed (or before it ever managed a successful write), there may be no cloud copy
+      // for this account at all yet. Check for that specific case and push one up if so, so a device
+      // that "looks" signed in but never actually got its data up doesn't sit that way indefinitely.
+      getDoc(doc(db, "users", user.uid)).then(function(snap){
+        if(!snap.exists() || !Object.keys(snap.data()).length){
+          setSyncStatus("Backing up existing data…");
+          pushLocalDataAsInitialCloudCopy(user.uid).then(function(){ setSyncStatus("Synced"); });
+        } else {
+          setSyncStatus("Synced");
+        }
+      }).catch(function(){ setSyncStatus("Couldn't reach the cloud - your data is still safe on this device"); });
+    }
+  });
 
   var signInBtn = document.getElementById("google-signin-btn");
   if(signInBtn) signInBtn.addEventListener("click", function(){
     var errEl = document.getElementById("account-error");
     if(errEl) errEl.style.display = "none";
+    justSignedIn = true;
     signInWithPopup(auth, provider).catch(function(err){
+      justSignedIn = false;
       if(errEl){ errEl.textContent = "Sign-in failed: " + err.message; errEl.style.display = "block"; }
     });
   });
