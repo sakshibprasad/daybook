@@ -74,7 +74,7 @@
   html[data-font="cinzel"]{ --font-display:'Cinzel', serif; }
   html[data-font="playfair"]{ --font-display:'Playfair Display', serif; }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); min-height:100vh; min-height:100dvh; }
+  html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); min-height:100vh; min-height:100dvh; overscroll-behavior:none; }
   body{ overscroll-behavior-y:none; }
   input,textarea,button{ font-family:inherit; }
   ::selection{ background:var(--moss-soft); }
@@ -1496,9 +1496,9 @@
       if(window.scrollY > 0) return;
       var dy = e.touches[0].clientY - startY;
       if(dy <= 0) return; // only care about downward pulls
+      e.preventDefault(); // must happen on the very first qualifying movement, not after a drag threshold - otherwise the browser's own pull-to-refresh can already claim the gesture before we get a chance to stop it
       if(!dragging && dy > 6) dragging = true;
       if(dragging){
-        e.preventDefault(); // stop the native page from scrolling/bouncing while we're driving this gesture ourselves
         currentHeight = Math.min(OPEN_HEIGHT, dy * 0.55); // damped so it feels elastic, not 1:1
         setHeight(currentHeight, false);
       }
