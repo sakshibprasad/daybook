@@ -1568,7 +1568,6 @@
   });
   document.getElementById("link-habits").addEventListener("click", function(){ switchTab("habits"); });
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
-  document.getElementById("link-categories").addEventListener("click", function(){ switchTab("categories"); });
   document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
   document.getElementById("link-organize").addEventListener("click", function(){ switchTab("organize"); });
   document.getElementById("categories-back").addEventListener("click", function(){ switchTab(lastMainTab); });
@@ -2533,7 +2532,6 @@
     if(del){ deleteShoppingItem(del.getAttribute("data-id")); return; }
     if(body){ var it2 = shoppingItems.find(function(x){ return x.id===body.getAttribute("data-edit"); }); if(it2) openShoppingSheet(it2); return; }
   });
-  document.getElementById("link-shopping").addEventListener("click", function(){ switchTab("shopping"); });
 
   /* ---------------- SHOPPING SHEET ---------------- */
   var shoppingSheet = document.getElementById("shopping-sheet");
