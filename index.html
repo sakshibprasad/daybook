@@ -63,6 +63,11 @@
     --line:#24262B; --moss:#8CA0C9; --moss-soft:#1E2530; --moss-2:#A8BAE0;
     --danger:#D9776A; --shadow:0 2px 10px rgba(0,0,0,0.3), 0 10px 26px rgba(0,0,0,0.35);
   }
+  html[data-theme="meadow"]{
+    --paper:#F4EFDD; --paper-2:#EBE3C7; --ink:#332D1F; --ink-soft:#93876A;
+    --line:#E1D6B3; --moss:#707C4E; --moss-soft:#E4E6D2; --moss-2:#8FA06A;
+    --danger:#C0693F; --shadow:0 2px 10px rgba(51,45,31,0.06), 0 10px 26px rgba(51,45,31,0.07);
+  }
   html[data-font="caslon"]{ --font-display:'Libre Caslon Display', serif; }
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
   html[data-font="fraunces"]{ --font-display:'Fraunces', serif; }
@@ -1750,7 +1755,8 @@
     linen: { bg:"#F3ECE1", bg2:"#EAE0D0", ink:"#4A3F33", accent:"#B08968", label:"Linen" },
     cocoa: { bg:"#17120F", bg2:"#211A15", ink:"#EDE4D8", accent:"#C79868", label:"Cocoa" },
     dusk: { bg:"#1C1B18", bg2:"#26241F", ink:"#EDE7D9", accent:"#8FAE7C", label:"Dusk" },
-    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" }
+    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
+    meadow: { bg:"#F4EFDD", bg2:"#EBE3C7", ink:"#332D1F", accent:"#707C4E", label:"Meadow" }
   };
   var THEME_TILTS = [-4, 3, -2, 4, -3, 2, -4];
   function renderThemePicker(){
