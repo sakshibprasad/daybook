@@ -132,6 +132,7 @@
   .home-hero > *{ position:relative; z-index:1; }
   .home-greeting-title{ font-family:var(--font-secondary); font-weight:400; font-size:46px; line-height:1.05; color:var(--ink); }
   .home-greeting-date{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); margin-top:8px; letter-spacing:0.03em; text-transform:uppercase; }
+  .home-gesture-hint{ font-size:10.5px; color:var(--ink-soft); opacity:0.55; margin-top:14px; letter-spacing:0.01em; }
 
 
   .home-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:26px; padding-bottom:10px; border-bottom:1px solid var(--line); }
@@ -495,17 +496,7 @@
           <div class="home-greeting-title" id="home-greeting"></div>
           <div class="home-greeting-date" id="home-date"></div>
         </div>
-      </div>
-
-      <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-label">To-Do</div>
-          <div class="stat-value"><b id="stat-todo-count">0</b> Tasks</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Habits</div>
-          <div class="stat-value"><b id="stat-habits-count">0</b> Today</div>
-        </div>
+        <div class="home-gesture-hint">Hold for categories · Swipe right for shopping</div>
       </div>
 
       <div class="next-up-card" id="next-up-card" style="display:none;">
@@ -547,11 +538,6 @@
           <span class="home-tile-label">Goals</span>
           <span class="home-tile-count" id="goals-count">—</span>
         </button>
-        <button class="home-tile" id="link-categories" data-tile-id="categories">
-          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
-          <span class="home-tile-label">Categories</span>
-          <span class="home-tile-count" id="cats-count">—</span>
-        </button>
         <button class="home-tile" id="link-work" data-tile-id="work">
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
           <span class="home-tile-label">Work</span>
@@ -566,11 +552,6 @@
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
           <span class="home-tile-label">Organize</span>
           <span class="home-tile-count" id="organize-count">—</span>
-        </button>
-        <button class="home-tile" id="link-shopping" data-tile-id="shopping">
-          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>
-          <span class="home-tile-label">Shopping</span>
-          <span class="home-tile-count" id="shopping-count">—</span>
         </button>
       </div>
     </div>
@@ -854,14 +835,6 @@
   <button class="nav-item" data-tab="goals">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>
     <span class="nav-lb">Goals</span>
-  </button>
-  <button class="nav-item" data-tab="organize">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
-    <span class="nav-lb">Organize</span>
-  </button>
-  <button class="nav-item" data-tab="shopping">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
-    <span class="nav-lb">Shopping</span>
   </button>
 </nav>
 
@@ -1512,6 +1485,50 @@
       if(isOpen && !e.target.closest("#pull-add-bar")) closeBar();
     });
   })();
+
+  /* ---------------- long-press for Categories / swipe-right for Shopping (Home) ----------------
+     Both of these pages used to have their own bottom-nav tab and Home tile; now they're reached
+     only through these two gestures, so they're scoped to fire only on "empty" background areas
+     of Home (never on top of a task/habit row, button, or the pull-add bar) to avoid hijacking
+     anything else that's already interactive there. */
+  (function(){
+    var homeWrap2 = document.getElementById("home-wrap");
+    var gestureStartX = 0, gestureStartY = 0, longPressTimer = null, longPressFired = false, gestureTracking = false;
+    var LONG_PRESS_MS = 500;
+    var SWIPE_THRESHOLD = 70;
+
+    function isInteractiveTarget(el){
+      return !!el.closest(".ledger-item, button, .pull-add-bar, .home-tile, input, a, .next-up-card, .work-summary-card");
+    }
+
+    homeWrap2.addEventListener("touchstart", function(e){
+      if(currentTab!=="home" || isInteractiveTarget(e.target)){ gestureTracking = false; return; }
+      gestureTracking = true;
+      longPressFired = false;
+      gestureStartX = e.touches[0].clientX; gestureStartY = e.touches[0].clientY;
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(function(){
+        longPressFired = true;
+        gestureTracking = false;
+        if(navigator.vibrate) navigator.vibrate(12);
+        switchTab("categories");
+      }, LONG_PRESS_MS);
+    }, { passive:true });
+
+    homeWrap2.addEventListener("touchmove", function(e){
+      if(!gestureTracking) return;
+      var dx = e.touches[0].clientX - gestureStartX, dy = e.touches[0].clientY - gestureStartY;
+      if(Math.abs(dx) > 10 || Math.abs(dy) > 10) clearTimeout(longPressTimer); // real movement means this isn't a long-press-and-hold anymore
+    }, { passive:true });
+
+    homeWrap2.addEventListener("touchend", function(e){
+      clearTimeout(longPressTimer);
+      if(!gestureTracking || longPressFired){ gestureTracking = false; return; }
+      gestureTracking = false;
+      var dx = e.changedTouches[0].clientX - gestureStartX, dy = e.changedTouches[0].clientY - gestureStartY;
+      if(dx > SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("shopping");
+    }, { passive:true });
+  })();
   /* ---------------- toast ---------------- */
   var toastTimer = null;
   function showToast(msg, undoFn){
@@ -1984,10 +2001,8 @@
     document.getElementById("home-progress-count").textContent = (doneTaskCount+doneHabitCount)+"/"+(taskRows.length+habitRows.length);
 
     var openTodos = todays.filter(function(t){ return !doneFor(t); }).length;
-    document.getElementById("stat-todo-count").textContent = openTodos;
     var habitsScheduledToday = habits.filter(function(h){ return isScheduledOn(h, realNow); });
     var habitsDoneToday = habitsScheduledToday.filter(function(h){ return h.completed && h.completed[todayKey]; }).length;
-    document.getElementById("stat-habits-count").textContent = habitsDoneToday+"/"+habitsScheduledToday.length;
 
     renderNextUp();
 
@@ -1996,7 +2011,6 @@
     document.getElementById("habits-count").textContent = habitsToday.length ? (habitsDone+"/"+habitsToday.length) : "—";
     var goalsOpen = goals.filter(function(g){ return !g.done; }).length;
     document.getElementById("goals-count").textContent = goalsOpen || "—";
-    document.getElementById("cats-count").textContent = categories.length || "—";
     var completedCount = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt; }).length;
     document.getElementById("activity-count").textContent = completedCount || "—";
     var subtaskCount = tasks.filter(function(t){ return t.parentId; }).length;
