@@ -149,11 +149,13 @@
   .stat-value{ font-family:var(--font-display); font-size:16px; color:var(--ink); }
   .stat-value b{ font-family:var(--font-mono); font-size:22px; font-weight:600; }
 
-  .next-up-card{ background:var(--paper-2); border-radius:16px; padding:18px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
-  .next-up-time{ font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); margin-bottom:8px; }
-  .next-up-title{ font-family:var(--font-secondary); font-size:30px; line-height:1.1; color:var(--ink); }
-  .next-up-sub{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
-  .next-up-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding-top:12px; border-top:1px solid var(--line); font-size:11px; color:var(--ink-soft); }
+  .next-up-card{ background:var(--paper-2); border-radius:14px; padding:12px 14px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
+  .next-up-time{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-bottom:4px; }
+  .next-up-title{ font-family:var(--font-secondary); font-size:20px; line-height:1.15; color:var(--ink); }
+  .next-up-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+  .next-up-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px solid var(--line); font-size:10.5px; color:var(--ink-soft); }
+  .home-progress-nav{ display:flex; align-items:center; gap:6px; }
+  .home-progress-nav-btn{ background:none; border:none; color:var(--ink-soft); font-size:15px; padding:2px 4px; cursor:pointer; line-height:1; }
   .next-up-arrow{ color:var(--moss); font-size:14px; }
   .home-progress-label{ font-family:var(--font-display); font-size:15px; color:var(--ink-soft); }
   .home-section-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); margin:22px 2px 10px; }
@@ -510,7 +512,11 @@
       </div>
 
       <div class="home-progress-row">
-        <span class="home-progress-label">Today</span>
+        <span class="home-progress-nav">
+          <button class="home-progress-nav-btn" id="home-progress-prev" aria-label="Previous day">‹</button>
+          <span class="home-progress-label">Today</span>
+          <button class="home-progress-nav-btn" id="home-progress-next" aria-label="Next day">›</button>
+        </span>
         <span class="home-progress-count mono" id="home-progress-count">0/0</span>
       </div>
       <div class="home-section-label" id="home-tasks-label" style="display:none;">Tasks</div>
@@ -1570,6 +1576,21 @@
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
   document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
   document.getElementById("link-organize").addEventListener("click", function(){ switchTab("organize"); });
+  function goToOrganizeDate(d){
+    switchTab("organize"); // this resets organizeSelectedDate back to today as a side effect - the two lines below then override it to the date we actually want
+    organizeSelectedDate = new Date(d);
+    renderOrganizePage();
+  }
+  document.getElementById("home-progress-prev").addEventListener("click", function(e){
+    e.stopPropagation();
+    var d = new Date(realNow); d.setDate(d.getDate()-1);
+    goToOrganizeDate(d);
+  });
+  document.getElementById("home-progress-next").addEventListener("click", function(e){
+    e.stopPropagation();
+    var d = new Date(realNow); d.setDate(d.getDate()+1);
+    goToOrganizeDate(d);
+  });
   document.getElementById("categories-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("category-detail-back").addEventListener("click", function(){ switchTab("categories"); });
   document.getElementById("activity-back").addEventListener("click", function(){ switchTab(lastMainTab); });
@@ -1885,13 +1906,25 @@
     var now = new Date();
     var nowStr = pad(now.getHours())+":"+pad(now.getMinutes());
     var todaysOpen = tasks.filter(function(t){ return t.type==="once" && t.dueDate===todayKey && !doneFor(t); });
-    var timed = todaysOpen.filter(function(t){ return t.dueTime; }).sort(function(a,b){ return a.dueTime.localeCompare(b.dueTime); });
-    var upcomingTimed = timed.filter(function(t){ return t.dueTime >= nowStr; });
-    if(upcomingTimed.length) return upcomingTimed[0];
-    var untimed = todaysOpen.filter(function(t){ return !t.dueTime; }).sort(function(a,b){ return b.createdAt-a.createdAt; });
-    if(untimed.length) return untimed[0];
-    if(timed.length) return timed[0]; // all timed tasks already passed today - still surface the last one
-    return null;
+    if(!todaysOpen.length) return null;
+    var rank = { high:3, medium:2, low:1 };
+    function priorityRank(t){ return rank[t.priority] || 0; }
+    // Highest priority first, regardless of time - that's the point of this card (surface what matters most today).
+    // Within the same priority tier: an upcoming timed task (soonest first), then any timed task even if
+    // its time already passed, then untimed tasks (most recently added first).
+    todaysOpen.sort(function(a,b){
+      var pr = priorityRank(b) - priorityRank(a);
+      if(pr) return pr;
+      var aUpcoming = a.dueTime && a.dueTime>=nowStr, bUpcoming = b.dueTime && b.dueTime>=nowStr;
+      if(aUpcoming && bUpcoming) return a.dueTime.localeCompare(b.dueTime);
+      if(aUpcoming) return -1;
+      if(bUpcoming) return 1;
+      if(a.dueTime && b.dueTime) return a.dueTime.localeCompare(b.dueTime);
+      if(a.dueTime) return -1;
+      if(b.dueTime) return 1;
+      return b.createdAt - a.createdAt;
+    });
+    return todaysOpen[0];
   }
   function renderNextUp(){
     var card = document.getElementById("next-up-card");
@@ -1901,8 +1934,11 @@
     document.getElementById("next-up-time").textContent = t.dueTime ? fmtTime(t.dueTime) : "Anytime today";
     document.getElementById("next-up-title").textContent = t.text;
     var catName = t.category ? catLabel(t.category) : "";
-    document.getElementById("next-up-sub").textContent = catName || "";
-    document.getElementById("next-up-sub").style.display = catName ? "block" : "none";
+    var subParts = [];
+    if(t.priority) subParts.push(t.priority.charAt(0).toUpperCase()+t.priority.slice(1)+" priority");
+    if(catName) subParts.push(catName);
+    document.getElementById("next-up-sub").textContent = subParts.join(" · ");
+    document.getElementById("next-up-sub").style.display = subParts.length ? "block" : "none";
     document.getElementById("next-up-footer-left").textContent = "Today";
     card.onclick = function(){ openTaskSheet(t); };
   }
