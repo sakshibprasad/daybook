@@ -98,6 +98,13 @@
 
   /* ---------------- HOME ---------------- */
   .home-wrap{ padding:0 22px 24px; position:relative; overflow:hidden; }
+  .pull-add-bar{ height:0; overflow:hidden; flex-shrink:0; }
+  .pull-add-bar.dragging{ transition:none; }
+  .pull-add-bar.snap{ transition:height .22s cubic-bezier(.22,1,.36,1); }
+  .pull-add-inner{ display:flex; align-items:center; gap:8px; padding:14px 2px 18px; height:100%; box-sizing:border-box; }
+  .pull-add-inner input{ flex:1; min-width:0; border:none; border-bottom:1.5px solid var(--line); background:none; font-size:14.5px; color:var(--ink); padding:6px 2px; font-family:inherit; }
+  .pull-add-inner input:focus{ outline:none; border-bottom-color:var(--moss); }
+  .pull-add-inner button{ flex-shrink:0; background:var(--moss); color:#fff; border:none; border-radius:20px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; }
   .home-topbar{ display:flex; align-items:center; justify-content:space-between; padding:18px 0 4px; }
   .home-word{ font-family:var(--font-display); font-weight:600; font-size:14px; letter-spacing:0.02em; color:var(--ink-soft); }
   .home-icon-btn{ width:34px; height:34px; border-radius:50%; border:none; background:var(--paper-2); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; cursor:pointer; }
@@ -169,6 +176,8 @@
   .ledger-check{ flex:0 0 auto; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--ink-soft); background:none; margin-top:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:transparent; transition:transform .15s cubic-bezier(.34,1.56,.64,1), background .15s ease, border-color .15s ease; }
   .ledger-check svg{ width:11px; height:11px; }
   .ledger-item.done .ledger-check{ background:var(--moss); border-color:var(--moss); color:#fff; }
+  .habit-value-btn{ width:auto !important; min-width:40px; height:22px !important; border-radius:12px; padding:0 8px; font-family:var(--font-mono); font-size:10.5px; font-weight:600; color:var(--ink-soft); }
+  .ledger-item.done .habit-value-btn{ color:#fff; }
   .ledger-item.done .ledger-text{ color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--line); }
   .ledger-body{ flex:1; min-width:0; }
   .ledger-text{ font-size:calc(15px * var(--text-zoom, 1)); color:var(--ink); line-height:1.4; }
@@ -379,7 +388,8 @@
   .sheet input[type=text]:focus{ border-bottom-color:var(--moss); }
   .type-row{ display:flex; gap:8px; margin-bottom:18px; }
   .date-time-row{ display:flex; gap:12px; margin-bottom:20px; }
-  .dt-field{ flex:1; }
+  .dt-field{ flex:1; min-width:0; }
+  .dt-field input{ width:100%; box-sizing:border-box; }
   .dt-label{ display:block; font-size:11px; color:var(--ink-soft); margin-bottom:6px; }
   .dt-field input{ width:100%; min-height:38px; box-sizing:border-box; border:1px solid var(--line); border-radius:10px; padding:9px 10px; font-size:13px; background:var(--paper-2); color:var(--ink); outline:none; font-family:var(--font-body); }
   .dt-field input:focus{ border-color:var(--moss); }
@@ -462,6 +472,12 @@
   <!-- HOME -->
   <div class="view active" id="view-home">
     <div class="home-wrap" id="home-wrap">
+      <div class="pull-add-bar" id="pull-add-bar">
+        <div class="pull-add-inner">
+          <input type="text" id="pull-add-input" placeholder="Quick add a task for today…">
+          <button id="pull-add-confirm">Add</button>
+        </div>
+      </div>
       <div class="home-topbar">
         <span class="home-word">Daybook</span>
         <button class="home-icon-btn" id="settings-btn" aria-label="Settings">
@@ -751,6 +767,8 @@
         <div id="account-signed-in" style="display:none;">
           <div style="font-size:13px; color:var(--ink); margin-bottom:6px;" id="account-email"></div>
           <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px;" id="account-sync-status">Synced</div>
+          <button class="pill-btn" id="notif-enable-btn" style="width:100%; padding:10px; margin-bottom:8px;">Enable reminders on this device</button>
+          <div id="notif-status" style="font-size:12px; color:var(--ink-soft); margin-bottom:12px; display:none;"></div>
           <button class="pill-btn" id="account-signout-btn" style="width:100%; padding:10px;">Sign out</button>
         </div>
       </div>
@@ -901,6 +919,14 @@
     <div class="day-opt" data-d="0">M</div><div class="day-opt" data-d="1">T</div><div class="day-opt" data-d="2">W</div>
     <div class="day-opt" data-d="3">T</div><div class="day-opt" data-d="4">F</div><div class="day-opt" data-d="5">S</div><div class="day-opt" data-d="6">S</div>
   </div>
+  <div class="type-row" id="habit-tracktype-row">
+    <div class="type-opt active" data-htrack="check">Check off</div>
+    <div class="type-opt" data-htrack="number">Track a number</div>
+  </div>
+  <div class="dt-field" id="habit-unit-row" style="display:none; margin-bottom:18px;">
+    <label class="dt-label">Unit (e.g. steps, kcal, km)</label>
+    <input type="text" id="habit-unit-input" placeholder="steps" maxlength="16">
+  </div>
   <div class="dt-field" style="margin-bottom:18px;">
     <label class="dt-label">Time (optional)</label>
     <input type="time" id="habit-time-input">
@@ -915,6 +941,25 @@
     <button class="btn btn-primary" id="habit-save">Save</button>
   </div>
   <button class="btn-danger-text" id="habit-delete" style="display:none;">Delete habit</button>
+</div>
+
+<!-- HABIT VALUE LOG SHEET (for "Track a number" habits - lets you log or edit any day's value) -->
+<div class="sheet" id="habit-log-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="habit-log-title">Log value</div>
+  <div class="dt-field" style="margin-bottom:16px;">
+    <label class="dt-label">Date</label>
+    <input type="date" id="habit-log-date-input">
+  </div>
+  <div class="dt-field" style="margin-bottom:20px;">
+    <label class="dt-label" id="habit-log-unit-label">Value</label>
+    <input type="number" id="habit-log-value-input" inputmode="decimal" step="any" placeholder="0">
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="habit-log-cancel">Cancel</button>
+    <button class="btn btn-primary" id="habit-log-save">Save</button>
+  </div>
+  <button class="btn-danger-text" id="habit-log-clear" style="display:none;">Clear this day's entry</button>
 </div>
 
 <!-- GOAL SHEET -->
@@ -1203,7 +1248,7 @@
     var labelEl = document.getElementById("organize-date-label");
     if(labelEl) labelEl.textContent = isToday ? "Today" : organizeSelectedDate.toLocaleDateString(undefined,{ weekday:"short", month:"short", day:"numeric" });
     var todayBtn = document.getElementById("organize-today");
-    if(todayBtn) todayBtn.style.visibility = isToday ? "hidden" : "visible";
+    if(todayBtn) todayBtn.style.display = isToday ? "none" : "inline-block";
     renderOrganizeHabitsSection(isToday);
     var topLevel = topLevelTasksForDate(organizeSelectedDate).sort(function(a,b){ var da=organizeDoneFor(a), db=organizeDoneFor(b); if(da!==db) return da?1:-1; return taskOrderKey(b)-taskOrderKey(a); });
     if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">'+(isToday ? "Nothing for today. Tap + to add a task." : "Nothing for this day.")+'</div>'; return; }
@@ -1324,7 +1369,9 @@
       if(isHabitRow){
         var hid = (chk && chk.getAttribute("data-id")) || (del && del.getAttribute("data-id")) || (body && body.getAttribute("data-edit"));
         var h = habits.find(function(x){ return x.id===hid; });
-        if(chk && h && isScheduledOn(h, realNow)){
+        if(chk && h && h.trackType==="number" && isScheduledOn(h, realNow)){
+          openHabitLogSheet(hid, todayKey);
+        } else if(chk && h && isScheduledOn(h, realNow)){
           h.completed = h.completed||{};
           if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true;
           saveHabits(); renderHabits(); renderHome();
@@ -1376,7 +1423,8 @@
           if(deltaX > 0){ deleteHabit(id); }
           else {
             var h = habits.find(function(x){return x.id===id;});
-            if(h && isScheduledOn(h, realNow)){ h.completed = h.completed||{}; if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true; saveHabits(); renderHabits(); renderHome(); }
+            if(h && h.trackType==="number" && isScheduledOn(h, realNow)){ openHabitLogSheet(id, todayKey); }
+            else if(h && isScheduledOn(h, realNow)){ h.completed = h.completed||{}; if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true; saveHabits(); renderHabits(); renderHome(); }
           }
         } else if(id && isGoal){
           if(deltaX > 0){ deleteGoal(id); }
@@ -1395,6 +1443,70 @@
   })();
 
   /* ---------------- swipe-down quick add (Home) ---------------- */
+  (function(){
+    var bar = document.getElementById("pull-add-bar");
+    var pullInput = document.getElementById("pull-add-input");
+    var confirmBtn = document.getElementById("pull-add-confirm");
+    var OPEN_HEIGHT = 62; // px, enough room for the input row
+    var THRESHOLD = 40; // px pulled before it snaps open on release
+    var startY = 0, dragging = false, currentHeight = 0, isOpen = false;
+
+    function setHeight(px, animate){
+      bar.classList.toggle("snap", !!animate);
+      bar.classList.toggle("dragging", !animate);
+      bar.style.height = px + "px";
+    }
+    function closeBar(){
+      isOpen = false;
+      setHeight(0, true);
+      pullInput.blur();
+    }
+    function openBar(){
+      isOpen = true;
+      setHeight(OPEN_HEIGHT, true);
+      setTimeout(function(){ pullInput.focus(); }, 220);
+    }
+    function addQuickTask(){
+      var text = pullInput.value.trim();
+      if(!text){ closeBar(); return; }
+      tasks.unshift({ id:uid(), text:text, type:"once", category:null, priority:null, list:"personal", parentId:null, dueDate: todayKey, dueTime:null, doneOnce:false, completed:{}, createdAt:Date.now() });
+      saveTasks();
+      pullInput.value = "";
+      closeBar();
+      renderAll();
+      showToast("Task added");
+    }
+
+    confirmBtn.addEventListener("click", addQuickTask);
+    pullInput.addEventListener("keydown", function(e){ if(e.key==="Enter") addQuickTask(); if(e.key==="Escape") closeBar(); });
+
+    var homeWrap = document.getElementById("home-wrap");
+    homeWrap.addEventListener("touchstart", function(e){
+      if(currentTab!=="home" || isOpen) return;
+      if(window.scrollY > 0) return; // only start the gesture from the very top of the page
+      startY = e.touches[0].clientY; dragging = false; currentHeight = 0;
+    }, { passive:true });
+    homeWrap.addEventListener("touchmove", function(e){
+      if(currentTab!=="home" || isOpen) return;
+      if(window.scrollY > 0) return;
+      var dy = e.touches[0].clientY - startY;
+      if(dy <= 0) return; // only care about downward pulls
+      if(!dragging && dy > 6) dragging = true;
+      if(dragging){
+        e.preventDefault(); // stop the native page from scrolling/bouncing while we're driving this gesture ourselves
+        currentHeight = Math.min(OPEN_HEIGHT, dy * 0.55); // damped so it feels elastic, not 1:1
+        setHeight(currentHeight, false);
+      }
+    }, { passive:false });
+    homeWrap.addEventListener("touchend", function(){
+      if(currentTab!=="home" || isOpen || !dragging) return;
+      dragging = false;
+      if(currentHeight >= THRESHOLD) openBar(); else setHeight(0, true);
+    }, { passive:true });
+    homeWrap.addEventListener("click", function(e){
+      if(isOpen && !e.target.closest("#pull-add-bar")) closeBar();
+    });
+  })();
   /* ---------------- toast ---------------- */
   var toastTimer = null;
   function showToast(msg, undoFn){
@@ -1774,15 +1886,21 @@
   }
   function habitRowHtmlHome(h, hideDelete){
     var isToday = isScheduledOn(h, realNow);
+    var isNumber = h.trackType==="number";
     var done = h.completed && h.completed[todayKey];
     var consistency = computeConsistency(h);
+    var avgLabel = isNumber ? formatHabitAverage(h) : null;
     var timeTag = h.time ? '<span class="ledger-tag">'+fmtTime(h.time)+'</span>' : '';
     var catName = h.category ? catLabel(h.category) : null;
     var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(h.category)+';">'+escapeHtml(catName)+'</span>' : '';
+    var todayVal = isNumber && h.values && Object.prototype.hasOwnProperty.call(h.values, todayKey) ? h.values[todayKey] : null;
+    var checkHtml = isNumber
+      ? '<button class="ledger-check habit-value-btn" data-id="'+h.id+'" style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+(todayVal!==null?escapeHtml(String(todayVal)):"+")+'</button>'
+      : '<button class="ledger-check" data-id="'+h.id+'" style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>';
     return '<li class="ledger-item habit-row'+(done?" done":"")+'" data-id="'+h.id+'">' +
-      '<button class="ledger-check" data-id="'+h.id+'" style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
+      checkHtml +
       '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
-      '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">Habit</span>'+catTag+(consistency.scheduled?'<span class="consistency-badge">'+consistency.done+'/'+consistency.scheduled+'</span>':'')+'</div></div>' +
+      '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">Habit</span>'+catTag+(avgLabel?'<span class="consistency-badge">'+escapeHtml(avgLabel)+'</span>':(consistency.scheduled?'<span class="consistency-badge">'+consistency.done+'/'+consistency.scheduled+'</span>':''))+'</div></div>' +
       (hideDelete ? '' : '<button class="ledger-del" data-id="'+h.id+'">×</button>') +
     '</li>';
   }
@@ -2093,6 +2211,20 @@
     }
     return { done: done, scheduled: scheduled };
   }
+  function computeHabitAverage(h){
+    if(!h.values) return null;
+    var vals = Object.keys(h.values).map(function(k){ return h.values[k]; }).filter(function(v){ return typeof v==="number" && !isNaN(v); });
+    if(!vals.length) return null;
+    var sum = vals.reduce(function(a,b){ return a+b; }, 0);
+    return { avg: sum/vals.length, count: vals.length };
+  }
+  function formatHabitAverage(h){
+    var r = computeHabitAverage(h);
+    if(!r) return null;
+    var rounded = Math.round(r.avg*10)/10; // one decimal place, trimmed if whole
+    var numStr = rounded % 1 === 0 ? String(rounded) : rounded.toFixed(1);
+    return "Avg " + numStr + (h.unit ? (" " + h.unit) : "") + " · " + r.count + " logged";
+  }
   function scheduleLabel(h){
     if(h.schedule.type==="daily") return "Daily";
     return h.schedule.days.map(function(i){ return DOW[i]; }).join(" ");
@@ -2172,18 +2304,24 @@
     if(!habits.length){ wrap.innerHTML = '<div class="empty-note">No habits yet.</div>'; return; }
     wrap.innerHTML = habits.map(function(h){
       var isToday = isScheduledOn(h, realNow);
+      var isNumber = h.trackType==="number";
       var done = h.completed && h.completed[todayKey];
       var consistency = computeConsistency(h);
+      var avgLabel = isNumber ? formatHabitAverage(h) : null;
       var wStats = weekStats(h), mStats = monthStats(h);
       var vm = getViewedMonth(h.id);
       var isOpen = !!openDropdowns[h.id];
       var timeTag = h.time ? '<span class="ledger-tag">'+fmtTime(h.time)+'</span>' : '';
       var catName = h.category ? catLabel(h.category) : null;
       var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(h.category)+';">'+escapeHtml(catName)+'</span>' : '';
+      var todayVal = isNumber && h.values && Object.prototype.hasOwnProperty.call(h.values, todayKey) ? h.values[todayKey] : null;
+      var checkHtml = isNumber
+        ? '<button class="ledger-check habit-value-btn" data-id="'+h.id+'" '+(isToday?"":"disabled")+' style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+(todayVal!==null?escapeHtml(String(todayVal)):"+")+'</button>'
+        : '<button class="ledger-check" data-id="'+h.id+'" '+(isToday?"":"disabled")+' style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>';
       return '<li class="ledger-item habit-row'+(isToday?"":" off-today")+'" data-id="'+h.id+'">' +
-        '<button class="ledger-check" data-id="'+h.id+'" '+(isToday?"":"disabled")+' style="'+(done?"background:var(--moss);border-color:var(--moss);color:#fff;":"")+'">'+checkSvg+'</button>' +
+        checkHtml +
         '<div class="ledger-body" data-edit="'+h.id+'"><div class="ledger-text">'+escapeHtml(h.name)+'</div>' +
-        '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">'+scheduleLabel(h)+'</span>'+catTag+(consistency.scheduled?'<span class="consistency-badge">'+consistency.done+'/'+consistency.scheduled+'</span>':'')+(isToday?'':'<span class="ledger-tag off">Not today</span>')+'</div>' +
+        '<div class="ledger-meta">'+timeTag+'<span class="ledger-tag">'+scheduleLabel(h)+'</span>'+catTag+(avgLabel?'<span class="consistency-badge">'+escapeHtml(avgLabel)+'</span>':(consistency.scheduled?'<span class="consistency-badge">'+consistency.done+'/'+consistency.scheduled+'</span>':''))+(isToday?'':'<span class="ledger-tag off">Not today</span>')+'</div>' +
         '<div class="habit-dropdown'+(isOpen?" open":"")+'" id="dropdown-'+h.id+'">' +
           '<div class="habit-perf-row"><span class="habit-perf-label">This week</span><span class="habit-perf-stat">'+wStats.done+'/'+wStats.scheduled+'</span></div>' +
           weekDotsHtml(h) +
@@ -2448,7 +2586,7 @@
     overlay.classList.add("open"); shoppingSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("shopping-input").focus(); }, 200);
   }
-  function closeShoppingSheetFn(){ shoppingSheet.classList.remove("open"); editingShoppingId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
+  function closeShoppingSheetFn(){ shoppingSheet.classList.remove("open"); editingShoppingId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open") && !document.getElementById("habit-log-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
   document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(o){
     o.addEventListener("click", function(){
       document.querySelectorAll("#shopping-want-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
@@ -2661,7 +2799,7 @@
   });
   document.getElementById("task-cancel").addEventListener("click", closeTaskSheet);
   overlay.addEventListener("click", function(){
-    closeTaskSheet(); closeHabitSheetFn(); closeGoalSheetFn(); closeShoppingSheetFn();
+    closeTaskSheet(); closeHabitSheetFn(); closeGoalSheetFn(); closeShoppingSheetFn(); closeHabitLogSheetFn();
   });
   document.getElementById("task-save").addEventListener("click", function(){
     var text = document.getElementById("task-input").value.trim();
@@ -2692,17 +2830,21 @@
 
   /* ---------------- HABIT SHEET ---------------- */
   var habitSheet = document.getElementById("habit-sheet");
-  var editingHabitId = null, habitType = "daily", habitDays = [];
+  var editingHabitId = null, habitType = "daily", habitDays = [], habitTrackType = "check";
   function openHabitSheet(existing){
     editingHabitId = existing ? existing.id : null;
     habitType = existing ? existing.schedule.type : "daily";
     habitDays = existing && existing.schedule.days ? existing.schedule.days.slice() : [];
+    habitTrackType = existing && existing.trackType==="number" ? "number" : "check";
     document.getElementById("habit-sheet-title").textContent = existing ? "Edit habit" : "New habit";
     document.getElementById("habit-input").value = existing ? existing.name : "";
     document.getElementById("habit-delete").style.display = existing ? "block" : "none";
-    document.querySelectorAll("#habit-sheet .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-htype")===habitType); });
+    document.querySelectorAll("#habit-sheet .type-opt[data-htype]").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-htype")===habitType); });
     document.getElementById("habit-day-row").style.display = habitType==="days" ? "flex" : "none";
     syncHabitDayChips();
+    document.querySelectorAll("#habit-tracktype-row .type-opt").forEach(function(o){ o.classList.toggle("active", o.getAttribute("data-htrack")===habitTrackType); });
+    document.getElementById("habit-unit-row").style.display = habitTrackType==="number" ? "block" : "none";
+    document.getElementById("habit-unit-input").value = existing && existing.unit ? existing.unit : "";
     document.getElementById("habit-time-input").value = existing && existing.time ? existing.time : "";
     renderHabitCatRow();
     document.getElementById("habit-cat-add-inline").style.display = "none";
@@ -2715,12 +2857,19 @@
       o.classList.toggle("active", habitDays.indexOf(parseInt(o.getAttribute("data-d"),10))!==-1);
     });
   }
-  function closeHabitSheetFn(){ habitSheet.classList.remove("open"); editingHabitId=null; if(!taskSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
-  document.querySelectorAll("#habit-sheet .type-opt").forEach(function(o){
+  function closeHabitSheetFn(){ habitSheet.classList.remove("open"); editingHabitId=null; if(!taskSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open") && !document.getElementById("habit-log-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
+  document.querySelectorAll("#habit-sheet .type-opt[data-htype]").forEach(function(o){
     o.addEventListener("click", function(){
-      document.querySelectorAll("#habit-sheet .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      document.querySelectorAll("#habit-sheet .type-opt[data-htype]").forEach(function(x){ x.classList.remove("active"); });
       o.classList.add("active"); habitType = o.getAttribute("data-htype");
       document.getElementById("habit-day-row").style.display = habitType==="days" ? "flex" : "none";
+    });
+  });
+  document.querySelectorAll("#habit-tracktype-row .type-opt").forEach(function(o){
+    o.addEventListener("click", function(){
+      document.querySelectorAll("#habit-tracktype-row .type-opt").forEach(function(x){ x.classList.remove("active"); });
+      o.classList.add("active"); habitTrackType = o.getAttribute("data-htrack");
+      document.getElementById("habit-unit-row").style.display = habitTrackType==="number" ? "block" : "none";
     });
   });
   document.getElementById("habit-day-row").addEventListener("click", function(e){
@@ -2736,13 +2885,14 @@
     if(!name) return;
     var schedule = { type:habitType, days: habitType==="days" ? habitDays.slice() : [] };
     var timeVal = document.getElementById("habit-time-input").value || null;
+    var unitVal = habitTrackType==="number" ? (document.getElementById("habit-unit-input").value.trim() || null) : null;
     var activeCat = document.querySelector("#habit-cat-row .cat-opt.active");
     var catVal = activeCat ? activeCat.getAttribute("data-cat") : null;
     if(editingHabitId){
       var h = habits.find(function(x){ return x.id===editingHabitId; });
-      if(h){ h.name=name; h.schedule=schedule; h.time=timeVal; h.category=catVal; }
+      if(h){ h.name=name; h.schedule=schedule; h.time=timeVal; h.category=catVal; h.trackType=habitTrackType; h.unit=unitVal; if(!h.values) h.values={}; }
     } else {
-      habits.unshift({ id:uid(), name:name, schedule:schedule, time:timeVal, category:catVal, completed:{}, createdAt:Date.now() });
+      habits.unshift({ id:uid(), name:name, schedule:schedule, time:timeVal, category:catVal, trackType:habitTrackType, unit:unitVal, completed:{}, values:{}, createdAt:Date.now() });
     }
     saveHabits(); closeHabitSheetFn(); renderHabits(); renderHome();
   });
@@ -2751,6 +2901,59 @@
     if(id){ habits = habits.filter(function(h){ return h.id!==id; }); saveHabits(); renderHabits(); renderHome(); }
   });
   document.getElementById("habit-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("habit-save").click(); });
+
+  /* ---------------- HABIT VALUE LOG SHEET ("Track a number" habits) ---------------- */
+  var habitLogSheet = document.getElementById("habit-log-sheet");
+  var loggingHabitId = null;
+  function openHabitLogSheet(habitId, presetDateKey){
+    var h = habits.find(function(x){ return x.id===habitId; });
+    if(!h) return;
+    loggingHabitId = habitId;
+    var dk = presetDateKey || todayKey;
+    document.getElementById("habit-log-title").textContent = "Log " + h.name;
+    document.getElementById("habit-log-date-input").value = dk;
+    document.getElementById("habit-log-unit-label").textContent = h.unit ? ("Value ("+h.unit+")") : "Value";
+    var hasVal = h.values && Object.prototype.hasOwnProperty.call(h.values, dk);
+    document.getElementById("habit-log-value-input").value = hasVal ? h.values[dk] : "";
+    document.getElementById("habit-log-clear").style.display = hasVal ? "block" : "none";
+    overlay.classList.add("open"); habitLogSheet.classList.add("open");
+    setTimeout(function(){ document.getElementById("habit-log-value-input").focus(); }, 200);
+  }
+  function closeHabitLogSheetFn(){
+    habitLogSheet.classList.remove("open"); loggingHabitId=null;
+    if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open")) overlay.classList.remove("open");
+    window.scrollTo(0,0);
+  }
+  document.getElementById("habit-log-cancel").addEventListener("click", closeHabitLogSheetFn);
+  document.getElementById("habit-log-date-input").addEventListener("change", function(){
+    var h = habits.find(function(x){ return x.id===loggingHabitId; });
+    if(!h) return;
+    var dk = this.value;
+    var hasVal = h.values && Object.prototype.hasOwnProperty.call(h.values, dk);
+    document.getElementById("habit-log-value-input").value = hasVal ? h.values[dk] : "";
+    document.getElementById("habit-log-clear").style.display = hasVal ? "block" : "none";
+  });
+  document.getElementById("habit-log-save").addEventListener("click", function(){
+    var h = habits.find(function(x){ return x.id===loggingHabitId; });
+    if(!h) return;
+    var dk = document.getElementById("habit-log-date-input").value;
+    if(!dk) return;
+    var raw = document.getElementById("habit-log-value-input").value;
+    var num = parseFloat(raw);
+    h.values = h.values || {};
+    h.completed = h.completed || {};
+    if(raw === "" || isNaN(num)){ delete h.values[dk]; delete h.completed[dk]; }
+    else { h.values[dk] = num; h.completed[dk] = true; }
+    saveHabits(); closeHabitLogSheetFn(); renderHabits(); renderHome();
+  });
+  document.getElementById("habit-log-clear").addEventListener("click", function(){
+    var h = habits.find(function(x){ return x.id===loggingHabitId; });
+    if(!h) return;
+    var dk = document.getElementById("habit-log-date-input").value;
+    if(h.values) delete h.values[dk];
+    if(h.completed) delete h.completed[dk];
+    saveHabits(); closeHabitLogSheetFn(); renderHabits(); renderHome();
+  });
 
   /* ---------------- GOAL SHEET ---------------- */
   var goalSheet = document.getElementById("goal-sheet");
@@ -2767,7 +2970,7 @@
     overlay.classList.add("open"); goalSheet.classList.add("open");
     setTimeout(function(){ document.getElementById("goal-input").focus(); }, 200);
   }
-  function closeGoalSheetFn(){ goalSheet.classList.remove("open"); editingGoalId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
+  function closeGoalSheetFn(){ goalSheet.classList.remove("open"); editingGoalId=null; if(!taskSheet.classList.contains("open") && !habitSheet.classList.contains("open") && !document.getElementById("habit-log-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
 
   /* ---------------- swipe-down-to-dismiss for sheets ---------------- */
   (function(){
@@ -3146,6 +3349,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+  import { getMessaging, getToken, isSupported as messagingIsSupported } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDqaxmrzyCrG1mbeJJh_7wHnRbco5NAeRs",
@@ -3322,6 +3526,48 @@
 
   var signOutBtn = document.getElementById("account-signout-btn");
   if(signOutBtn) signOutBtn.addEventListener("click", function(){ signOut(auth); });
+
+  /* ---------------- Push notifications (Firebase Cloud Messaging) ----------------
+     This part only registers the device and saves its token - it's free and needs no
+     billing plan. Something still has to actually DECIDE when to send a reminder and
+     trigger the send (a scheduled Cloud Function, checking due tasks) - that part is
+     separate, requires the Blaze plan, and isn't included yet. Until that's built,
+     enabling this here won't actually produce any notifications - it just gets the
+     device ready for when it is.
+  */
+  // TODO: paste your VAPID key here (Firebase Console -> Project Settings -> Cloud Messaging tab -> Web Push certificates -> Generate key pair)
+  var VAPID_KEY = "";
+
+  function setNotifStatus(text){
+    var el = document.getElementById("notif-status");
+    if(!el) return;
+    if(text){ el.textContent = text; el.style.display = "block"; } else { el.style.display = "none"; }
+  }
+
+  var notifBtn = document.getElementById("notif-enable-btn");
+  if(notifBtn) notifBtn.addEventListener("click", function(){
+    if(!VAPID_KEY){ setNotifStatus("Not set up yet - ask for this to be finished."); return; }
+    if(!currentUser){ setNotifStatus("Sign in first."); return; }
+    messagingIsSupported().then(function(supported){
+      if(!supported){ setNotifStatus("Notifications aren't supported in this browser."); return; }
+      Notification.requestPermission().then(function(permission){
+        if(permission !== "granted"){ setNotifStatus("Permission not granted."); return; }
+        var messaging = getMessaging(app);
+        navigator.serviceWorker.ready.then(function(registration){
+          getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration }).then(function(token){
+            if(!token){ setNotifStatus("Couldn't get a device token - try again."); return; }
+            var tokenField = {};
+            tokenField["fcmTokens." + token] = true;
+            setDoc(doc(db, "users", currentUser.uid), tokenField, { merge: true })
+              .then(function(){ setNotifStatus("Reminders enabled on this device."); })
+              .catch(function(){ setNotifStatus("Saved on this device, but couldn't reach the cloud - try again later."); });
+          }).catch(function(err){
+            setNotifStatus("Couldn't enable notifications: " + (err.message || err));
+          });
+        });
+      });
+    });
+  });
 </script>
 </body>
 </html>
