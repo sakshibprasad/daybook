@@ -2349,7 +2349,9 @@
     wrap.querySelectorAll(".ledger-check").forEach(function(btn){
       btn.addEventListener("click", function(){
         var h = habits.find(function(x){ return x.id===btn.getAttribute("data-id"); });
-        if(h){ h.completed = h.completed||{}; if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true; saveHabits(); renderHabits(); renderHome(); }
+        if(!h) return;
+        if(h.trackType==="number"){ openHabitLogSheet(h.id, todayKey); return; }
+        h.completed = h.completed||{}; if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true; saveHabits(); renderHabits(); renderHome();
       });
     });
     wrap.querySelectorAll(".habit-dropdown-toggle").forEach(function(btn){
