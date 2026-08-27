@@ -81,6 +81,7 @@
   :focus-visible{ outline:2px solid var(--moss); outline-offset:2px; }
 
   .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; position:relative; padding-bottom:90px; }
+  #view-month{ padding-bottom:76px; } /* extra room so the last item in the day-list can scroll clear of the fixed "Add a task" bar, which floats above the bottom nav on this page only */
   @media (min-width:600px){
     .app,.bottom-nav,.sheet{ max-width:640px; }
     .section,.topbar,.home-wrap{ padding-left:36px; padding-right:36px; }
