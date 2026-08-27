@@ -68,6 +68,38 @@
     --line:#E1D6B3; --moss:#707C4E; --moss-soft:#E4E6D2; --moss-2:#8FA06A;
     --danger:#C0693F; --shadow:0 2px 10px rgba(51,45,31,0.06), 0 10px 26px rgba(51,45,31,0.07);
   }
+  html[data-theme="glass"]{
+    --paper:#E7EFE9; --paper-2:rgba(255,255,255,0.5); --ink:#354238; --ink-soft:#748078;
+    --line:rgba(255,255,255,0.65); --moss:#7FA88C; --moss-soft:rgba(196,208,183,0.4); --moss-2:#9DBEA4;
+    --danger:#C98B7A; --shadow:0 8px 32px rgba(90,110,95,0.14), 0 2px 10px rgba(90,110,95,0.08);
+  }
+  html[data-theme="glass"] body{
+    background:linear-gradient(160deg, #E3EDE6 0%, #D9E7E1 22%, #DCE3EC 50%, #E9E3E9 75%, #EEE8DF 100%);
+    background-attachment:fixed;
+    position:relative;
+  }
+  html[data-theme="glass"] body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(38vw 38vw at 12% 8%, rgba(159,190,164,0.55) 0%, transparent 65%),
+      radial-gradient(34vw 34vw at 88% 22%, rgba(200,186,214,0.45) 0%, transparent 65%),
+      radial-gradient(40vw 40vw at 20% 92%, rgba(210,177,158,0.4) 0%, transparent 65%),
+      radial-gradient(30vw 30vw at 85% 85%, rgba(159,190,164,0.4) 0%, transparent 65%);
+  }
+  html[data-theme="glass"] .app{ position:relative; z-index:1; }
+  html[data-theme="glass"] .card,
+  html[data-theme="glass"] .home-hero,
+  html[data-theme="glass"] .next-up-card,
+  html[data-theme="glass"] .sheet,
+  html[data-theme="glass"] .bottom-nav,
+  html[data-theme="glass"] .quickview-popup,
+  html[data-theme="glass"] .confirm-popup,
+  html[data-theme="glass"] .toast,
+  html[data-theme="glass"] .work-summary-card{
+    background:var(--paper-2);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.7);
+  }
   html[data-font="caslon"]{ --font-display:'Libre Caslon Display', serif; }
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
   html[data-font="fraunces"]{ --font-display:'Fraunces', serif; }
@@ -165,8 +197,8 @@
 
   .ledger-list{ list-style:none; margin:0; padding:0; }
   .ledger-item{ display:flex; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); position:relative; }
-  .ledger-item.subtask-row{ padding:9px 0 9px 26px; position:relative; }
-  .ledger-item.subtask-row::before{ content:""; position:absolute; left:8px; top:0; bottom:0; width:1px; background:var(--line); }
+  .ledger-item.subtask-row{ padding:9px 0 9px var(--subtask-pad, 26px); position:relative; }
+  .ledger-item.subtask-row::before{ content:""; position:absolute; left:calc(var(--subtask-pad, 26px) - 18px); top:0; bottom:0; width:1px; background:var(--line); }
   .ledger-item.subtask-row .ledger-text{ font-size:calc(12.5px * var(--text-zoom, 1)); }
   .ledger-item.subtask-row .ledger-check{ width:16px; height:16px; }
   .ledger-item.subtask-row .ledger-tag{ font-size:9.5px; padding:2px 7px; }
@@ -180,7 +212,8 @@
   #home-today-list .ledger-item .ledger-meta, #home-habits-list .ledger-item .ledger-meta{ margin-top:3px; gap:6px; }
   #home-today-list .ledger-item .ledger-tag, #home-habits-list .ledger-item .ledger-tag{ font-size:9px; padding:1px 7px; }
   #home-today-list .ledger-item.done, #home-habits-list .ledger-item.done{ border-left-color:var(--line); }
-  #home-today-list .ledger-item.subtask-row{ margin-left:20px; width:calc(100% - 20px); border-left-color:var(--ink-soft); padding:8px 11px; }
+  #home-today-list .ledger-item.subtask-row{ margin-left:var(--subtask-margin, 20px); width:calc(100% - var(--subtask-margin, 20px)); border-left-color:var(--ink-soft); padding:8px 11px; }
+  #home-today-list .ledger-item.subtask-row::before{ display:none; }
   #home-today-list .ledger-item.subtask-row.done{ border-left-color:var(--line); }
   html[data-theme="dusk"] #home-today-list .ledger-item, html[data-theme="dusk"] #home-habits-list .ledger-item{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
   .ledger-item:last-child{ border-bottom:none; }
@@ -1248,12 +1281,45 @@
 
   function taskOrderKey(t){ return t.order!==undefined ? t.order : t.createdAt; }
   function taskChildren(id){ return tasks.filter(function(c){ return c.parentId===id; }).sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); }); }
+  function taskDepth(t){
+    // how many levels of nesting deep this task is (0 = top-level, 1 = subtask, 2 = subtask-of-a-subtask, ...)
+    var depth = 0, cur = t, guard = 0;
+    while(cur && cur.parentId && guard < 50){
+      var parent = tasks.find(function(x){ return x.id===cur.parentId; });
+      if(!parent) break;
+      depth++; cur = parent; guard++;
+    }
+    return depth;
+  }
+  function isDescendantOf(possibleDescendantId, possibleAncestorId){
+    // true if possibleDescendantId is somewhere in possibleAncestorId's own subtree (a child, grandchild, etc.) -
+    // used to stop a task from being nested under its own descendant, which would create an endless loop
+    var cur = tasks.find(function(x){ return x.id===possibleDescendantId; });
+    var guard = 0;
+    while(cur && cur.parentId && guard < 50){
+      if(cur.parentId === possibleAncestorId) return true;
+      cur = tasks.find(function(x){ return x.id===cur.parentId; });
+      guard++;
+    }
+    return false;
+  }
+  function expandWithSubtasksRecursive(list, depth){
+    var result = [];
+    list.forEach(function(t){
+      result.push({ item: t, depth: depth });
+      var children = taskChildren(t.id);
+      if(children.length) result = result.concat(expandWithSubtasksRecursive(children, depth+1));
+    });
+    return result;
+  }
+  // Returns bare task objects (for callers that don't need depth info directly - taskRowHtml
+  // computes each item's own depth itself via taskDepth() when rendering).
   function expandWithSubtasks(topLevelList){
     var result = [];
     topLevelList.forEach(function(t){
       if(t.parentId) return; // subtasks are only added via their parent below, never listed independently
       result.push(t);
-      taskChildren(t.id).forEach(function(c){ result.push(c); });
+      expandWithSubtasksRecursive(taskChildren(t.id), 1).forEach(function(x){ result.push(x.item); });
     });
     return result;
   }
@@ -1284,18 +1350,21 @@
     if(p==="low") return '<span class="ledger-tag priority-low">Low</span>';
     return '';
   }
-  function organizeRowHtml(t, isChild){
-    var childCount = isChild ? 0 : taskChildren(t.id).length;
+  function organizeRowHtml(t, depth){
+    var childCount = taskChildren(t.id).length;
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
     var prTag = priorityTag(t.priority);
-    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(organizeDoneFor(t)?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
+    var isChild = depth > 0;
+    var visualDepth = Math.min(depth, 4);
+    var indentStyle = isChild ? ' style="--subtask-pad:'+(26+(visualDepth-1)*16)+'px;"' : '';
+    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(organizeDoneFor(t)?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'"'+indentStyle+'>' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+t.id+'">' +
         '<div class="ledger-text">'+escapeHtml(t.text)+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
         (dateTag||recurTag||prTag ? '<div class="ledger-meta">'+dateTag+recurTag+prTag+'</div>' : '') +
         '<div class="organize-actions">' +
-          (isChild ? '' : '<button class="organize-action-btn organize-add-sub" data-id="'+t.id+'">+ Add subtask</button>') +
+          '<button class="organize-action-btn organize-add-sub" data-id="'+t.id+'">+ Add subtask</button>' +
           '<button class="organize-action-btn organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Make top-level" : "Nest under\u2026")+'</button>' +
         '</div>' +
       '</div>' +
@@ -1325,8 +1394,8 @@
     if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">'+(isToday ? "Nothing for today. Tap + to add a task." : "Nothing for this day.")+'</div>'; return; }
     var html = "";
     topLevel.forEach(function(t){
-      html += organizeRowHtml(t, false);
-      taskChildren(t.id).forEach(function(c){ html += organizeRowHtml(c, true); });
+      html += organizeRowHtml(t, 0);
+      expandWithSubtasksRecursive(taskChildren(t.id), 1).forEach(function(x){ html += organizeRowHtml(x.item, x.depth); });
     });
     wrap.innerHTML = html;
     wireOrganizeReorder("organize-list", function(orderedIds){
@@ -1350,12 +1419,11 @@
       var dragged = tasks.find(function(x){ return x.id===draggedId; });
       var target = tasks.find(function(x){ return x.id===targetId; });
       if(!dragged || !target || dragged.id===target.id) { renderOrganizePage(); return; }
-      if(target.parentId){
-        // the drop target is itself a subtask - nesting under it would create a third level that
-        // nothing in the app actually displays (Home, Week, Month, Activity only ever expand one
-        // level deep), so the task would just silently vanish from every list. Refuse instead.
+      if(isDescendantOf(target.id, dragged.id)){
+        // target is already nested somewhere inside dragged's own subtree - nesting dragged under
+        // it would create a loop (dragged's parent chain would eventually point back to itself)
         renderOrganizePage();
-        showToast("Can't nest under a subtask - only one level of nesting is supported.");
+        showToast("Can't nest a task under its own subtask.");
         return;
       }
       dragged.parentId = target.id;
@@ -1401,11 +1469,17 @@
       showToast('"'+t.text+'" is now a top-level task.');
       return;
     }
-    var candidates = topLevelTasksForDate(organizeSelectedDate).filter(function(x){ return x.id!==taskId; });
+    var topLevelForDay = topLevelTasksForDate(organizeSelectedDate);
+    var allForDay = topLevelForDay.slice();
+    topLevelForDay.forEach(function(tl){
+      expandWithSubtasksRecursive(taskChildren(tl.id), 1).forEach(function(x){ allForDay.push(x.item); });
+    });
+    var candidates = allForDay.filter(function(x){ return x.id!==taskId && !isDescendantOf(x.id, taskId); });
     if(!candidates.length){ showToast("No other tasks to nest this under yet."); return; }
     var body = document.getElementById("nest-picker-body");
     body.innerHTML = candidates.map(function(c){
-      return '<div class="day-preview-row nest-picker-opt" data-target-id="'+c.id+'" style="cursor:pointer;">' +
+      var indent = taskDepth(c) * 16;
+      return '<div class="day-preview-row nest-picker-opt" data-target-id="'+c.id+'" style="cursor:pointer; padding-left:'+indent+'px;">' +
         '<div class="day-preview-text"><div class="day-preview-name">'+escapeHtml(c.text)+'</div></div>' +
       '</div>';
     }).join("");
@@ -1437,7 +1511,11 @@
     var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(t.category)+';">'+catName+'</span>' : '';
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
-    return '<li class="ledger-item'+(done?" done":"")+(t.parentId?" subtask-row":"")+'" data-id="'+t.id+'">' +
+    var depth = t.parentId ? taskDepth(t) : 0;
+    // indent grows with each level, capped after a few levels so it can't run off the edge of a narrow phone screen
+    var visualDepth = Math.min(depth, 4);
+    var indentStyle = depth ? ' style="--subtask-pad:'+(26+(visualDepth-1)*16)+'px; --subtask-margin:'+(20+(visualDepth-1)*14)+'px;"' : '';
+    return '<li class="ledger-item'+(done?" done":"")+(depth?" subtask-row":"")+'" data-id="'+t.id+'"'+indentStyle+'>' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+t.id+'"><div class="ledger-text">'+escapeHtml(t.text)+'</div><div class="ledger-meta">'+dateTag+recurTag+priorityTag(t.priority)+catTag+'</div></div>' +
       '<button class="ledger-del" data-id="'+t.id+'">×</button>' +
@@ -2008,7 +2086,8 @@
     cocoa: { bg:"#17120F", bg2:"#211A15", ink:"#EDE4D8", accent:"#C79868", label:"Cocoa" },
     dusk: { bg:"#1C1B18", bg2:"#26241F", ink:"#EDE7D9", accent:"#8FAE7C", label:"Dusk" },
     midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
-    meadow: { bg:"#F4EFDD", bg2:"#EBE3C7", ink:"#332D1F", accent:"#707C4E", label:"Meadow" }
+    meadow: { bg:"#F4EFDD", bg2:"#EBE3C7", ink:"#332D1F", accent:"#707C4E", label:"Meadow" },
+    glass: { bg:"#E7EFE9", bg2:"rgba(255,255,255,0.6)", ink:"#354238", accent:"#7FA88C", label:"Glass" }
   };
   var THEME_TILTS = [-4, 3, -2, 4, -3, 2, -4];
   function renderThemePicker(){
@@ -2198,7 +2277,7 @@
     var taskRowsExpanded = [];
     taskRows.forEach(function(x){
       taskRowsExpanded.push(x);
-      taskChildren(x.item.id).forEach(function(c){ taskRowsExpanded.push({ item:c, done:doneFor(c) }); });
+      expandWithSubtasksRecursive(taskChildren(x.item.id), 1).forEach(function(d){ taskRowsExpanded.push({ item:d.item, done:doneFor(d.item) }); });
     });
     taskRows = taskRowsExpanded;
 
