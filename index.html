@@ -640,6 +640,11 @@
           <span class="home-tile-label">Activity</span>
           <span class="home-tile-count" id="activity-count">—</span>
         </button>
+        <button class="home-tile" id="link-notes" data-tile-id="notes">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h9a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z"/><path d="M9 2v5H4"/><path d="M8 12h8M8 16h5"/></svg></span>
+          <span class="home-tile-label">Notes</span>
+          <span class="home-tile-count" id="notes-count">—</span>
+        </button>
       </div>
     </div>
   </div>
@@ -796,6 +801,22 @@
           <input type="text" id="work-cat-page-add-input" placeholder="Category name" maxlength="20">
           <button id="work-cat-page-add-confirm">Add</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="view" id="view-notes">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="notes-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">Notes</div>
+    </div>
+    <div class="section">
+      <div class="card">
+        <ul class="cat-list" id="notes-list"></ul>
+        <div class="add-line" id="add-note"><span class="plus">+</span>New note</div>
       </div>
     </div>
   </div>
@@ -1020,6 +1041,19 @@
   <button class="btn-danger-text" id="task-delete" style="display:none;">Delete task</button>
 </div>
 
+<!-- NOTE EDITOR SHEET -->
+<div class="overlay" id="note-overlay"></div>
+<div class="sheet" id="note-sheet">
+  <div class="sheet-handle"></div>
+  <input type="text" id="note-title-input" placeholder="Title" style="font-family:var(--font-display); font-size:19px; font-weight:600; border:none; background:none; width:100%; color:var(--ink); padding:0 0 12px; outline:none;">
+  <textarea id="note-body-input" placeholder="Write something…" style="width:100%; min-height:180px; border:none; background:none; resize:vertical; font-family:var(--font-body); font-size:15px; line-height:1.5; color:var(--ink); padding:0; outline:none;"></textarea>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="note-cancel">Cancel</button>
+    <button class="btn btn-primary" id="note-save">Save</button>
+  </div>
+  <button class="btn-danger-text" id="note-delete" style="display:none;">Delete note</button>
+</div>
+
 <!-- HABIT SHEET -->
 <div class="sheet" id="habit-sheet">
   <div class="sheet-handle"></div>
@@ -1185,6 +1219,9 @@
   var workCategories = load("db2.workCategories", []);
   function saveWorkCategories(){ save("db2.workCategories", workCategories); }
   function workCatLabel(id){ var c = workCategories.find(function(x){ return x.id===id; }); return c ? c.label : null; }
+
+  var notes = load("db2.notes", []);
+  function saveNotes(){ save("db2.notes", notes); }
 
   var categories = load("db2.categories", [
     { id:"personal", label:"Personal" }, { id:"work", label:"Work" },
@@ -1877,12 +1914,12 @@
     currentTab = tab;
     saveStr("db2.currentTab", tab);
     window.scrollTo(0,0); // views vary a lot in height (e.g. Organize can be much shorter than Home) - always land at the top of the new view
-    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="work"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
+    if(tab!=="settings" && tab!=="categories" && tab!=="category-detail" && tab!=="activity" && tab!=="work" && tab!=="notes"){ lastMainTab = tab; saveStr("db2.lastMainTab", tab); }
     document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===tab); });
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
     if(el) el.classList.add("active");
-    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity");
+    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="notes");
     if(tab==="month") renderMonthTab();
     if(tab==="habits") renderHabits();
     if(tab==="goals") renderGoalsView();
@@ -1892,6 +1929,7 @@
     if(tab==="organize"){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); }
     if(tab==="shopping") renderShoppingPage();
     if(tab==="work") renderWorkPage();
+    if(tab==="notes") renderNotesPage();
   }
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
@@ -1899,6 +1937,8 @@
   document.getElementById("link-habits").addEventListener("click", function(){ switchTab("habits"); });
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
   document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
+  document.getElementById("link-notes").addEventListener("click", function(){ switchTab("notes"); });
+  document.getElementById("notes-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   function goToOrganizeDate(d){
     switchTab("organize"); // this resets organizeSelectedDate back to today as a side effect - the two lines below then override it to the date we actually want
     organizeSelectedDate = new Date(d);
@@ -2427,6 +2467,7 @@
     document.getElementById("goals-count").textContent = goalsOpen || "—";
     var completedCount = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt; }).length;
     document.getElementById("activity-count").textContent = completedCount || "—";
+    document.getElementById("notes-count").textContent = notes.length || "—";
     if(currentTab==="organize") renderOrganizeHabitsSection(dateKey(organizeSelectedDate)===todayKey); // habit changes elsewhere (Home, Habits page) always call renderHome() - keep Organize's habit section in sync too
   }
 
@@ -3175,6 +3216,87 @@
       workCategories.push(removed); saveWorkCategories();
     });
   }
+
+  /* ---------------- notes ---------------- */
+  var editingNoteId = null;
+  function noteSnippet(n){
+    var firstLine = (n.body||"").split("\n").find(function(l){ return l.trim().length; });
+    return firstLine ? firstLine.slice(0,80) : "No additional text";
+  }
+  function renderNotesPage(){
+    var wrap = document.getElementById("notes-list");
+    var sorted = notes.slice().sort(function(a,b){ return b.updatedAt-a.updatedAt; });
+    if(!sorted.length){ wrap.innerHTML = '<div class="empty-note">No notes yet.</div>'; }
+    else {
+      wrap.innerHTML = sorted.map(function(n){
+        return '<li class="day-preview-row note-row" data-note="'+n.id+'" style="cursor:pointer;">' +
+          '<div class="day-preview-text" style="flex:1; min-width:0;">' +
+            '<div class="day-preview-name">'+escapeHtml(n.title||"Untitled")+'</div>' +
+            '<div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'+escapeHtml(noteSnippet(n))+'</div>' +
+            '<div style="font-size:11px; color:var(--ink-soft); margin-top:3px;">'+trashTimeAgo(n.updatedAt)+'</div>' +
+          '</div>' +
+          '<button class="cat-list-del" data-note-del="'+n.id+'">×</button>' +
+        '</li>';
+      }).join("");
+    }
+    wrap.querySelectorAll(".note-row").forEach(function(row){
+      row.addEventListener("click", function(e){
+        if(e.target.closest("[data-note-del]")) return;
+        var n = notes.find(function(x){ return x.id===row.getAttribute("data-note"); });
+        if(n) openNoteSheet(n);
+      });
+    });
+    wrap.querySelectorAll("[data-note-del]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        deleteNoteWithUndo(btn.getAttribute("data-note-del"));
+      });
+    });
+  }
+  function deleteNoteWithUndo(id){
+    var idx = notes.findIndex(function(n){ return n.id===id; });
+    if(idx===-1) return;
+    var removed = notes[idx];
+    notes.splice(idx,1); saveNotes(); renderNotesPage();
+    addToTrash("note", removed.title||"Untitled", removed);
+    showToast("Note deleted.", function(){ notes.splice(idx,0,removed); saveNotes(); renderNotesPage(); removeFromTrashByOriginalId(removed.id); });
+  }
+  function openNoteSheet(existing){
+    editingNoteId = existing ? existing.id : null;
+    document.getElementById("note-title-input").value = existing ? existing.title : "";
+    document.getElementById("note-body-input").value = existing ? existing.body : "";
+    document.getElementById("note-delete").style.display = existing ? "block" : "none";
+    document.getElementById("note-overlay").classList.add("open");
+    document.getElementById("note-sheet").classList.add("open");
+    setTimeout(function(){ document.getElementById("note-title-input").focus(); }, 200);
+  }
+  function closeNoteSheetFn(){
+    document.getElementById("note-overlay").classList.remove("open");
+    document.getElementById("note-sheet").classList.remove("open");
+    editingNoteId = null;
+  }
+  document.getElementById("add-note").addEventListener("click", function(){ openNoteSheet(null); });
+  document.getElementById("note-overlay").addEventListener("click", closeNoteSheetFn);
+  document.getElementById("note-cancel").addEventListener("click", closeNoteSheetFn);
+  document.getElementById("note-save").addEventListener("click", function(){
+    var title = document.getElementById("note-title-input").value.trim();
+    var body = document.getElementById("note-body-input").value;
+    if(!title && !body.trim()){ closeNoteSheetFn(); return; } // nothing was written - just close, don't save an empty note
+    if(editingNoteId){
+      var n = notes.find(function(x){ return x.id===editingNoteId; });
+      if(n){ n.title = title; n.body = body; n.updatedAt = Date.now(); }
+    } else {
+      notes.unshift({ id:uid(), title:title, body:body, createdAt:Date.now(), updatedAt:Date.now() });
+    }
+    saveNotes();
+    closeNoteSheetFn();
+    renderNotesPage();
+  });
+  document.getElementById("note-delete").addEventListener("click", function(){
+    var id = editingNoteId;
+    closeNoteSheetFn();
+    if(id) deleteNoteWithUndo(id);
+  });
   document.getElementById("cat-add-confirm").addEventListener("click", function(){
     var name = document.getElementById("cat-add-input").value.trim();
     if(!name) return;
@@ -3464,6 +3586,7 @@
     wireSwipeToDismiss(shoppingSheet, closeShoppingSheetFn);
     wireSwipeToDismiss(document.getElementById("habit-log-sheet"), closeHabitLogSheetFn);
     wireSwipeToDismiss(document.getElementById("trash-sheet"), closeTrashSheet);
+    wireSwipeToDismiss(document.getElementById("note-sheet"), closeNoteSheetFn);
   })();
   document.querySelectorAll(".sheet-handle").forEach(function(handle){
     handle.style.cursor = "pointer";
@@ -3514,7 +3637,7 @@
       return;
     }
     emptyNote.style.display = "none";
-    var kindLabel = { task:"Task", habit:"Habit", goal:"Goal", shopping:"Shopping item" };
+    var kindLabel = { task:"Task", habit:"Habit", goal:"Goal", shopping:"Shopping item", note:"Note" };
     body.innerHTML = trashedItems.map(function(x){
       return '<div class="day-preview-row" data-trash-id="'+x.id+'">' +
         '<div class="day-preview-text" style="flex:1; min-width:0;">' +
@@ -3543,6 +3666,7 @@
     else if(entry.kind==="habit") habits.unshift(entry.data), saveHabits();
     else if(entry.kind==="goal") goals.unshift(entry.data), saveGoals();
     else if(entry.kind==="shopping") shoppingItems.unshift(entry.data), saveShopping();
+    else if(entry.kind==="note"){ notes.unshift(entry.data); saveNotes(); if(currentTab==="notes") renderNotesPage(); }
     trashedItems.splice(idx,1); saveTrash();
     renderTrash(); renderAll();
     showToast('"'+entry.label+'" restored.');
@@ -3562,7 +3686,7 @@
 
   /* ---------------- export / import ---------------- */
   document.getElementById("export-btn").addEventListener("click", function(){
-    var data = { tasks:tasks, habits:habits, goals:goals, categories:categories, userName: loadStr("db2.userName") };
+    var data = { tasks:tasks, habits:habits, goals:goals, categories:categories, workCategories:workCategories, notes:notes, userName: loadStr("db2.userName") };
     var blob = new Blob([JSON.stringify(data,null,2)], { type:"application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a"); a.href=url; a.download="daybook-backup.json"; a.click();
@@ -3577,18 +3701,21 @@
     reader.onload = function(){
       try{
         var data = JSON.parse(reader.result);
-        var preImportSnapshot = { tasks:tasks, habits:habits, goals:goals, categories:categories };
+        var preImportSnapshot = { tasks:tasks, habits:habits, goals:goals, categories:categories, workCategories:workCategories, notes:notes };
         if(data.tasks) tasks = data.tasks;
         if(data.habits) habits = data.habits;
         if(data.goals) goals = data.goals;
         if(data.categories) categories = data.categories;
+        if(data.workCategories) workCategories = data.workCategories;
+        if(data.notes) notes = data.notes;
         if(data.userName) saveStr("db2.userName", data.userName);
-        saveTasks(); saveHabits(); saveGoals(); saveCategories();
+        saveTasks(); saveHabits(); saveGoals(); saveCategories(); saveWorkCategories(); saveNotes();
         renderAll();
         showToast("Data imported.", function(){
           tasks = preImportSnapshot.tasks; habits = preImportSnapshot.habits;
           goals = preImportSnapshot.goals; categories = preImportSnapshot.categories;
-          saveTasks(); saveHabits(); saveGoals(); saveCategories();
+          workCategories = preImportSnapshot.workCategories; notes = preImportSnapshot.notes;
+          saveTasks(); saveHabits(); saveGoals(); saveCategories(); saveWorkCategories(); saveNotes();
           renderAll();
         });
       }catch(err){ showToast("Import failed — file may be corrupted."); }
@@ -3925,7 +4052,7 @@
   // (which tab you were on, etc.) that shouldn't follow you between devices.
   var SYNC_KEYS = ["db2.tasks","db2.habits","db2.goals","db2.categories","db2.shopping",
     "db2.shoppingFor","db2.workCategories","db2.userName","db2.theme","db2.font",
-    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder","db2.cardOpacity"];
+    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder","db2.cardOpacity","db2.notes"];
 
   var currentUser = null;
   var justSignedIn = false;
