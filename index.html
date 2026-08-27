@@ -32,7 +32,7 @@
     --line:#E3DDCE; --moss:#5B6B4F; --moss-soft:#E4E8DA; --moss-2:#7C8E6C;
     --danger:#A3543F; --shadow:0 2px 10px rgba(43,38,32,0.05), 0 10px 26px rgba(43,38,32,0.06);
     --font-display:'Libre Caslon Display', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
-    --font-secondary:'Tangerine', cursive; --card-opacity:88%;
+    --font-secondary:'Tangerine', cursive; --card-opacity:70%;
   }
   html[data-secondary-font="tangerine"]{ --font-secondary:'Tangerine', cursive; }
   html[data-secondary-font="caveat"]{ --font-secondary:'Caveat', cursive; }
@@ -82,27 +82,29 @@
       radial-gradient(38vw 38vw at 12% 8%, rgba(159,190,164,0.55) 0%, transparent 65%),
       radial-gradient(34vw 34vw at 88% 22%, rgba(200,186,214,0.45) 0%, transparent 65%),
       radial-gradient(40vw 40vw at 20% 92%, rgba(210,177,158,0.4) 0%, transparent 65%),
-      radial-gradient(30vw 30vw at 85% 85%, rgba(159,190,164,0.4) 0%, transparent 65%);
+      radial-gradient(30vw 30vw at 85% 85%, rgba(159,190,164,0.4) 0%, transparent 65%),
+      radial-gradient(45vw 45vw at 50% 45%, rgba(200,186,214,0.35) 0%, transparent 70%);
     opacity:1;
   }
   /* ---- Universal glass-card treatment: every theme gets translucent, blurred, rounded, gapped
      cards now, not just Glass - this is what "cards and transparency like the glass theme" means
      applied everywhere. Each theme keeps its own colors (via --paper-2/--line), only the surface
      TREATMENT (blur, transparency, rounding, spacing) is now shared. --card-opacity is the user's
-     adjustable transparency slider (Settings -> Appearance), default 88%. ---- */
+     adjustable transparency slider (Settings -> Appearance), default 70%. ---- */
   body{ position:relative; }
   body::before{
     content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(38vw 38vw at 12% 8%, var(--moss-soft) 0%, transparent 65%),
-      radial-gradient(34vw 34vw at 88% 22%, var(--moss-2) 0%, transparent 65%),
-      radial-gradient(40vw 40vw at 20% 92%, var(--moss-soft) 0%, transparent 65%),
-      radial-gradient(30vw 30vw at 85% 85%, var(--moss-2) 0%, transparent 65%);
-    opacity:0.45;
+      radial-gradient(65vw 65vw at 8% 5%, var(--moss-soft) 0%, transparent 72%),
+      radial-gradient(60vw 60vw at 95% 30%, var(--moss-2) 0%, transparent 72%),
+      radial-gradient(70vw 70vw at 15% 75%, var(--moss-soft) 0%, transparent 72%),
+      radial-gradient(55vw 55vw at 90% 95%, var(--moss-2) 0%, transparent 72%),
+      radial-gradient(50vw 50vw at 50% 45%, var(--moss-soft) 0%, transparent 75%);
+    opacity:0.55;
   }
   .app{ position:relative; z-index:1; }
-  .card, .home-hero, .next-up-card, .sheet, .bottom-nav, .quickview-popup, .confirm-popup, .toast, .work-summary-card{
-    background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 88%), transparent);
+  .card, .home-hero, .next-up-card, .sheet, .bottom-nav, .quickview-popup, .confirm-popup, .work-summary-card{
+    background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
     backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
     border:1px solid var(--line);
   }
@@ -166,7 +168,7 @@
     position:relative; border-radius:22px; padding:26px 22px 24px; margin:8px 0 24px;
     background:
       radial-gradient(130% 160% at 12% -10%, var(--moss-soft) 0%, transparent 55%),
-      var(--paper-2);
+      color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
     box-shadow:var(--shadow); overflow:hidden;
   }
   .home-hero::after{
@@ -182,7 +184,7 @@
 
   .home-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:26px; padding-bottom:10px; border-bottom:1px solid var(--line); }
   .home-week-summary{ font-size:11.5px; color:var(--ink-soft); margin-top:14px; text-align:center; }
-  .work-summary-card{ background:var(--paper-2); border-radius:14px; padding:13px 16px; margin-top:12px; cursor:pointer; border-left:3px solid var(--moss); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .work-summary-card{ background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent); border-radius:14px; padding:13px 16px; margin-top:12px; cursor:pointer; border-left:3px solid var(--moss); display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .work-summary-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); }
   .work-summary-text{ font-size:14px; color:var(--ink); font-weight:600; margin-top:2px; }
   .work-summary-preview{ margin-top:6px; }
@@ -194,7 +196,7 @@
   .stat-value{ font-family:var(--font-display); font-size:16px; color:var(--ink); }
   .stat-value b{ font-family:var(--font-mono); font-size:22px; font-weight:600; }
 
-  .next-up-card{ background:var(--paper-2); border-radius:14px; padding:12px 14px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
+  .next-up-card{ background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent); border-radius:14px; padding:12px 14px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
   .next-up-time{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-bottom:4px; }
   .next-up-title{ font-family:var(--font-secondary); font-size:20px; line-height:1.15; color:var(--ink); }
   .next-up-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
@@ -246,7 +248,7 @@
   .ledger-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); opacity:0.35; font-size:16px; cursor:pointer; padding:2px 4px; transition:opacity .15s ease; }
   .ledger-item:active .ledger-del{ opacity:0.7; }
 
-  .empty-note{ font-family:var(--font-display); font-size:14.5px; color:var(--ink-soft); text-align:center; padding:36px 10px; }
+  .empty-note{ font-family:var(--font-display); font-size:14.5px; color:var(--ink-soft); text-align:center; padding:18px 10px; }
 
   .home-tile-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px; }
   .home-tile{
@@ -267,9 +269,10 @@
   .ledger-item.organize-unnest-armed{ box-shadow:inset 0 0 0 2px var(--danger); border-radius:10px; }
   .organize-child-count{ font-size:11.5px; color:var(--ink-soft); font-weight:400; }
 
-  /* ---------------- generic card / label pattern used on other tabs ---------------- */
-  .card{ background:var(--paper); border-bottom:1px solid var(--line); padding:22px 2px; }
-  .card:last-child{ border-bottom:none; }
+  /* ---------------- generic card / label pattern used on other tabs ----------------
+     (background/padding/border-radius/margin for .card are now defined once, near the
+     top of the stylesheet, as part of the universal glass-card treatment - this stray
+     duplicate definition used to silently win the cascade and cancel that out) */
   .label-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .label{ font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); }
   .pill-btn{ padding:6px 13px; border-radius:20px; border:1px solid var(--line); background:none; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft); cursor:pointer; }
@@ -407,7 +410,7 @@
   /* ---------------- bottom nav ---------------- */
   .bottom-nav{
     position:fixed; left:14px; right:14px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:20;
-    background:color-mix(in srgb, var(--paper) 78%, transparent);
+    background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
     backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid color-mix(in srgb, var(--line) 70%, transparent);
     border-radius:26px; display:flex; padding:8px 6px;
@@ -432,7 +435,8 @@
   .overlay{ position:fixed; inset:0; background:rgba(43,38,32,0.35); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:30; }
   .overlay.open{ opacity:1; pointer-events:all; }
   .sheet{
-    position:fixed; left:0; right:0; bottom:0; background:var(--paper);
+    position:fixed; left:0; right:0; bottom:0; background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
+    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
     border-radius:24px 24px 0 0; padding:10px 22px calc(24px + env(safe-area-inset-bottom));
     max-width:480px; margin:0 auto; transform:translateY(105%);
     transition:transform .3s cubic-bezier(.32,.72,0,1); z-index:31; max-height:85vh; overflow-y:auto;
@@ -495,7 +499,8 @@
   .confirm-overlay.open{ opacity:1; pointer-events:all; }
   .confirm-popup{
     position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.94); z-index:96;
-    background:var(--paper); border-radius:16px; padding:20px; width:min(300px, calc(100vw - 56px));
+    background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    border-radius:16px; padding:20px; width:min(300px, calc(100vw - 56px));
     box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
   }
   .confirm-popup.open{ opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
@@ -509,7 +514,7 @@
   .quickview-popup{
     position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.94); z-index:91;
     width:min(320px, calc(100vw - 56px));
-    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    background: color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     border-radius:22px; padding:22px 44px 20px 20px; box-shadow:var(--shadow); border:1px solid var(--line);
     opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
@@ -863,7 +868,7 @@
         <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">How see-through cards, sheets, and the nav bar are. Lower is more transparent.</div>
         <div style="display:flex; align-items:center; gap:12px;">
           <input type="range" id="transparency-slider" min="40" max="100" step="1" style="flex:1;">
-          <span class="mono" id="transparency-value" style="font-size:12px; color:var(--ink-soft); min-width:34px; text-align:right;">88%</span>
+          <span class="mono" id="transparency-value" style="font-size:12px; color:var(--ink-soft); min-width:34px; text-align:right;">70%</span>
         </div>
       </div>
       <div class="card">
@@ -2231,7 +2236,7 @@
   applyFontSize(currentFontSize);
 
   /* ---------------- card transparency ---------------- */
-  var currentCardOpacity = loadStr("db2.cardOpacity") || "88";
+  var currentCardOpacity = loadStr("db2.cardOpacity") || "70";
   function applyCardOpacity(v){
     currentCardOpacity = v;
     document.documentElement.style.setProperty("--card-opacity", v+"%");
