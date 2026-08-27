@@ -209,7 +209,7 @@
   }
   .home-tile:active{ transform:scale(0.96); }
   .home-tile.dragging{ z-index:5; position:relative; box-shadow:0 12px 28px rgba(0,0,0,0.2); }
-  .ledger-item.reorder-dragging{ z-index:15; position:relative; box-shadow:0 10px 24px rgba(0,0,0,0.18); }
+  .ledger-item.reorder-dragging{ z-index:30; position:relative; box-shadow:0 10px 24px rgba(0,0,0,0.18); }
   .home-tile-icon{ color:var(--moss); flex:0 0 auto; display:flex; }
   .home-tile-icon svg{ width:16px; height:16px; }
   .home-tile-label{ flex:1; font-size:13px; color:var(--ink); font-weight:500; }
@@ -217,6 +217,7 @@
   .organize-actions{ display:flex; gap:16px; margin-top:8px; }
   .organize-action-btn{ background:none; border:none; padding:0; font-size:12px; color:var(--moss); cursor:pointer; font-weight:600; font-family:var(--font-body); }
   .organize-nest-hover{ background:var(--moss-soft); box-shadow:inset 0 0 0 2px var(--moss); border-radius:10px; }
+  .ledger-item.organize-unnest-armed{ box-shadow:inset 0 0 0 2px var(--danger); border-radius:10px; }
   .organize-child-count{ font-size:11.5px; color:var(--ink-soft); font-weight:400; }
 
   /* ---------------- generic card / label pattern used on other tabs ---------------- */
@@ -1324,6 +1325,13 @@
       dragged.order = Date.now();
       saveTasks(); renderOrganizePage(); renderHome();
       showToast('"'+dragged.text+'" is now a subtask of "'+target.text+'".');
+    }, function(draggedId){
+      var dragged = tasks.find(function(x){ return x.id===draggedId; });
+      if(!dragged) { renderOrganizePage(); return; }
+      dragged.parentId = null;
+      dragged.order = Date.now();
+      saveTasks(); renderOrganizePage(); renderHome();
+      showToast('"'+dragged.text+'" is now a top-level task.');
     });
   }
   var organizeSelectedDate = new Date(realNow);
@@ -3177,6 +3185,8 @@
     wireSwipeToDismiss(document.getElementById("day-preview-sheet"), closeDayPreview);
     wireSwipeToDismiss(document.getElementById("nest-picker-sheet"), closeNestPicker);
     wireSwipeToDismiss(shoppingSheet, closeShoppingSheetFn);
+    wireSwipeToDismiss(document.getElementById("habit-log-sheet"), closeHabitLogSheetFn);
+    wireSwipeToDismiss(document.getElementById("trash-sheet"), closeTrashSheet);
   })();
   document.querySelectorAll(".sheet-handle").forEach(function(handle){
     handle.style.cursor = "pointer";
@@ -3190,6 +3200,8 @@
       else if(id==="shopping-sheet") closeShoppingSheetFn();
       else if(id==="day-preview-sheet") closeDayPreview();
       else if(id==="nest-picker-sheet") closeNestPicker();
+      else if(id==="habit-log-sheet") closeHabitLogSheetFn();
+      else if(id==="trash-sheet") closeTrashSheet();
     });
   });
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
@@ -3318,12 +3330,13 @@
     if(currentTab==="work") renderWorkPage();
   }
 
-  /* ---------------- Organize page reorder + drag-left-to-nest (TickTick-style) ---------------- */
-  function wireOrganizeReorder(containerId, onReorder, onNest){
+  /* ---------------- Organize page reorder + drag-left-to-nest + drag-right-to-unnest (TickTick-style) ---------------- */
+  function wireOrganizeReorder(containerId, onReorder, onNest, onUnnest){
     var container = document.getElementById(containerId);
     if(!container) return;
     container.querySelectorAll(".ledger-item").forEach(function(item){
-      var pressTimer = null, dragging = false, startY = 0, startX = 0, longPressed = false, nestTarget = null;
+      var pressTimer = null, dragging = false, startY = 0, startX = 0, longPressed = false, nestTarget = null, lastDx = 0;
+      var hasParent = !!item.getAttribute("data-parent");
       function clearNestHighlight(){
         var prev = container.querySelectorAll(".organize-nest-hover");
         for(var i=0;i<prev.length;i++){ prev[i].classList.remove("organize-nest-hover"); }
@@ -3337,8 +3350,15 @@
       function moveDrag(x, y){
         if(!dragging) return;
         var dy = y - startY, dx = x - startX;
+        lastDx = dx;
         var isNesting = dx < -40;
-        item.style.transform = "translate("+(isNesting?-14:0)+"px,"+dy+"px)";
+        var isUnnesting = hasParent && dx > 40;
+        item.style.transform = "translate("+(isNesting?-14:isUnnesting?14:0)+"px,"+dy+"px)";
+        item.classList.toggle("organize-unnest-armed", isUnnesting);
+        if(isUnnesting){
+          if(nestTarget) clearNestHighlight();
+          return; // unnesting is a standalone action on this item alone - no sibling target to check, it completes on release
+        }
         var siblings = Array.prototype.slice.call(container.querySelectorAll(".ledger-item"));
         for(var i=0;i<siblings.length;i++){
           var sib = siblings[i];
@@ -3358,13 +3378,18 @@
           }
         }
       }
-      function endDrag(){
+      function endDrag(cancelled){
         clearTimeout(pressTimer);
         if(!dragging) return;
         dragging = false;
         item.classList.remove("reorder-dragging");
+        item.classList.remove("organize-unnest-armed");
         item.style.transition = ""; item.style.transform = "";
-        if(nestTarget){
+        if(cancelled){ clearNestHighlight(); return; } // the gesture was interrupted (e.g. by the OS) - just reset visuals, don't apply a half-finished action
+        if(hasParent && lastDx > 40 && onUnnest){
+          clearNestHighlight();
+          onUnnest(item.getAttribute("data-id"));
+        } else if(nestTarget){
           var targetId = nestTarget.getAttribute("data-id");
           clearNestHighlight();
           onNest(item.getAttribute("data-id"), targetId);
@@ -3388,7 +3413,14 @@
       }, { passive:false });
       item.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
-        if(longPressed){ e.preventDefault(); endDrag(); }
+        if(longPressed){ e.preventDefault(); endDrag(false); }
+      });
+      item.addEventListener("touchcancel", function(){
+        // the OS interrupted the touch sequence (an incoming call, a system gesture, etc.) - touchend never fires in
+        // this case, so without this the item would stay stuck mid-drag (translated, faded, effectively "hidden")
+        // forever. Reset it cleanly instead of leaving it in limbo.
+        clearTimeout(pressTimer);
+        endDrag(true);
       });
       item.addEventListener("click", function(e){
         if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
@@ -3425,12 +3457,13 @@
           }
         }
       }
-      function endDrag(){
+      function endDrag(cancelled){
         clearTimeout(pressTimer);
         if(!dragging) return;
         dragging = false;
         item.classList.remove("reorder-dragging");
         item.style.transition = ""; item.style.transform = "";
+        if(cancelled) return; // the gesture was interrupted (e.g. by the OS) - just reset visuals, don't apply a half-finished reorder
         onReorder(Array.prototype.map.call(container.querySelectorAll(".ledger-item"), function(x){ return x.getAttribute("data-id"); }));
       }
       item.addEventListener("touchstart", function(e){
@@ -3450,7 +3483,11 @@
       }, { passive:false });
       item.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
-        if(longPressed){ e.preventDefault(); endDrag(); }
+        if(longPressed){ e.preventDefault(); endDrag(false); }
+      });
+      item.addEventListener("touchcancel", function(){
+        clearTimeout(pressTimer);
+        endDrag(true);
       });
       item.addEventListener("click", function(e){
         if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
