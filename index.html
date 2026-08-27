@@ -25,20 +25,19 @@
 <meta name="apple-mobile-web-app-title" content="Daybook">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Alex+Brush&family=Sacramento&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Alex+Brush&family=Sacramento&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5F1E6; --paper-2:#EDE7D6; --ink:#2B2620; --ink-soft:#8C8375;
     --line:#E3DDCE; --moss:#5B6B4F; --moss-soft:#E4E8DA; --moss-2:#7C8E6C;
     --danger:#A3543F; --shadow:0 2px 10px rgba(43,38,32,0.05), 0 10px 26px rgba(43,38,32,0.06);
     --font-display:'Libre Caslon Display', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
-    --font-secondary:'Tangerine', cursive; --card-opacity:70%;
+    --font-secondary:'Tangerine', cursive;
   }
   html[data-secondary-font="tangerine"]{ --font-secondary:'Tangerine', cursive; }
   html[data-secondary-font="caveat"]{ --font-secondary:'Caveat', cursive; }
   html[data-secondary-font="alexbrush"]{ --font-secondary:'Alex Brush', cursive; }
   html[data-secondary-font="sacramento"]{ --font-secondary:'Sacramento', cursive; }
-  html[data-secondary-font="greatvibes"]{ --font-secondary:'Great Vibes', cursive; }
   html[data-theme="dusk"]{
     --paper:#1C1B18; --paper-2:#26241F; --ink:#EDE7D9; --ink-soft:#8A8377;
     --line:#35322B; --moss:#8FAE7C; --moss-soft:#2C3325; --moss-2:#A6C293;
@@ -69,82 +68,6 @@
     --line:#E1D6B3; --moss:#707C4E; --moss-soft:#E4E6D2; --moss-2:#8FA06A;
     --danger:#C0693F; --shadow:0 2px 10px rgba(51,45,31,0.06), 0 10px 26px rgba(51,45,31,0.07);
   }
-  html[data-theme="glass"]{
-    --paper:#E7EFE9; --paper-2:#FFFFFF; --ink:#354238; --ink-soft:#748078;
-    --line:rgba(255,255,255,0.65); --moss:#7FA88C; --moss-soft:rgba(196,208,183,0.4); --moss-2:#9DBEA4;
-    --danger:#C98B7A; --shadow:0 8px 32px rgba(90,110,95,0.14), 0 2px 10px rgba(90,110,95,0.08);
-  }
-  html[data-theme="glass"] body{
-    background:linear-gradient(160deg, #E3EDE6 0%, #D9E7E1 22%, #DCE3EC 50%, #E9E3E9 75%, #EEE8DF 100%);
-    background-attachment:fixed;
-  }
-  html[data-theme="glass"] body::before{
-    background:
-      radial-gradient(38vw 38vw at 12% 8%, rgba(159,190,164,0.55) 0%, transparent 65%),
-      radial-gradient(34vw 34vw at 88% 22%, rgba(200,186,214,0.45) 0%, transparent 65%),
-      radial-gradient(40vw 40vw at 20% 92%, rgba(210,177,158,0.4) 0%, transparent 65%),
-      radial-gradient(30vw 30vw at 85% 85%, rgba(159,190,164,0.4) 0%, transparent 65%),
-      radial-gradient(45vw 45vw at 50% 45%, rgba(200,186,214,0.35) 0%, transparent 70%);
-    opacity:1;
-  }
-  /* ---- Universal glass-card treatment: every theme gets translucent, blurred, rounded, gapped
-     cards now, not just Glass - this is what "cards and transparency like the glass theme" means
-     applied everywhere. Each theme keeps its own colors (via --paper-2/--line), only the surface
-     TREATMENT (blur, transparency, rounding, spacing) is now shared. --card-opacity is the user's
-     adjustable transparency slider (Settings -> Appearance), default 70%. ---- */
-  body{ position:relative; }
-  body::before{
-    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:
-      radial-gradient(65vw 65vw at 8% 5%, var(--moss-soft) 0%, transparent 72%),
-      radial-gradient(60vw 60vw at 95% 30%, var(--moss-2) 0%, transparent 72%),
-      radial-gradient(70vw 70vw at 15% 75%, var(--moss-soft) 0%, transparent 72%),
-      radial-gradient(55vw 55vw at 90% 95%, var(--moss-2) 0%, transparent 72%),
-      radial-gradient(50vw 50vw at 50% 45%, var(--moss-soft) 0%, transparent 75%);
-    opacity:0.55;
-  }
-  .app{ position:relative; z-index:1; }
-  .card, .home-hero, .next-up-card, .sheet, .bottom-nav, .quickview-popup, .confirm-popup, .work-summary-card{
-    background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
-    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-    border:1px solid var(--line);
-  }
-  .card{
-    border-radius:20px;
-    padding:20px 18px;
-    margin-bottom:14px;
-  }
-  .card:last-child{ margin-bottom:0; }
-  .notes-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
-  .note-tile{
-    background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
-    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-    border:1px solid var(--line); border-radius:16px; padding:14px;
-    display:flex; flex-direction:column; min-height:108px; position:relative; cursor:pointer;
-    text-align:left; font-family:inherit;
-  }
-  .note-tile-badge{
-    width:24px; height:24px; border-radius:50%; background:var(--moss-soft); color:var(--moss);
-    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; font-weight:600;
-    margin-bottom:10px; flex-shrink:0;
-  }
-  .note-tile-title{ font-family:var(--font-secondary); font-size:22px; color:var(--ink); line-height:1.15; margin-bottom:4px; }
-  .note-tile-snippet{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; flex:1; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
-  .note-tile-time{ font-size:10px; color:var(--ink-soft); margin-top:8px; font-family:var(--font-mono); }
-  .note-tile-del{ position:absolute; top:8px; right:8px; background:none; border:none; color:var(--ink-soft); opacity:0.5; font-size:16px; cursor:pointer; padding:2px 6px; }
-  .note-tile-add{
-    width:100%; border:1px dashed var(--line); background:none; border-radius:16px; padding:14px;
-    display:flex; align-items:center; justify-content:center; gap:8px; color:var(--moss); cursor:pointer; font-size:14px; font-weight:500;
-  }
-  .note-tile-add .plus{ font-size:16px; }
-  /* ---- subtle animation polish: a gentle press-down on anything tappable, and a small pop when
-     you check something off, so interactions feel a touch more alive without being distracting ---- */
-  .home-tile, .note-tile, .nav-item, .fab, .pill-btn, .ledger-check, .cal-quickadd, .work-summary-card, .next-up-card{
-    transition:transform .12s ease;
-  }
-  .home-tile:active, .note-tile:active, .nav-item:active, .pill-btn:active, .cal-quickadd:active{ transform:scale(0.96); }
-  @keyframes checkPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
-  .ledger-check.just-checked{ animation:checkPop .32s ease; }
   html[data-font="caslon"]{ --font-display:'Libre Caslon Display', serif; }
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
   html[data-font="fraunces"]{ --font-display:'Fraunces', serif; }
@@ -199,7 +122,7 @@
     position:relative; border-radius:22px; padding:26px 22px 24px; margin:8px 0 24px;
     background:
       radial-gradient(130% 160% at 12% -10%, var(--moss-soft) 0%, transparent 55%),
-      color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
+      var(--paper-2);
     box-shadow:var(--shadow); overflow:hidden;
   }
   .home-hero::after{
@@ -215,7 +138,7 @@
 
   .home-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:26px; padding-bottom:10px; border-bottom:1px solid var(--line); }
   .home-week-summary{ font-size:11.5px; color:var(--ink-soft); margin-top:14px; text-align:center; }
-  .work-summary-card{ background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent); border-radius:14px; padding:13px 16px; margin-top:12px; cursor:pointer; border-left:3px solid var(--moss); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .work-summary-card{ background:var(--paper-2); border-radius:14px; padding:13px 16px; margin-top:12px; cursor:pointer; border-left:3px solid var(--moss); display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .work-summary-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); }
   .work-summary-text{ font-size:14px; color:var(--ink); font-weight:600; margin-top:2px; }
   .work-summary-preview{ margin-top:6px; }
@@ -227,7 +150,7 @@
   .stat-value{ font-family:var(--font-display); font-size:16px; color:var(--ink); }
   .stat-value b{ font-family:var(--font-mono); font-size:22px; font-weight:600; }
 
-  .next-up-card{ background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent); border-radius:14px; padding:12px 14px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
+  .next-up-card{ background:var(--paper-2); border-radius:14px; padding:12px 14px; margin-top:14px; cursor:pointer; border-left:3px solid var(--moss); }
   .next-up-time{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-bottom:4px; }
   .next-up-title{ font-family:var(--font-secondary); font-size:20px; line-height:1.15; color:var(--ink); }
   .next-up-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
@@ -242,11 +165,9 @@
 
   .ledger-list{ list-style:none; margin:0; padding:0; }
   .ledger-item{ display:flex; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); position:relative; }
-  .ledger-item.subtask-row{ padding:9px 0 9px var(--subtask-pad, 26px); position:relative; }
-  .ledger-item.subtask-row::before{ content:""; position:absolute; left:calc(var(--subtask-pad, 26px) - 18px); top:0; bottom:0; width:1px; background:var(--line); }
-  .ledger-item.subtask-row .ledger-text{ font-size:calc(12.5px * var(--text-zoom, 1)); }
-  .ledger-item.subtask-row .ledger-check{ width:16px; height:16px; }
-  .ledger-item.subtask-row .ledger-tag{ font-size:9.5px; padding:2px 7px; }
+  .ledger-item.subtask-row{ padding-left:26px; position:relative; }
+  .ledger-item.subtask-row::before{ content:""; position:absolute; left:8px; top:0; bottom:0; width:1px; background:var(--line); }
+  .ledger-item.subtask-row .ledger-text{ font-size:calc(13.5px * var(--text-zoom, 1)); }
   #home-today-list.ledger-list, #home-habits-list.ledger-list{ display:flex; flex-direction:column; gap:6px; }
   #home-today-list .ledger-item, #home-habits-list .ledger-item{
     border-bottom:none; background:var(--paper-2); border-radius:12px; padding:9px 12px; gap:10px;
@@ -257,8 +178,7 @@
   #home-today-list .ledger-item .ledger-meta, #home-habits-list .ledger-item .ledger-meta{ margin-top:3px; gap:6px; }
   #home-today-list .ledger-item .ledger-tag, #home-habits-list .ledger-item .ledger-tag{ font-size:9px; padding:1px 7px; }
   #home-today-list .ledger-item.done, #home-habits-list .ledger-item.done{ border-left-color:var(--line); }
-  #home-today-list .ledger-item.subtask-row{ margin-left:var(--subtask-margin, 20px); width:calc(100% - var(--subtask-margin, 20px)); border-left-color:var(--ink-soft); padding:8px 11px; }
-  #home-today-list .ledger-item.subtask-row::before{ display:none; }
+  #home-today-list .ledger-item.subtask-row{ margin-left:20px; width:calc(100% - 20px); border-left-color:var(--ink-soft); padding:8px 11px; }
   #home-today-list .ledger-item.subtask-row.done{ border-left-color:var(--line); }
   html[data-theme="dusk"] #home-today-list .ledger-item, html[data-theme="dusk"] #home-habits-list .ledger-item{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
   .ledger-item:last-child{ border-bottom:none; }
@@ -279,7 +199,7 @@
   .ledger-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); opacity:0.35; font-size:16px; cursor:pointer; padding:2px 4px; transition:opacity .15s ease; }
   .ledger-item:active .ledger-del{ opacity:0.7; }
 
-  .empty-note{ font-family:var(--font-display); font-size:14.5px; color:var(--ink-soft); text-align:center; padding:18px 10px; }
+  .empty-note{ font-family:var(--font-display); font-size:14.5px; color:var(--ink-soft); text-align:center; padding:36px 10px; }
 
   .home-tile-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px; }
   .home-tile{
@@ -289,7 +209,7 @@
   }
   .home-tile:active{ transform:scale(0.96); }
   .home-tile.dragging{ z-index:5; position:relative; box-shadow:0 12px 28px rgba(0,0,0,0.2); }
-  .ledger-item.reorder-dragging{ z-index:30; position:relative; box-shadow:0 10px 24px rgba(0,0,0,0.18); }
+  .ledger-item.reorder-dragging{ z-index:15; position:relative; box-shadow:0 10px 24px rgba(0,0,0,0.18); }
   .home-tile-icon{ color:var(--moss); flex:0 0 auto; display:flex; }
   .home-tile-icon svg{ width:16px; height:16px; }
   .home-tile-label{ flex:1; font-size:13px; color:var(--ink); font-weight:500; }
@@ -297,13 +217,11 @@
   .organize-actions{ display:flex; gap:16px; margin-top:8px; }
   .organize-action-btn{ background:none; border:none; padding:0; font-size:12px; color:var(--moss); cursor:pointer; font-weight:600; font-family:var(--font-body); }
   .organize-nest-hover{ background:var(--moss-soft); box-shadow:inset 0 0 0 2px var(--moss); border-radius:10px; }
-  .ledger-item.organize-unnest-armed{ box-shadow:inset 0 0 0 2px var(--danger); border-radius:10px; }
   .organize-child-count{ font-size:11.5px; color:var(--ink-soft); font-weight:400; }
 
-  /* ---------------- generic card / label pattern used on other tabs ----------------
-     (background/padding/border-radius/margin for .card are now defined once, near the
-     top of the stylesheet, as part of the universal glass-card treatment - this stray
-     duplicate definition used to silently win the cascade and cancel that out) */
+  /* ---------------- generic card / label pattern used on other tabs ---------------- */
+  .card{ background:var(--paper); border-bottom:1px solid var(--line); padding:22px 2px; }
+  .card:last-child{ border-bottom:none; }
   .label-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .label{ font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); }
   .pill-btn{ padding:6px 13px; border-radius:20px; border:1px solid var(--line); background:none; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft); cursor:pointer; }
@@ -441,7 +359,7 @@
   /* ---------------- bottom nav ---------------- */
   .bottom-nav{
     position:fixed; left:14px; right:14px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:20;
-    background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
+    background:color-mix(in srgb, var(--paper) 78%, transparent);
     backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid color-mix(in srgb, var(--line) 70%, transparent);
     border-radius:26px; display:flex; padding:8px 6px;
@@ -466,8 +384,7 @@
   .overlay{ position:fixed; inset:0; background:rgba(43,38,32,0.35); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:30; }
   .overlay.open{ opacity:1; pointer-events:all; }
   .sheet{
-    position:fixed; left:0; right:0; bottom:0; background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
-    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    position:fixed; left:0; right:0; bottom:0; background:var(--paper);
     border-radius:24px 24px 0 0; padding:10px 22px calc(24px + env(safe-area-inset-bottom));
     max-width:480px; margin:0 auto; transform:translateY(105%);
     transition:transform .3s cubic-bezier(.32,.72,0,1); z-index:31; max-height:85vh; overflow-y:auto;
@@ -509,7 +426,7 @@
   .day-opt.active{ background:var(--moss); border-color:var(--moss); color:#fff; }
   .sheet-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
   .btn{ padding:11px 22px; border-radius:22px; border:none; font-weight:600; font-size:13.5px; cursor:pointer; }
-  .btn-ghost{ background:none; color:var(--ink-soft); border:none; cursor:pointer; }
+  .btn-ghost{ background:none; color:var(--ink-soft); }
   .btn-primary{ background:var(--ink); color:var(--paper); }
   .btn-danger-text{ background:none; border:none; color:var(--danger); font-weight:600; font-size:13px; cursor:pointer; width:100%; text-align:center; margin-top:16px; padding:6px; }
 
@@ -530,8 +447,7 @@
   .confirm-overlay.open{ opacity:1; pointer-events:all; }
   .confirm-popup{
     position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.94); z-index:96;
-    background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-    border-radius:16px; padding:20px; width:min(300px, calc(100vw - 56px));
+    background:var(--paper); border-radius:16px; padding:20px; width:min(300px, calc(100vw - 56px));
     box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
   }
   .confirm-popup.open{ opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
@@ -539,25 +455,6 @@
   .confirm-popup-actions{ display:flex; justify-content:flex-end; gap:10px; }
   .confirm-popup-actions .btn-danger-text{ width:auto; margin-top:0; padding:8px 14px; }
   .confirm-popup-actions .btn-ghost{ padding:8px 14px; }
-
-  .quickview-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:90; opacity:0; pointer-events:none; transition:opacity .15s ease; }
-  .quickview-overlay.open{ opacity:1; pointer-events:all; }
-  .quickview-popup{
-    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.94); z-index:91;
-    width:min(320px, calc(100vw - 56px));
-    background: color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-radius:22px; padding:22px 44px 20px 20px; box-shadow:var(--shadow); border:1px solid var(--line);
-    opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
-  }
-  .quickview-popup.open{ opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
-  .quickview-edit-btn{
-    position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%;
-    background:var(--paper-2); border:none; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; cursor:pointer;
-  }
-  .quickview-edit-btn svg{ width:15px; height:15px; }
-  .quickview-title{ font-family:var(--font-display); font-size:19px; color:var(--ink); margin-bottom:12px; line-height:1.3; }
-  .quickview-meta{ display:flex; flex-wrap:wrap; gap:6px; }
 
   /* ---------- splash screen ---------- */
   #splash-screen{
@@ -615,7 +512,7 @@
           <div class="home-greeting-title" id="home-greeting"></div>
           <div class="home-greeting-date" id="home-date"></div>
         </div>
-        <div class="home-gesture-hint">Hold for categories · Swipe right for shopping · Swipe left for organize · Swipe up for notes</div>
+        <div class="home-gesture-hint">Hold for categories · Swipe right for shopping</div>
       </div>
 
       <div class="next-up-card" id="next-up-card" style="display:none;">
@@ -675,11 +572,6 @@
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
           <span class="home-tile-label">Organize</span>
           <span class="home-tile-count" id="organize-count">—</span>
-        </button>
-        <button class="home-tile" id="link-shopping" data-tile-id="shopping">
-          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12Z"/><path d="M6 6 5 3H2"/><circle cx="9.5" cy="19" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.5" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg></span>
-          <span class="home-tile-label">Shopping</span>
-          <span class="home-tile-count" id="shopping-count">—</span>
         </button>
       </div>
     </div>
@@ -821,7 +713,6 @@
     </div>
     <div class="section">
       <div class="card">
-        <div class="label-row"><span class="label">Personal</span></div>
         <ul class="cat-list" id="cat-list"></ul>
         <div class="add-line" id="add-category"><span class="plus">+</span>New category</div>
         <div class="cat-add-inline" id="cat-page-add-inline" style="display:none; margin-top:8px;">
@@ -829,27 +720,6 @@
           <button id="cat-page-add-confirm">Add</button>
         </div>
       </div>
-      <div class="card">
-        <div class="label-row"><span class="label">Work</span></div>
-        <ul class="cat-list" id="work-cat-list"></ul>
-        <div class="add-line" id="add-work-category"><span class="plus">+</span>New work category</div>
-        <div class="cat-add-inline" id="work-cat-page-add-inline" style="display:none; margin-top:8px;">
-          <input type="text" id="work-cat-page-add-input" placeholder="Category name" maxlength="20">
-          <button id="work-cat-page-add-confirm">Add</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- NOTES -->
-  <div class="view" id="view-notes">
-    <div class="topbar bordered"><div class="topbar-title">Notes</div></div>
-    <div class="section">
-      <div class="notes-grid" id="notes-list"></div>
-      <button class="note-tile note-tile-add" id="add-note">
-        <span class="plus">+</span>
-        <span>New note</span>
-      </button>
     </div>
   </div>
 
@@ -917,14 +787,6 @@
         <div class="theme-row" id="theme-row"></div>
       </div>
       <div class="card">
-        <div class="label-row"><span class="label">Card transparency</span></div>
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">How see-through cards, sheets, and the nav bar are. Lower is more transparent.</div>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <input type="range" id="transparency-slider" min="40" max="100" step="1" style="flex:1;">
-          <span class="mono" id="transparency-value" style="font-size:12px; color:var(--ink-soft); min-width:34px; text-align:right;">70%</span>
-        </div>
-      </div>
-      <div class="card">
         <div class="label-row"><span class="label">Typeface</span></div>
         <div class="theme-row" id="font-row">
           <div class="theme-opt" data-font-opt="caslon">Caslon</div>
@@ -941,7 +803,6 @@
           <div class="theme-opt" data-secondary-font-opt="caveat" style="font-family:'Caveat',cursive; font-size:17px;">Caveat</div>
           <div class="theme-opt" data-secondary-font-opt="alexbrush" style="font-family:'Alex Brush',cursive; font-size:19px;">Alex Brush</div>
           <div class="theme-opt" data-secondary-font-opt="sacramento" style="font-family:'Sacramento',cursive; font-size:17px;">Sacramento</div>
-          <div class="theme-opt" data-secondary-font-opt="greatvibes" style="font-family:'Great Vibes',cursive; font-size:19px;">Great Vibes</div>
         </div>
       </div>
       <div class="card">
@@ -1002,10 +863,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="0.9" fill="currentColor" stroke="none"/></svg>
     <span class="nav-lb">Month</span>
   </button>
-  <button class="nav-item" data-tab="notes">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h9a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z"/><path d="M9 2v5H4"/><path d="M8 12h8M8 16h5"/></svg>
-    <span class="nav-lb">Notes</span>
-  </button>
   <button class="nav-item" data-tab="habits">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 7-2.9 7-6.8 0-2.7-1.8-4.6-2.9-6.5-.3 2-1.4 2.9-2.4 1.9 1-2.9-.9-5.7-3.3-6.6.5 2.9-1 4.8-2.9 6.6-1.4 1.4-1.9 3.3-1.9 4.6 0 3.9 2.9 6.8 6.4 6.8z"/></svg>
     <span class="nav-lb">Habits</span>
@@ -1024,14 +881,6 @@
     <button class="btn-ghost" id="confirm-popup-cancel">Cancel</button>
     <button class="btn-danger-text" id="confirm-popup-ok">Delete</button>
   </div>
-</div>
-<div class="quickview-overlay" id="quickview-overlay"></div>
-<div class="quickview-popup" id="quickview-popup">
-  <button class="quickview-edit-btn" id="quickview-edit-btn" aria-label="Edit">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-  </button>
-  <div class="quickview-title" id="quickview-title"></div>
-  <div class="quickview-meta" id="quickview-meta"></div>
 </div>
 <div class="overlay" id="overlay"></div>
 
@@ -1076,19 +925,6 @@
     <button class="btn btn-primary" id="task-save">Save</button>
   </div>
   <button class="btn-danger-text" id="task-delete" style="display:none;">Delete task</button>
-</div>
-
-<!-- NOTE EDITOR SHEET -->
-<div class="overlay" id="note-overlay"></div>
-<div class="sheet" id="note-sheet">
-  <div class="sheet-handle"></div>
-  <input type="text" id="note-title-input" placeholder="Title" style="font-family:var(--font-display); font-size:19px; font-weight:600; border:none; background:none; width:100%; color:var(--ink); padding:0 0 12px; outline:none;">
-  <textarea id="note-body-input" placeholder="Write something…" style="width:100%; min-height:180px; border:none; background:none; resize:vertical; font-family:var(--font-body); font-size:15px; line-height:1.5; color:var(--ink); padding:0; outline:none;"></textarea>
-  <div class="sheet-actions">
-    <button class="btn btn-ghost" id="note-cancel">Cancel</button>
-    <button class="btn btn-primary" id="note-save">Save</button>
-  </div>
-  <button class="btn-danger-text" id="note-delete" style="display:none;">Delete note</button>
 </div>
 
 <!-- HABIT SHEET -->
@@ -1257,9 +1093,6 @@
   function saveWorkCategories(){ save("db2.workCategories", workCategories); }
   function workCatLabel(id){ var c = workCategories.find(function(x){ return x.id===id; }); return c ? c.label : null; }
 
-  var notes = load("db2.notes", []);
-  function saveNotes(){ save("db2.notes", notes); }
-
   var categories = load("db2.categories", [
     { id:"personal", label:"Personal" }, { id:"work", label:"Work" },
     { id:"errands", label:"Errands" }, { id:"health", label:"Health" }
@@ -1385,45 +1218,12 @@
 
   function taskOrderKey(t){ return t.order!==undefined ? t.order : t.createdAt; }
   function taskChildren(id){ return tasks.filter(function(c){ return c.parentId===id; }).sort(function(a,b){ return taskOrderKey(b)-taskOrderKey(a); }); }
-  function taskDepth(t){
-    // how many levels of nesting deep this task is (0 = top-level, 1 = subtask, 2 = subtask-of-a-subtask, ...)
-    var depth = 0, cur = t, guard = 0;
-    while(cur && cur.parentId && guard < 50){
-      var parent = tasks.find(function(x){ return x.id===cur.parentId; });
-      if(!parent) break;
-      depth++; cur = parent; guard++;
-    }
-    return depth;
-  }
-  function isDescendantOf(possibleDescendantId, possibleAncestorId){
-    // true if possibleDescendantId is somewhere in possibleAncestorId's own subtree (a child, grandchild, etc.) -
-    // used to stop a task from being nested under its own descendant, which would create an endless loop
-    var cur = tasks.find(function(x){ return x.id===possibleDescendantId; });
-    var guard = 0;
-    while(cur && cur.parentId && guard < 50){
-      if(cur.parentId === possibleAncestorId) return true;
-      cur = tasks.find(function(x){ return x.id===cur.parentId; });
-      guard++;
-    }
-    return false;
-  }
-  function expandWithSubtasksRecursive(list, depth){
-    var result = [];
-    list.forEach(function(t){
-      result.push({ item: t, depth: depth });
-      var children = taskChildren(t.id);
-      if(children.length) result = result.concat(expandWithSubtasksRecursive(children, depth+1));
-    });
-    return result;
-  }
-  // Returns bare task objects (for callers that don't need depth info directly - taskRowHtml
-  // computes each item's own depth itself via taskDepth() when rendering).
   function expandWithSubtasks(topLevelList){
     var result = [];
     topLevelList.forEach(function(t){
       if(t.parentId) return; // subtasks are only added via their parent below, never listed independently
       result.push(t);
-      expandWithSubtasksRecursive(taskChildren(t.id), 1).forEach(function(x){ result.push(x.item); });
+      taskChildren(t.id).forEach(function(c){ result.push(c); });
     });
     return result;
   }
@@ -1454,21 +1254,18 @@
     if(p==="low") return '<span class="ledger-tag priority-low">Low</span>';
     return '';
   }
-  function organizeRowHtml(t, depth){
-    var childCount = taskChildren(t.id).length;
+  function organizeRowHtml(t, isChild){
+    var childCount = isChild ? 0 : taskChildren(t.id).length;
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
     var prTag = priorityTag(t.priority);
-    var isChild = depth > 0;
-    var visualDepth = Math.min(depth, 4);
-    var indentStyle = isChild ? ' style="--subtask-pad:'+(26+(visualDepth-1)*16)+'px;"' : '';
-    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(organizeDoneFor(t)?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'"'+indentStyle+'>' +
+    return '<li class="ledger-item organize-row'+(isChild?" subtask-row":"")+(organizeDoneFor(t)?" done":"")+'" data-id="'+t.id+'" data-parent="'+(t.parentId||"")+'">' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+t.id+'">' +
         '<div class="ledger-text">'+escapeHtml(t.text)+(childCount?' <span class="organize-child-count">('+childCount+' subtask'+(childCount===1?"":"s")+')</span>':'')+'</div>' +
         (dateTag||recurTag||prTag ? '<div class="ledger-meta">'+dateTag+recurTag+prTag+'</div>' : '') +
         '<div class="organize-actions">' +
-          '<button class="organize-action-btn organize-add-sub" data-id="'+t.id+'">+ Add subtask</button>' +
+          (isChild ? '' : '<button class="organize-action-btn organize-add-sub" data-id="'+t.id+'">+ Add subtask</button>') +
           '<button class="organize-action-btn organize-nest-btn" data-id="'+t.id+'">'+(isChild ? "Make top-level" : "Nest under\u2026")+'</button>' +
         '</div>' +
       '</div>' +
@@ -1498,8 +1295,8 @@
     if(!topLevel.length){ wrap.innerHTML = '<div class="empty-note">'+(isToday ? "Nothing for today. Tap + to add a task." : "Nothing for this day.")+'</div>'; return; }
     var html = "";
     topLevel.forEach(function(t){
-      html += organizeRowHtml(t, 0);
-      expandWithSubtasksRecursive(taskChildren(t.id), 1).forEach(function(x){ html += organizeRowHtml(x.item, x.depth); });
+      html += organizeRowHtml(t, false);
+      taskChildren(t.id).forEach(function(c){ html += organizeRowHtml(c, true); });
     });
     wrap.innerHTML = html;
     wireOrganizeReorder("organize-list", function(orderedIds){
@@ -1523,24 +1320,10 @@
       var dragged = tasks.find(function(x){ return x.id===draggedId; });
       var target = tasks.find(function(x){ return x.id===targetId; });
       if(!dragged || !target || dragged.id===target.id) { renderOrganizePage(); return; }
-      if(isDescendantOf(target.id, dragged.id)){
-        // target is already nested somewhere inside dragged's own subtree - nesting dragged under
-        // it would create a loop (dragged's parent chain would eventually point back to itself)
-        renderOrganizePage();
-        showToast("Can't nest a task under its own subtask.");
-        return;
-      }
       dragged.parentId = target.id;
       dragged.order = Date.now();
       saveTasks(); renderOrganizePage(); renderHome();
       showToast('"'+dragged.text+'" is now a subtask of "'+target.text+'".');
-    }, function(draggedId){
-      var dragged = tasks.find(function(x){ return x.id===draggedId; });
-      if(!dragged) { renderOrganizePage(); return; }
-      dragged.parentId = null;
-      dragged.order = Date.now();
-      saveTasks(); renderOrganizePage(); renderHome();
-      showToast('"'+dragged.text+'" is now a top-level task.');
     });
   }
   var organizeSelectedDate = new Date(realNow);
@@ -1573,17 +1356,11 @@
       showToast('"'+t.text+'" is now a top-level task.');
       return;
     }
-    var topLevelForDay = topLevelTasksForDate(organizeSelectedDate);
-    var allForDay = topLevelForDay.slice();
-    topLevelForDay.forEach(function(tl){
-      expandWithSubtasksRecursive(taskChildren(tl.id), 1).forEach(function(x){ allForDay.push(x.item); });
-    });
-    var candidates = allForDay.filter(function(x){ return x.id!==taskId && !isDescendantOf(x.id, taskId); });
+    var candidates = topLevelTasksForDate(organizeSelectedDate).filter(function(x){ return x.id!==taskId; });
     if(!candidates.length){ showToast("No other tasks to nest this under yet."); return; }
     var body = document.getElementById("nest-picker-body");
     body.innerHTML = candidates.map(function(c){
-      var indent = taskDepth(c) * 16;
-      return '<div class="day-preview-row nest-picker-opt" data-target-id="'+c.id+'" style="cursor:pointer; padding-left:'+indent+'px;">' +
+      return '<div class="day-preview-row nest-picker-opt" data-target-id="'+c.id+'" style="cursor:pointer;">' +
         '<div class="day-preview-text"><div class="day-preview-name">'+escapeHtml(c.text)+'</div></div>' +
       '</div>';
     }).join("");
@@ -1615,11 +1392,7 @@
     var catTag = catName ? '<span class="ledger-tag cat" style="background:'+catColor(t.category)+';">'+catName+'</span>' : '';
     var dateTag = t.type==="once" && t.dueDate ? '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>' : '';
     var recurTag = t.type==="daily" ? '<span class="ledger-tag">Daily</span>' : t.type==="weekly" ? '<span class="ledger-tag">Weekly</span>' : t.type==="monthly" ? '<span class="ledger-tag">Monthly</span>' : '';
-    var depth = t.parentId ? taskDepth(t) : 0;
-    // indent grows with each level, capped after a few levels so it can't run off the edge of a narrow phone screen
-    var visualDepth = Math.min(depth, 4);
-    var indentStyle = depth ? ' style="--subtask-pad:'+(26+(visualDepth-1)*16)+'px; --subtask-margin:'+(20+(visualDepth-1)*14)+'px;"' : '';
-    return '<li class="ledger-item'+(done?" done":"")+(depth?" subtask-row":"")+'" data-id="'+t.id+'"'+indentStyle+'>' +
+    return '<li class="ledger-item'+(done?" done":"")+(t.parentId?" subtask-row":"")+'" data-id="'+t.id+'">' +
       '<button class="ledger-check" data-id="'+t.id+'">'+checkSvg+'</button>' +
       '<div class="ledger-body" data-edit="'+t.id+'"><div class="ledger-text">'+escapeHtml(t.text)+'</div><div class="ledger-meta">'+dateTag+recurTag+priorityTag(t.priority)+catTag+'</div></div>' +
       '<button class="ledger-del" data-id="'+t.id+'">×</button>' +
@@ -1627,14 +1400,6 @@
   }
   function escapeHtml(s){ var d=document.createElement("div"); d.textContent=s||""; return d.innerHTML; }
 
-  function popThenCommit(chk, wasDone, commitFn){
-    // when completing something (not un-completing), let the checkbox play its little "pop" first,
-    // then commit the actual state change - the app re-renders the whole list right after a commit,
-    // which would otherwise replace the checkbox mid-animation and cut the pop off before it's visible
-    if(wasDone){ commitFn(); return; }
-    chk.classList.add("just-checked");
-    setTimeout(commitFn, 150);
-  }
   function wireTaskList(container){
     container.addEventListener("click", function(e){
       var chk = e.target.closest(".ledger-check");
@@ -1649,16 +1414,13 @@
           openHabitLogSheet(hid, todayKey);
         } else if(chk && h && isScheduledOn(h, realNow)){
           h.completed = h.completed||{};
-          var hWasDone = !!h.completed[todayKey];
-          popThenCommit(chk, hWasDone, function(){
-            if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true;
-            saveHabits(); renderHabits(); renderHome();
-          });
+          if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true;
+          saveHabits(); renderHabits(); renderHome();
         } else if(del && h){ deleteHabit(hid); }
         else if(body && h){ openHabitSheet(h); }
         return;
       }
-      if(chk){ var t = tasks.find(function(x){return x.id===chk.getAttribute("data-id");}); if(t) popThenCommit(chk, doneFor(t), function(){ toggleDone(t); }); }
+      if(chk){ var t = tasks.find(function(x){return x.id===chk.getAttribute("data-id");}); if(t) toggleDone(t); }
       else if(del){ deleteTask(del.getAttribute("data-id")); }
       else if(body){ var t2 = tasks.find(function(x){return x.id===body.getAttribute("data-edit");}); if(t2) openTaskSheet(t2); }
     });
@@ -1729,36 +1491,6 @@
       item.style.transform = ""; item.style.background = "";
       swipeItem = null; active = false;
     }, { passive:true });
-  })();
-
-  /* ---------------- long-press for quick task detail view (everywhere except Organize, which already uses long-press for its own drag gesture) ---------------- */
-  (function(){
-    var pressTimer = null, longPressed = false, startX = 0, startY = 0;
-    document.addEventListener("touchstart", function(e){
-      var body = e.target.closest(".ledger-body");
-      var item = e.target.closest(".ledger-item");
-      if(!body || !item) return;
-      if(item.closest("#organize-list")) return; // Organize's long-press is already spoken for (drag to reorder/nest)
-      if(item.classList.contains("habit-row") || item.classList.contains("goal-row")) return; // quick-view is for tasks only
-      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-      longPressed = false;
-      pressTimer = setTimeout(function(){
-        longPressed = true;
-        if(navigator.vibrate) navigator.vibrate(12);
-        var id = body.getAttribute("data-edit");
-        var t = tasks.find(function(x){ return x.id===id; });
-        if(t) openQuickView(t);
-      }, 480);
-    }, { passive:true });
-    document.addEventListener("touchmove", function(e){
-      if(!pressTimer) return;
-      if(Math.abs(e.touches[0].clientX-startX)>8 || Math.abs(e.touches[0].clientY-startY)>8) clearTimeout(pressTimer);
-    }, { passive:true });
-    document.addEventListener("touchend", function(){ clearTimeout(pressTimer); });
-    document.addEventListener("touchcancel", function(){ clearTimeout(pressTimer); });
-    document.addEventListener("click", function(e){
-      if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
-    }, true);
   })();
 
   /* ---------------- swipe-down quick add (Home) ---------------- */
@@ -1868,8 +1600,6 @@
       gestureTracking = false;
       var dx = e.changedTouches[0].clientX - gestureStartX, dy = e.changedTouches[0].clientY - gestureStartY;
       if(dx > SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("shopping");
-      else if(dx < -SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("organize");
-      else if(dy < -SWIPE_THRESHOLD && Math.abs(dx) < 60) switchTab("notes");
     }, { passive:true });
   })();
   /* ---------------- toast ---------------- */
@@ -1900,32 +1630,6 @@
     return Math.round(hrs/24)+"d ago";
   }
   pruneTrash();
-
-  function openQuickView(t){
-    document.getElementById("quickview-title").textContent = t.text;
-    var metaHtml = "";
-    if(t.type==="once" && t.dueDate) metaHtml += '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>';
-    if(t.type==="daily") metaHtml += '<span class="ledger-tag">Daily</span>';
-    if(t.type==="weekly") metaHtml += '<span class="ledger-tag">Weekly</span>';
-    if(t.type==="monthly") metaHtml += '<span class="ledger-tag">Monthly</span>';
-    metaHtml += priorityTag(t.priority);
-    if(t.category) metaHtml += '<span class="ledger-tag cat" style="background:'+catColor(t.category)+';">'+catLabel(t.category)+'</span>';
-    var childCount = taskChildren(t.id).length;
-    if(childCount) metaHtml += '<span class="ledger-tag">'+childCount+' subtask'+(childCount===1?"":"s")+'</span>';
-    if(t.parentId){
-      var parent = tasks.find(function(x){ return x.id===t.parentId; });
-      if(parent) metaHtml += '<span class="ledger-tag">Subtask of "'+escapeHtml(parent.text)+'"</span>';
-    }
-    document.getElementById("quickview-meta").innerHTML = metaHtml;
-    document.getElementById("quickview-edit-btn").onclick = function(){ closeQuickView(); openTaskSheet(t); };
-    document.getElementById("quickview-overlay").classList.add("open");
-    document.getElementById("quickview-popup").classList.add("open");
-  }
-  function closeQuickView(){
-    document.getElementById("quickview-overlay").classList.remove("open");
-    document.getElementById("quickview-popup").classList.remove("open");
-  }
-  document.getElementById("quickview-overlay").addEventListener("click", closeQuickView);
 
   function confirmPopup(message, onConfirm){
     var overlayEl = document.getElementById("confirm-overlay");
@@ -1968,7 +1672,7 @@
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     var el = document.getElementById("view-"+tab);
     if(el) el.classList.add("active");
-    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity" || tab==="notes");
+    document.getElementById("fab-wrap").classList.toggle("hide", tab==="settings" || tab==="categories" || tab==="category-detail" || tab==="activity");
     if(tab==="month") renderMonthTab();
     if(tab==="habits") renderHabits();
     if(tab==="goals") renderGoalsView();
@@ -1978,7 +1682,6 @@
     if(tab==="organize"){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); }
     if(tab==="shopping") renderShoppingPage();
     if(tab==="work") renderWorkPage();
-    if(tab==="notes") renderNotesPage();
   }
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
@@ -1987,7 +1690,6 @@
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
   document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
   document.getElementById("link-organize").addEventListener("click", function(){ switchTab("organize"); });
-  document.getElementById("link-shopping").addEventListener("click", function(){ switchTab("shopping"); });
   function goToOrganizeDate(d){
     switchTab("organize"); // this resets organizeSelectedDate back to today as a side effect - the two lines below then override it to the date we actually want
     organizeSelectedDate = new Date(d);
@@ -2093,33 +1795,6 @@
         renderCategoriesPage();
       });
     });
-
-    var workWrap = document.getElementById("work-cat-list");
-    if(!workCategories.length){ workWrap.innerHTML = '<div class="empty-note">No work categories yet.</div>'; }
-    else {
-      workWrap.innerHTML = workCategories.map(function(c){
-        var count = tasks.filter(function(t){ return t.category===c.id; }).length;
-        return '<li class="cat-list-row" data-cat="'+c.id+'">' +
-          '<span class="cat-list-name">'+escapeHtml(c.label)+'</span>' +
-          '<span class="cat-list-count">'+count+'</span>' +
-          '<span class="cat-list-chevron">›</span>' +
-          '<button class="cat-list-del" data-cat-del="'+c.id+'">×</button>' +
-        '</li>';
-      }).join("");
-    }
-    workWrap.querySelectorAll(".cat-list-row").forEach(function(row){
-      row.addEventListener("click", function(e){
-        if(e.target.closest(".cat-list-del")) return;
-        openCategoryDetail(row.getAttribute("data-cat"));
-      });
-    });
-    workWrap.querySelectorAll(".cat-list-del").forEach(function(btn){
-      btn.addEventListener("click", function(e){
-        e.stopPropagation();
-        deleteWorkCategoryWithUndo(btn.getAttribute("data-cat-del"));
-        renderCategoriesPage();
-      });
-    });
   }
   document.getElementById("add-category").addEventListener("click", function(){
     document.getElementById("cat-page-add-inline").style.display = "flex";
@@ -2132,19 +1807,6 @@
     saveCategories();
     document.getElementById("cat-page-add-input").value = "";
     document.getElementById("cat-page-add-inline").style.display = "none";
-    renderCategoriesPage();
-  });
-  document.getElementById("add-work-category").addEventListener("click", function(){
-    document.getElementById("work-cat-page-add-inline").style.display = "flex";
-    document.getElementById("work-cat-page-add-input").focus();
-  });
-  document.getElementById("work-cat-page-add-confirm").addEventListener("click", function(){
-    var name = document.getElementById("work-cat-page-add-input").value.trim();
-    if(!name) return;
-    workCategories.push({ id:"c"+uid(), label:name });
-    saveWorkCategories();
-    document.getElementById("work-cat-page-add-input").value = "";
-    document.getElementById("work-cat-page-add-inline").style.display = "none";
     renderCategoriesPage();
   });
 
@@ -2245,8 +1907,7 @@
     cocoa: { bg:"#17120F", bg2:"#211A15", ink:"#EDE4D8", accent:"#C79868", label:"Cocoa" },
     dusk: { bg:"#1C1B18", bg2:"#26241F", ink:"#EDE7D9", accent:"#8FAE7C", label:"Dusk" },
     midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
-    meadow: { bg:"#F4EFDD", bg2:"#EBE3C7", ink:"#332D1F", accent:"#707C4E", label:"Meadow" },
-    glass: { bg:"#E7EFE9", bg2:"rgba(255,255,255,0.6)", ink:"#354238", accent:"#7FA88C", label:"Glass" }
+    meadow: { bg:"#F4EFDD", bg2:"#EBE3C7", ink:"#332D1F", accent:"#707C4E", label:"Meadow" }
   };
   var THEME_TILTS = [-4, 3, -2, 4, -3, 2, -4];
   function renderThemePicker(){
@@ -2323,21 +1984,6 @@
     o.addEventListener("click", function(){ applyFontSize(o.getAttribute("data-fontsize-opt")); });
   });
   applyFontSize(currentFontSize);
-
-  /* ---------------- card transparency ---------------- */
-  var currentCardOpacity = loadStr("db2.cardOpacity") || "70";
-  function applyCardOpacity(v){
-    currentCardOpacity = v;
-    document.documentElement.style.setProperty("--card-opacity", v+"%");
-    saveStr("db2.cardOpacity", v);
-    var slider = document.getElementById("transparency-slider");
-    var label = document.getElementById("transparency-value");
-    if(slider) slider.value = v;
-    if(label) label.textContent = v+"%";
-  }
-  var transparencySlider = document.getElementById("transparency-slider");
-  if(transparencySlider) transparencySlider.addEventListener("input", function(){ applyCardOpacity(this.value); });
-  applyCardOpacity(currentCardOpacity);
 
   /* ---------------- secondary (script) font ---------------- */
   var currentSecondaryFont = loadStr("db2.secondaryFont") || "tangerine";
@@ -2451,7 +2097,7 @@
     var taskRowsExpanded = [];
     taskRows.forEach(function(x){
       taskRowsExpanded.push(x);
-      expandWithSubtasksRecursive(taskChildren(x.item.id), 1).forEach(function(d){ taskRowsExpanded.push({ item:d.item, done:doneFor(d.item) }); });
+      taskChildren(x.item.id).forEach(function(c){ taskRowsExpanded.push({ item:c, done:doneFor(c) }); });
     });
     taskRows = taskRowsExpanded;
 
@@ -2516,10 +2162,8 @@
     document.getElementById("goals-count").textContent = goalsOpen || "—";
     var completedCount = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt; }).length;
     document.getElementById("activity-count").textContent = completedCount || "—";
-    var todayOrganizeCount = tasks.filter(function(t){ return !t.parentId && (t.type==="daily" || (t.type==="once" && t.dueDate===todayKey)); }).length;
-    document.getElementById("organize-count").textContent = todayOrganizeCount || "—";
-    var openShoppingCount = shoppingItems.filter(function(i){ return !i.bought; }).length;
-    document.getElementById("shopping-count").textContent = openShoppingCount || "—";
+    var subtaskCount = tasks.filter(function(t){ return t.parentId; }).length;
+    document.getElementById("organize-count").textContent = subtaskCount || "—";
     if(currentTab==="organize") renderOrganizeHabitsSection(dateKey(organizeSelectedDate)===todayKey); // habit changes elsewhere (Home, Habits page) always call renderHome() - keep Organize's habit section in sync too
   }
 
@@ -2547,12 +2191,10 @@
     var s = startOfWeek(selectedDate), e = new Date(s); e.setDate(s.getDate()+6);
     document.getElementById("week-label").textContent = fmtShort(s)+" – "+fmtShort(e);
     var keys = []; for(var i=0;i<7;i++){ var d=new Date(s); d.setDate(s.getDate()+i); keys.push(dateKey(d)); }
-    var topLevel = tasks.filter(function(t){
+    var list = tasks.filter(function(t){
       if(t.list==="work") return false;
-      if(t.parentId) return false;
       return t.type==="weekly" || (t.type==="once" && t.dueDate && keys.indexOf(t.dueDate)!==-1);
     }).sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
-    var list = expandWithSubtasks(topLevel);
     var wrap = document.getElementById("week-list");
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this week yet.</div>';
   }
@@ -2685,9 +2327,8 @@
     var isToday = selKey()===todayKey;
     var dayLabel = isToday ? "Today" : selectedDate.toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"});
     document.getElementById("cal-day-label").textContent = dayLabel;
-    var topLevel = tasks.filter(function(t){ if(t.list==="work") return false; if(t.parentId) return false; return t.type==="daily" || (t.type==="once" && t.dueDate===selKey()); })
+    var list = tasks.filter(function(t){ if(t.list==="work") return false; return t.type==="daily" || (t.type==="once" && t.dueDate===selKey()); })
       .sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
-    var list = expandWithSubtasks(topLevel);
     var wrap = document.getElementById("cal-day-list");
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this day.</div>';
     document.getElementById("cal-quickadd-text").textContent = "Add a task for "+(isToday ? "today" : dayLabel);
@@ -2709,7 +2350,7 @@
     var addSub = e.target.closest(".organize-add-sub");
     var nestBtn = e.target.closest(".organize-nest-btn");
     var body = e.target.closest(".ledger-body");
-    if(chk){ var t1 = tasks.find(function(x){ return x.id===chk.getAttribute("data-id"); }); if(t1) popThenCommit(chk, organizeDoneFor(t1), function(){ organizeToggleDone(t1); }); return; }
+    if(chk){ var t1 = tasks.find(function(x){ return x.id===chk.getAttribute("data-id"); }); if(t1) organizeToggleDone(t1); return; }
     if(del){ deleteTask(del.getAttribute("data-id")); return; }
     if(addSub){ e.stopPropagation(); openTaskSheet(null, "once", { parentId: addSub.getAttribute("data-id"), dueDate: dateKey(organizeSelectedDate) }); return; }
     if(nestBtn){ e.stopPropagation(); openNestPicker(nestBtn.getAttribute("data-id")); return; }
@@ -3255,99 +2896,6 @@
       renderHabitCatRow();
     });
   }
-  function deleteWorkCategoryWithUndo(id){
-    var removed = workCategories.find(function(c){ return c.id===id; });
-    if(!removed) return;
-    var affectedCount = tasks.filter(function(t){ return t.category===id; }).length;
-    workCategories = workCategories.filter(function(c){ return c.id!==id; });
-    saveWorkCategories();
-    var msg = affectedCount > 0
-      ? '"'+removed.label+'" deleted — '+affectedCount+' item'+(affectedCount===1?"":"s")+' left uncategorized.'
-      : '"'+removed.label+'" deleted.';
-    showToast(msg, function(){
-      workCategories.push(removed); saveWorkCategories();
-    });
-  }
-
-  /* ---------------- notes ---------------- */
-  var editingNoteId = null;
-  function noteSnippet(n){
-    var firstLine = (n.body||"").split("\n").find(function(l){ return l.trim().length; });
-    return firstLine ? firstLine.slice(0,80) : "No additional text";
-  }
-  function renderNotesPage(){
-    var wrap = document.getElementById("notes-list");
-    var sorted = notes.slice().sort(function(a,b){ return b.updatedAt-a.updatedAt; });
-    if(!sorted.length){ wrap.innerHTML = '<div class="empty-note">No notes yet — tap "New note" below to add one.</div>'; }
-    else {
-      wrap.innerHTML = sorted.map(function(n, i){
-        return '<button class="note-tile" data-note="'+n.id+'">' +
-          '<span class="note-tile-badge">'+(i+1)+'</span>' +
-          '<button class="note-tile-del" data-note-del="'+n.id+'">×</button>' +
-          '<div class="note-tile-title">'+escapeHtml(n.title||"Untitled")+'</div>' +
-          '<div class="note-tile-snippet">'+escapeHtml(noteSnippet(n))+'</div>' +
-          '<div class="note-tile-time">'+trashTimeAgo(n.updatedAt)+'</div>' +
-        '</button>';
-      }).join("");
-    }
-    wrap.querySelectorAll(".note-tile").forEach(function(row){
-      row.addEventListener("click", function(e){
-        if(e.target.closest("[data-note-del]")) return;
-        var n = notes.find(function(x){ return x.id===row.getAttribute("data-note"); });
-        if(n) openNoteSheet(n);
-      });
-    });
-    wrap.querySelectorAll("[data-note-del]").forEach(function(btn){
-      btn.addEventListener("click", function(e){
-        e.stopPropagation();
-        deleteNoteWithUndo(btn.getAttribute("data-note-del"));
-      });
-    });
-  }
-  function deleteNoteWithUndo(id){
-    var idx = notes.findIndex(function(n){ return n.id===id; });
-    if(idx===-1) return;
-    var removed = notes[idx];
-    notes.splice(idx,1); saveNotes(); renderNotesPage();
-    addToTrash("note", removed.title||"Untitled", removed);
-    showToast("Note deleted.", function(){ notes.splice(idx,0,removed); saveNotes(); renderNotesPage(); removeFromTrashByOriginalId(removed.id); });
-  }
-  function openNoteSheet(existing){
-    editingNoteId = existing ? existing.id : null;
-    document.getElementById("note-title-input").value = existing ? existing.title : "";
-    document.getElementById("note-body-input").value = existing ? existing.body : "";
-    document.getElementById("note-delete").style.display = existing ? "block" : "none";
-    document.getElementById("note-overlay").classList.add("open");
-    document.getElementById("note-sheet").classList.add("open");
-    setTimeout(function(){ document.getElementById("note-title-input").focus(); }, 200);
-  }
-  function closeNoteSheetFn(){
-    document.getElementById("note-overlay").classList.remove("open");
-    document.getElementById("note-sheet").classList.remove("open");
-    editingNoteId = null;
-  }
-  document.getElementById("add-note").addEventListener("click", function(){ openNoteSheet(null); });
-  document.getElementById("note-overlay").addEventListener("click", closeNoteSheetFn);
-  document.getElementById("note-cancel").addEventListener("click", closeNoteSheetFn);
-  document.getElementById("note-save").addEventListener("click", function(){
-    var title = document.getElementById("note-title-input").value.trim();
-    var body = document.getElementById("note-body-input").value;
-    if(!title && !body.trim()){ closeNoteSheetFn(); return; } // nothing was written - just close, don't save an empty note
-    if(editingNoteId){
-      var n = notes.find(function(x){ return x.id===editingNoteId; });
-      if(n){ n.title = title; n.body = body; n.updatedAt = Date.now(); }
-    } else {
-      notes.unshift({ id:uid(), title:title, body:body, createdAt:Date.now(), updatedAt:Date.now() });
-    }
-    saveNotes();
-    closeNoteSheetFn();
-    renderNotesPage();
-  });
-  document.getElementById("note-delete").addEventListener("click", function(){
-    var id = editingNoteId;
-    closeNoteSheetFn();
-    if(id) deleteNoteWithUndo(id);
-  });
   document.getElementById("cat-add-confirm").addEventListener("click", function(){
     var name = document.getElementById("cat-add-input").value.trim();
     if(!name) return;
@@ -3620,13 +3168,7 @@
         if(e.target.closest(skipSelector)) return; // let form controls handle their own taps normally
         start(e.touches[0].clientY, e.touches[0].clientX);
       }, { passive:true });
-      sheetEl.addEventListener("touchmove", function(e){
-        if(!dragging) return;
-        var dx = Math.abs(e.touches[0].clientX - startX);
-        var dyRaw = e.touches[0].clientY - startY;
-        if(dyRaw > 0 && dyRaw > dx) e.preventDefault(); // this is a genuine downward drag on the sheet - stop the page underneath from also scrolling at the same time
-        move(e.touches[0].clientY, e.touches[0].clientX);
-      }, { passive:false });
+      sheetEl.addEventListener("touchmove", function(e){ move(e.touches[0].clientY, e.touches[0].clientX); }, { passive:true });
       sheetEl.addEventListener("touchend", end, { passive:true });
     }
     wireSwipeToDismiss(taskSheet, closeTaskSheet);
@@ -3635,9 +3177,6 @@
     wireSwipeToDismiss(document.getElementById("day-preview-sheet"), closeDayPreview);
     wireSwipeToDismiss(document.getElementById("nest-picker-sheet"), closeNestPicker);
     wireSwipeToDismiss(shoppingSheet, closeShoppingSheetFn);
-    wireSwipeToDismiss(document.getElementById("habit-log-sheet"), closeHabitLogSheetFn);
-    wireSwipeToDismiss(document.getElementById("trash-sheet"), closeTrashSheet);
-    wireSwipeToDismiss(document.getElementById("note-sheet"), closeNoteSheetFn);
   })();
   document.querySelectorAll(".sheet-handle").forEach(function(handle){
     handle.style.cursor = "pointer";
@@ -3651,8 +3190,6 @@
       else if(id==="shopping-sheet") closeShoppingSheetFn();
       else if(id==="day-preview-sheet") closeDayPreview();
       else if(id==="nest-picker-sheet") closeNestPicker();
-      else if(id==="habit-log-sheet") closeHabitLogSheetFn();
-      else if(id==="trash-sheet") closeTrashSheet();
     });
   });
   document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
@@ -3688,7 +3225,7 @@
       return;
     }
     emptyNote.style.display = "none";
-    var kindLabel = { task:"Task", habit:"Habit", goal:"Goal", shopping:"Shopping item", note:"Note" };
+    var kindLabel = { task:"Task", habit:"Habit", goal:"Goal", shopping:"Shopping item" };
     body.innerHTML = trashedItems.map(function(x){
       return '<div class="day-preview-row" data-trash-id="'+x.id+'">' +
         '<div class="day-preview-text" style="flex:1; min-width:0;">' +
@@ -3717,7 +3254,6 @@
     else if(entry.kind==="habit") habits.unshift(entry.data), saveHabits();
     else if(entry.kind==="goal") goals.unshift(entry.data), saveGoals();
     else if(entry.kind==="shopping") shoppingItems.unshift(entry.data), saveShopping();
-    else if(entry.kind==="note"){ notes.unshift(entry.data); saveNotes(); if(currentTab==="notes") renderNotesPage(); }
     trashedItems.splice(idx,1); saveTrash();
     renderTrash(); renderAll();
     showToast('"'+entry.label+'" restored.');
@@ -3737,7 +3273,7 @@
 
   /* ---------------- export / import ---------------- */
   document.getElementById("export-btn").addEventListener("click", function(){
-    var data = { tasks:tasks, habits:habits, goals:goals, categories:categories, workCategories:workCategories, notes:notes, userName: loadStr("db2.userName") };
+    var data = { tasks:tasks, habits:habits, goals:goals, categories:categories, userName: loadStr("db2.userName") };
     var blob = new Blob([JSON.stringify(data,null,2)], { type:"application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a"); a.href=url; a.download="daybook-backup.json"; a.click();
@@ -3752,21 +3288,18 @@
     reader.onload = function(){
       try{
         var data = JSON.parse(reader.result);
-        var preImportSnapshot = { tasks:tasks, habits:habits, goals:goals, categories:categories, workCategories:workCategories, notes:notes };
+        var preImportSnapshot = { tasks:tasks, habits:habits, goals:goals, categories:categories };
         if(data.tasks) tasks = data.tasks;
         if(data.habits) habits = data.habits;
         if(data.goals) goals = data.goals;
         if(data.categories) categories = data.categories;
-        if(data.workCategories) workCategories = data.workCategories;
-        if(data.notes) notes = data.notes;
         if(data.userName) saveStr("db2.userName", data.userName);
-        saveTasks(); saveHabits(); saveGoals(); saveCategories(); saveWorkCategories(); saveNotes();
+        saveTasks(); saveHabits(); saveGoals(); saveCategories();
         renderAll();
         showToast("Data imported.", function(){
           tasks = preImportSnapshot.tasks; habits = preImportSnapshot.habits;
           goals = preImportSnapshot.goals; categories = preImportSnapshot.categories;
-          workCategories = preImportSnapshot.workCategories; notes = preImportSnapshot.notes;
-          saveTasks(); saveHabits(); saveGoals(); saveCategories(); saveWorkCategories(); saveNotes();
+          saveTasks(); saveHabits(); saveGoals(); saveCategories();
           renderAll();
         });
       }catch(err){ showToast("Import failed — file may be corrupted."); }
@@ -3785,13 +3318,12 @@
     if(currentTab==="work") renderWorkPage();
   }
 
-  /* ---------------- Organize page reorder + drag-left-to-nest + drag-right-to-unnest (TickTick-style) ---------------- */
-  function wireOrganizeReorder(containerId, onReorder, onNest, onUnnest){
+  /* ---------------- Organize page reorder + drag-left-to-nest (TickTick-style) ---------------- */
+  function wireOrganizeReorder(containerId, onReorder, onNest){
     var container = document.getElementById(containerId);
     if(!container) return;
     container.querySelectorAll(".ledger-item").forEach(function(item){
-      var pressTimer = null, dragging = false, startY = 0, startX = 0, longPressed = false, nestTarget = null, lastDx = 0;
-      var hasParent = !!item.getAttribute("data-parent");
+      var pressTimer = null, dragging = false, startY = 0, startX = 0, longPressed = false, nestTarget = null;
       function clearNestHighlight(){
         var prev = container.querySelectorAll(".organize-nest-hover");
         for(var i=0;i<prev.length;i++){ prev[i].classList.remove("organize-nest-hover"); }
@@ -3805,15 +3337,8 @@
       function moveDrag(x, y){
         if(!dragging) return;
         var dy = y - startY, dx = x - startX;
-        lastDx = dx;
         var isNesting = dx < -40;
-        var isUnnesting = hasParent && dx > 40;
-        item.style.transform = "translate("+(isNesting?-14:isUnnesting?14:0)+"px,"+dy+"px)";
-        item.classList.toggle("organize-unnest-armed", isUnnesting);
-        if(isUnnesting){
-          if(nestTarget) clearNestHighlight();
-          return; // unnesting is a standalone action on this item alone - no sibling target to check, it completes on release
-        }
+        item.style.transform = "translate("+(isNesting?-14:0)+"px,"+dy+"px)";
         var siblings = Array.prototype.slice.call(container.querySelectorAll(".ledger-item"));
         for(var i=0;i<siblings.length;i++){
           var sib = siblings[i];
@@ -3821,14 +3346,7 @@
           var r = sib.getBoundingClientRect();
           if(y > r.top && y < r.bottom){
             if(isNesting){
-              var sibHasParent = !!sib.getAttribute("data-parent");
-              if(sibHasParent){
-                // this sibling is itself a subtask - nesting under it would create an unsupported third
-                // level that would just vanish from every list, so it's never a valid drop target
-                if(nestTarget) clearNestHighlight();
-              } else if(nestTarget !== sib){
-                clearNestHighlight(); sib.classList.add("organize-nest-hover"); nestTarget = sib;
-              }
+              if(nestTarget !== sib){ clearNestHighlight(); sib.classList.add("organize-nest-hover"); nestTarget = sib; }
             } else {
               if(nestTarget) clearNestHighlight();
               var itemIdx = siblings.indexOf(item), sibIdx = siblings.indexOf(sib);
@@ -3840,18 +3358,13 @@
           }
         }
       }
-      function endDrag(cancelled){
+      function endDrag(){
         clearTimeout(pressTimer);
         if(!dragging) return;
         dragging = false;
         item.classList.remove("reorder-dragging");
-        item.classList.remove("organize-unnest-armed");
         item.style.transition = ""; item.style.transform = "";
-        if(cancelled){ clearNestHighlight(); return; } // the gesture was interrupted (e.g. by the OS) - just reset visuals, don't apply a half-finished action
-        if(hasParent && lastDx > 40 && onUnnest){
-          clearNestHighlight();
-          onUnnest(item.getAttribute("data-id"));
-        } else if(nestTarget){
+        if(nestTarget){
           var targetId = nestTarget.getAttribute("data-id");
           clearNestHighlight();
           onNest(item.getAttribute("data-id"), targetId);
@@ -3875,14 +3388,7 @@
       }, { passive:false });
       item.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
-        if(longPressed){ e.preventDefault(); endDrag(false); }
-      });
-      item.addEventListener("touchcancel", function(){
-        // the OS interrupted the touch sequence (an incoming call, a system gesture, etc.) - touchend never fires in
-        // this case, so without this the item would stay stuck mid-drag (translated, faded, effectively "hidden")
-        // forever. Reset it cleanly instead of leaving it in limbo.
-        clearTimeout(pressTimer);
-        endDrag(true);
+        if(longPressed){ e.preventDefault(); endDrag(); }
       });
       item.addEventListener("click", function(e){
         if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
@@ -3919,13 +3425,12 @@
           }
         }
       }
-      function endDrag(cancelled){
+      function endDrag(){
         clearTimeout(pressTimer);
         if(!dragging) return;
         dragging = false;
         item.classList.remove("reorder-dragging");
         item.style.transition = ""; item.style.transform = "";
-        if(cancelled) return; // the gesture was interrupted (e.g. by the OS) - just reset visuals, don't apply a half-finished reorder
         onReorder(Array.prototype.map.call(container.querySelectorAll(".ledger-item"), function(x){ return x.getAttribute("data-id"); }));
       }
       item.addEventListener("touchstart", function(e){
@@ -3945,11 +3450,7 @@
       }, { passive:false });
       item.addEventListener("touchend", function(e){
         clearTimeout(pressTimer);
-        if(longPressed){ e.preventDefault(); endDrag(false); }
-      });
-      item.addEventListener("touchcancel", function(){
-        clearTimeout(pressTimer);
-        endDrag(true);
+        if(longPressed){ e.preventDefault(); endDrag(); }
       });
       item.addEventListener("click", function(e){
         if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
@@ -4103,7 +3604,7 @@
   // (which tab you were on, etc.) that shouldn't follow you between devices.
   var SYNC_KEYS = ["db2.tasks","db2.habits","db2.goals","db2.categories","db2.shopping",
     "db2.shoppingFor","db2.workCategories","db2.userName","db2.theme","db2.font",
-    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder","db2.cardOpacity","db2.notes"];
+    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder"];
 
   var currentUser = null;
   var justSignedIn = false;
