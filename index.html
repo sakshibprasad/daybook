@@ -165,9 +165,11 @@
 
   .ledger-list{ list-style:none; margin:0; padding:0; }
   .ledger-item{ display:flex; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); position:relative; }
-  .ledger-item.subtask-row{ padding-left:26px; position:relative; }
+  .ledger-item.subtask-row{ padding:9px 0 9px 26px; position:relative; }
   .ledger-item.subtask-row::before{ content:""; position:absolute; left:8px; top:0; bottom:0; width:1px; background:var(--line); }
-  .ledger-item.subtask-row .ledger-text{ font-size:calc(13.5px * var(--text-zoom, 1)); }
+  .ledger-item.subtask-row .ledger-text{ font-size:calc(12.5px * var(--text-zoom, 1)); }
+  .ledger-item.subtask-row .ledger-check{ width:16px; height:16px; }
+  .ledger-item.subtask-row .ledger-tag{ font-size:9.5px; padding:2px 7px; }
   #home-today-list.ledger-list, #home-habits-list.ledger-list{ display:flex; flex-direction:column; gap:6px; }
   #home-today-list .ledger-item, #home-habits-list .ledger-item{
     border-bottom:none; background:var(--paper-2); border-radius:12px; padding:9px 12px; gap:10px;
@@ -427,7 +429,7 @@
   .day-opt.active{ background:var(--moss); border-color:var(--moss); color:#fff; }
   .sheet-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
   .btn{ padding:11px 22px; border-radius:22px; border:none; font-weight:600; font-size:13.5px; cursor:pointer; }
-  .btn-ghost{ background:none; color:var(--ink-soft); }
+  .btn-ghost{ background:none; color:var(--ink-soft); border:none; cursor:pointer; }
   .btn-primary{ background:var(--ink); color:var(--paper); }
   .btn-danger-text{ background:none; border:none; color:var(--danger); font-weight:600; font-size:13px; cursor:pointer; width:100%; text-align:center; margin-top:16px; padding:6px; }
 
@@ -456,6 +458,25 @@
   .confirm-popup-actions{ display:flex; justify-content:flex-end; gap:10px; }
   .confirm-popup-actions .btn-danger-text{ width:auto; margin-top:0; padding:8px 14px; }
   .confirm-popup-actions .btn-ghost{ padding:8px 14px; }
+
+  .quickview-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:90; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+  .quickview-overlay.open{ opacity:1; pointer-events:all; }
+  .quickview-popup{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.94); z-index:91;
+    width:min(320px, calc(100vw - 56px));
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius:22px; padding:22px 44px 20px 20px; box-shadow:var(--shadow); border:1px solid var(--line);
+    opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+  }
+  .quickview-popup.open{ opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
+  .quickview-edit-btn{
+    position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%;
+    background:var(--paper-2); border:none; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .quickview-edit-btn svg{ width:15px; height:15px; }
+  .quickview-title{ font-family:var(--font-display); font-size:19px; color:var(--ink); margin-bottom:12px; line-height:1.3; }
+  .quickview-meta{ display:flex; flex-wrap:wrap; gap:6px; }
 
   /* ---------- splash screen ---------- */
   #splash-screen{
@@ -882,6 +903,14 @@
     <button class="btn-ghost" id="confirm-popup-cancel">Cancel</button>
     <button class="btn-danger-text" id="confirm-popup-ok">Delete</button>
   </div>
+</div>
+<div class="quickview-overlay" id="quickview-overlay"></div>
+<div class="quickview-popup" id="quickview-popup">
+  <button class="quickview-edit-btn" id="quickview-edit-btn" aria-label="Edit">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+  </button>
+  <div class="quickview-title" id="quickview-title"></div>
+  <div class="quickview-meta" id="quickview-meta"></div>
 </div>
 <div class="overlay" id="overlay"></div>
 
@@ -1321,6 +1350,14 @@
       var dragged = tasks.find(function(x){ return x.id===draggedId; });
       var target = tasks.find(function(x){ return x.id===targetId; });
       if(!dragged || !target || dragged.id===target.id) { renderOrganizePage(); return; }
+      if(target.parentId){
+        // the drop target is itself a subtask - nesting under it would create a third level that
+        // nothing in the app actually displays (Home, Week, Month, Activity only ever expand one
+        // level deep), so the task would just silently vanish from every list. Refuse instead.
+        renderOrganizePage();
+        showToast("Can't nest under a subtask - only one level of nesting is supported.");
+        return;
+      }
       dragged.parentId = target.id;
       dragged.order = Date.now();
       saveTasks(); renderOrganizePage(); renderHome();
@@ -1501,6 +1538,36 @@
     }, { passive:true });
   })();
 
+  /* ---------------- long-press for quick task detail view (everywhere except Organize, which already uses long-press for its own drag gesture) ---------------- */
+  (function(){
+    var pressTimer = null, longPressed = false, startX = 0, startY = 0;
+    document.addEventListener("touchstart", function(e){
+      var body = e.target.closest(".ledger-body");
+      var item = e.target.closest(".ledger-item");
+      if(!body || !item) return;
+      if(item.closest("#organize-list")) return; // Organize's long-press is already spoken for (drag to reorder/nest)
+      if(item.classList.contains("habit-row") || item.classList.contains("goal-row")) return; // quick-view is for tasks only
+      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+      longPressed = false;
+      pressTimer = setTimeout(function(){
+        longPressed = true;
+        if(navigator.vibrate) navigator.vibrate(12);
+        var id = body.getAttribute("data-edit");
+        var t = tasks.find(function(x){ return x.id===id; });
+        if(t) openQuickView(t);
+      }, 480);
+    }, { passive:true });
+    document.addEventListener("touchmove", function(e){
+      if(!pressTimer) return;
+      if(Math.abs(e.touches[0].clientX-startX)>8 || Math.abs(e.touches[0].clientY-startY)>8) clearTimeout(pressTimer);
+    }, { passive:true });
+    document.addEventListener("touchend", function(){ clearTimeout(pressTimer); });
+    document.addEventListener("touchcancel", function(){ clearTimeout(pressTimer); });
+    document.addEventListener("click", function(e){
+      if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed = false; }
+    }, true);
+  })();
+
   /* ---------------- swipe-down quick add (Home) ---------------- */
   (function(){
     var bar = document.getElementById("pull-add-bar");
@@ -1638,6 +1705,32 @@
     return Math.round(hrs/24)+"d ago";
   }
   pruneTrash();
+
+  function openQuickView(t){
+    document.getElementById("quickview-title").textContent = t.text;
+    var metaHtml = "";
+    if(t.type==="once" && t.dueDate) metaHtml += '<span class="ledger-tag">'+fmtShort(new Date(t.dueDate+"T00:00:00"))+(t.dueTime?' · '+fmtTime(t.dueTime):'')+'</span>';
+    if(t.type==="daily") metaHtml += '<span class="ledger-tag">Daily</span>';
+    if(t.type==="weekly") metaHtml += '<span class="ledger-tag">Weekly</span>';
+    if(t.type==="monthly") metaHtml += '<span class="ledger-tag">Monthly</span>';
+    metaHtml += priorityTag(t.priority);
+    if(t.category) metaHtml += '<span class="ledger-tag cat" style="background:'+catColor(t.category)+';">'+catLabel(t.category)+'</span>';
+    var childCount = taskChildren(t.id).length;
+    if(childCount) metaHtml += '<span class="ledger-tag">'+childCount+' subtask'+(childCount===1?"":"s")+'</span>';
+    if(t.parentId){
+      var parent = tasks.find(function(x){ return x.id===t.parentId; });
+      if(parent) metaHtml += '<span class="ledger-tag">Subtask of "'+escapeHtml(parent.text)+'"</span>';
+    }
+    document.getElementById("quickview-meta").innerHTML = metaHtml;
+    document.getElementById("quickview-edit-btn").onclick = function(){ closeQuickView(); openTaskSheet(t); };
+    document.getElementById("quickview-overlay").classList.add("open");
+    document.getElementById("quickview-popup").classList.add("open");
+  }
+  function closeQuickView(){
+    document.getElementById("quickview-overlay").classList.remove("open");
+    document.getElementById("quickview-popup").classList.remove("open");
+  }
+  document.getElementById("quickview-overlay").addEventListener("click", closeQuickView);
 
   function confirmPopup(message, onConfirm){
     var overlayEl = document.getElementById("confirm-overlay");
@@ -2199,10 +2292,12 @@
     var s = startOfWeek(selectedDate), e = new Date(s); e.setDate(s.getDate()+6);
     document.getElementById("week-label").textContent = fmtShort(s)+" – "+fmtShort(e);
     var keys = []; for(var i=0;i<7;i++){ var d=new Date(s); d.setDate(s.getDate()+i); keys.push(dateKey(d)); }
-    var list = tasks.filter(function(t){
+    var topLevel = tasks.filter(function(t){
       if(t.list==="work") return false;
+      if(t.parentId) return false;
       return t.type==="weekly" || (t.type==="once" && t.dueDate && keys.indexOf(t.dueDate)!==-1);
     }).sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
+    var list = expandWithSubtasks(topLevel);
     var wrap = document.getElementById("week-list");
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this week yet.</div>';
   }
@@ -2335,8 +2430,9 @@
     var isToday = selKey()===todayKey;
     var dayLabel = isToday ? "Today" : selectedDate.toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"});
     document.getElementById("cal-day-label").textContent = dayLabel;
-    var list = tasks.filter(function(t){ if(t.list==="work") return false; return t.type==="daily" || (t.type==="once" && t.dueDate===selKey()); })
+    var topLevel = tasks.filter(function(t){ if(t.list==="work") return false; if(t.parentId) return false; return t.type==="daily" || (t.type==="once" && t.dueDate===selKey()); })
       .sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
+    var list = expandWithSubtasks(topLevel);
     var wrap = document.getElementById("cal-day-list");
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this day.</div>';
     document.getElementById("cal-quickadd-text").textContent = "Add a task for "+(isToday ? "today" : dayLabel);
@@ -3176,7 +3272,13 @@
         if(e.target.closest(skipSelector)) return; // let form controls handle their own taps normally
         start(e.touches[0].clientY, e.touches[0].clientX);
       }, { passive:true });
-      sheetEl.addEventListener("touchmove", function(e){ move(e.touches[0].clientY, e.touches[0].clientX); }, { passive:true });
+      sheetEl.addEventListener("touchmove", function(e){
+        if(!dragging) return;
+        var dx = Math.abs(e.touches[0].clientX - startX);
+        var dyRaw = e.touches[0].clientY - startY;
+        if(dyRaw > 0 && dyRaw > dx) e.preventDefault(); // this is a genuine downward drag on the sheet - stop the page underneath from also scrolling at the same time
+        move(e.touches[0].clientY, e.touches[0].clientX);
+      }, { passive:false });
       sheetEl.addEventListener("touchend", end, { passive:true });
     }
     wireSwipeToDismiss(taskSheet, closeTaskSheet);
@@ -3366,7 +3468,14 @@
           var r = sib.getBoundingClientRect();
           if(y > r.top && y < r.bottom){
             if(isNesting){
-              if(nestTarget !== sib){ clearNestHighlight(); sib.classList.add("organize-nest-hover"); nestTarget = sib; }
+              var sibHasParent = !!sib.getAttribute("data-parent");
+              if(sibHasParent){
+                // this sibling is itself a subtask - nesting under it would create an unsupported third
+                // level that would just vanish from every list, so it's never a valid drop target
+                if(nestTarget) clearNestHighlight();
+              } else if(nestTarget !== sib){
+                clearNestHighlight(); sib.classList.add("organize-nest-hover"); nestTarget = sib;
+              }
             } else {
               if(nestTarget) clearNestHighlight();
               var itemIdx = siblings.indexOf(item), sibIdx = siblings.indexOf(sib);
