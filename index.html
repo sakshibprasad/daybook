@@ -443,6 +443,19 @@
   .toast.show{ transform:translateY(0); opacity:1; pointer-events:all; }
   .toast button{ background:none; border:none; color:var(--moss-2); font-weight:700; font-size:13px; cursor:pointer; }
 
+  .confirm-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:95; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+  .confirm-overlay.open{ opacity:1; pointer-events:all; }
+  .confirm-popup{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.94); z-index:96;
+    background:var(--paper); border-radius:16px; padding:20px; width:min(300px, calc(100vw - 56px));
+    box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+  }
+  .confirm-popup.open{ opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
+  .confirm-popup-text{ font-size:14.5px; color:var(--ink); margin-bottom:18px; line-height:1.4; }
+  .confirm-popup-actions{ display:flex; justify-content:flex-end; gap:10px; }
+  .confirm-popup-actions .btn-danger-text{ width:auto; margin-top:0; padding:8px 14px; }
+  .confirm-popup-actions .btn-ghost{ padding:8px 14px; }
+
   /* ---------- splash screen ---------- */
   #splash-screen{
     position:fixed; inset:0; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
@@ -815,9 +828,24 @@
         </div>
         <input type="file" id="import-file" accept="application/json" style="display:none;">
       </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Recently Deleted</span></div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:10px; line-height:1.5;">Tasks, habits, goals, and shopping items you've deleted, kept here for 30 days in case you need one back.</div>
+        <button class="pill-btn" id="open-trash-btn" style="width:100%; padding:10px;">View Recently Deleted</button>
+      </div>
     </div>
   </div>
 
+</div>
+
+<!-- RECENTLY DELETED (trash) sheet -->
+<div class="overlay" id="trash-overlay"></div>
+<div class="sheet day-preview-sheet" id="trash-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Recently Deleted</div>
+  <div id="trash-empty-note" style="font-size:13px; color:var(--ink-soft); text-align:center; padding:20px 0; display:none;">Nothing in here right now.</div>
+  <div id="trash-body"></div>
+  <button class="btn-ghost" id="trash-close" style="width:100%; margin-top:10px;">Close</button>
 </div>
 
 <div class="fab-wrap" id="fab-wrap">
@@ -846,6 +874,14 @@
 </nav>
 
 <div class="toast" id="toast"></div>
+<div class="confirm-overlay" id="confirm-overlay"></div>
+<div class="confirm-popup" id="confirm-popup">
+  <div class="confirm-popup-text" id="confirm-popup-text"></div>
+  <div class="confirm-popup-actions">
+    <button class="btn-ghost" id="confirm-popup-cancel">Cancel</button>
+    <button class="btn-danger-text" id="confirm-popup-ok">Delete</button>
+  </div>
+</div>
 <div class="overlay" id="overlay"></div>
 
 <!-- ADD TASK SHEET (Week/Month) -->
@@ -1147,20 +1183,37 @@
     if(t.type==="once"){
       t.doneOnce = !t.doneOnce;
       t.completedAt = t.doneOnce ? Date.now() : null;
+      if(t.doneOnce && !t.parentId) cascadeCompleteChildren(t, selectedDate);
     }
     else {
       var pk = t.type==="daily" ? dateKey(selectedDate) : t.type==="weekly" ? weekKey(selectedDate) : monthKey(selectedDate);
       t.completed = t.completed || {};
-      if(t.completed[pk]) delete t.completed[pk]; else t.completed[pk] = true;
+      var wasDone = !!t.completed[pk];
+      if(wasDone) delete t.completed[pk]; else t.completed[pk] = true;
+      if(!wasDone && !t.parentId) cascadeCompleteChildren(t, selectedDate);
     }
     saveTasks(); renderAll();
+  }
+  // Checking off a parent task also completes all of its subtasks - only in that direction
+  // (checking the parent), never the reverse, and never when un-checking.
+  function cascadeCompleteChildren(parent, refDate){
+    taskChildren(parent.id).forEach(function(c){
+      if(c.type==="once"){
+        if(!c.doneOnce){ c.doneOnce = true; c.completedAt = Date.now(); }
+      } else {
+        var cpk = c.type==="daily" ? dateKey(refDate) : c.type==="weekly" ? weekKey(refDate) : monthKey(refDate);
+        c.completed = c.completed || {};
+        c.completed[cpk] = true;
+      }
+    });
   }
   function deleteTask(id){
     var idx = tasks.findIndex(function(t){ return t.id===id; });
     if(idx===-1) return;
     var removed = tasks[idx];
     tasks.splice(idx,1); saveTasks(); renderAll();
-    showToast("Task deleted.", function(){ tasks.splice(idx,0,removed); saveTasks(); renderAll(); });
+    addToTrash("task", removed.text, removed);
+    showToast("Task deleted.", function(){ tasks.splice(idx,0,removed); saveTasks(); renderAll(); removeFromTrashByOriginalId(removed.id); });
   }
 
   function taskOrderKey(t){ return t.order!==undefined ? t.order : t.createdAt; }
@@ -1185,10 +1238,13 @@
     if(t.type==="once"){
       t.doneOnce = !t.doneOnce;
       t.completedAt = t.doneOnce ? Date.now() : null;
+      if(t.doneOnce && !t.parentId) cascadeCompleteChildren(t, organizeSelectedDate);
     } else {
       var pk = t.type==="daily" ? dateKey(organizeSelectedDate) : t.type==="weekly" ? weekKey(organizeSelectedDate) : monthKey(organizeSelectedDate);
       t.completed = t.completed || {};
-      if(t.completed[pk]) delete t.completed[pk]; else t.completed[pk] = true;
+      var wasDone = !!t.completed[pk];
+      if(wasDone) delete t.completed[pk]; else t.completed[pk] = true;
+      if(!wasDone && !t.parentId) cascadeCompleteChildren(t, organizeSelectedDate);
     }
     saveTasks(); renderOrganizePage(); renderHome();
   }
@@ -1377,6 +1433,7 @@
     document.addEventListener("touchstart", function(e){
       var item = e.target.closest(".ledger-item");
       if(!item) return;
+      if(item.closest("#organize-list")) return; // Organize has its own long-press-then-drag gesture (reorder/nest) - a plain horizontal swipe would conflict with it and cause accidental deletes mid-drag
       swipeItem = item; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
       deltaX = 0; active = false;
       item.style.transition = "none";
@@ -1405,20 +1462,29 @@
         var isHabit = item.classList.contains("habit-row");
         var isGoal = item.classList.contains("goal-row");
         if(id && isHabit){
-          if(deltaX > 0){ deleteHabit(id); }
+          if(deltaX > 0){
+            var hForConfirm = habits.find(function(x){return x.id===id;});
+            confirmPopup('Delete "'+(hForConfirm?hForConfirm.name:"this habit")+'"?', function(){ deleteHabit(id); });
+          }
           else {
             var h = habits.find(function(x){return x.id===id;});
             if(h && h.trackType==="number" && isScheduledOn(h, realNow)){ openHabitLogSheet(id, todayKey); }
             else if(h && isScheduledOn(h, realNow)){ h.completed = h.completed||{}; if(h.completed[todayKey]) delete h.completed[todayKey]; else h.completed[todayKey]=true; saveHabits(); renderHabits(); renderHome(); }
           }
         } else if(id && isGoal){
-          if(deltaX > 0){ deleteGoal(id); }
+          if(deltaX > 0){
+            var gForConfirm = goals.find(function(x){return x.id===id;});
+            confirmPopup('Delete "'+(gForConfirm?gForConfirm.text:"this goal")+'"?', function(){ deleteGoal(id); });
+          }
           else {
             var g = goals.find(function(x){return x.id===id;});
             if(g){ g.done=!g.done; if(g.done) g.progress=100; saveGoals(); renderGoalsView(); renderHome(); }
           }
         } else if(id){
-          if(deltaX > 0){ deleteTask(id); }
+          if(deltaX > 0){
+            var tForConfirm = tasks.find(function(x){return x.id===id;});
+            confirmPopup('Delete "'+(tForConfirm?tForConfirm.text:"this task")+'"?', function(){ deleteTask(id); });
+          }
           else { var t = tasks.find(function(x){return x.id===id;}); if(t) toggleDone(t); }
         }
       }
@@ -1538,6 +1604,53 @@
   })();
   /* ---------------- toast ---------------- */
   var toastTimer = null;
+  /* ---------------- trash / recently deleted ---------------- */
+  var trashedItems = load("db2.trash", []);
+  function saveTrash(){ save("db2.trash", trashedItems); }
+  function pruneTrash(){
+    var cutoff = Date.now() - 30*24*60*60*1000; // items older than 30 days are auto-purged
+    var before = trashedItems.length;
+    trashedItems = trashedItems.filter(function(x){ return x.deletedAt >= cutoff; });
+    if(trashedItems.length !== before) saveTrash();
+  }
+  function addToTrash(kind, label, data){
+    trashedItems.unshift({ id: uid(), kind: kind, label: label, data: data, deletedAt: Date.now() });
+    saveTrash();
+  }
+  function removeFromTrashByOriginalId(originalId){
+    var idx = trashedItems.findIndex(function(x){ return x.data && x.data.id === originalId; });
+    if(idx !== -1){ trashedItems.splice(idx,1); saveTrash(); }
+  }
+  function trashTimeAgo(ts){
+    var mins = Math.round((Date.now()-ts)/60000);
+    if(mins < 1) return "just now";
+    if(mins < 60) return mins+"m ago";
+    var hrs = Math.round(mins/60);
+    if(hrs < 24) return hrs+"h ago";
+    return Math.round(hrs/24)+"d ago";
+  }
+  pruneTrash();
+
+  function confirmPopup(message, onConfirm){
+    var overlayEl = document.getElementById("confirm-overlay");
+    var popupEl = document.getElementById("confirm-popup");
+    var okBtn = document.getElementById("confirm-popup-ok");
+    var cancelBtn = document.getElementById("confirm-popup-cancel");
+    document.getElementById("confirm-popup-text").textContent = message;
+    overlayEl.classList.add("open"); popupEl.classList.add("open");
+    function cleanup(){
+      overlayEl.classList.remove("open"); popupEl.classList.remove("open");
+      okBtn.removeEventListener("click", onOk);
+      cancelBtn.removeEventListener("click", onCancel);
+      overlayEl.removeEventListener("click", onCancel);
+    }
+    function onOk(){ cleanup(); onConfirm(); }
+    function onCancel(){ cleanup(); }
+    okBtn.addEventListener("click", onOk);
+    cancelBtn.addEventListener("click", onCancel);
+    overlayEl.addEventListener("click", onCancel);
+  }
+
   function showToast(msg, undoFn){
     var el = document.getElementById("toast");
     el.innerHTML = '<span>'+msg+'</span>'+(undoFn?'<button id="toast-undo">Undo</button>':'');
@@ -2330,7 +2443,8 @@
     if(idx===-1) return;
     var removed = habits[idx];
     habits.splice(idx,1); saveHabits(); renderHabits(); renderHome();
-    showToast("Habit deleted.", function(){ habits.splice(idx,0,removed); saveHabits(); renderHabits(); renderHome(); });
+    addToTrash("habit", removed.name, removed);
+    showToast("Habit deleted.", function(){ habits.splice(idx,0,removed); saveHabits(); renderHabits(); renderHome(); removeFromTrashByOriginalId(removed.id); });
   }
   function weekStats(h){
     var start = startOfWeek(realNow), scheduled=0, done=0;
@@ -2453,7 +2567,8 @@
     if(idx===-1) return;
     var removed = goals[idx];
     goals.splice(idx,1); saveGoals(); renderGoalsView(); renderHome();
-    showToast("Goal deleted.", function(){ goals.splice(idx,0,removed); saveGoals(); renderGoalsView(); renderHome(); });
+    addToTrash("goal", removed.text, removed);
+    showToast("Goal deleted.", function(){ goals.splice(idx,0,removed); saveGoals(); renderGoalsView(); renderHome(); removeFromTrashByOriginalId(removed.id); });
   }
   function renderGoalList(containerId, timeframe){
     var wrap = document.getElementById(containerId);
@@ -2559,7 +2674,8 @@
     if(idx===-1) return;
     var removed = shoppingItems[idx];
     shoppingItems.splice(idx,1); saveShopping(); renderShoppingPage();
-    showToast("Item deleted.", function(){ shoppingItems.splice(idx,0,removed); saveShopping(); renderShoppingPage(); });
+    addToTrash("shopping", removed.text, removed);
+    showToast("Item deleted.", function(){ shoppingItems.splice(idx,0,removed); saveShopping(); renderShoppingPage(); removeFromTrashByOriginalId(removed.id); });
   }
   document.getElementById("shopping-list").addEventListener("click", function(e){
     var chk = e.target.closest(".ledger-check");
@@ -3097,6 +3213,63 @@
     if(id){ goals = goals.filter(function(g){ return g.id!==id; }); saveGoals(); renderGoalsView(); renderHome(); }
   });
   document.getElementById("goal-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("goal-save").click(); });
+
+  /* ---------------- recently deleted (trash) ---------------- */
+  function renderTrash(){
+    pruneTrash();
+    var body = document.getElementById("trash-body");
+    var emptyNote = document.getElementById("trash-empty-note");
+    if(!trashedItems.length){
+      body.innerHTML = "";
+      emptyNote.style.display = "block";
+      return;
+    }
+    emptyNote.style.display = "none";
+    var kindLabel = { task:"Task", habit:"Habit", goal:"Goal", shopping:"Shopping item" };
+    body.innerHTML = trashedItems.map(function(x){
+      return '<div class="day-preview-row" data-trash-id="'+x.id+'">' +
+        '<div class="day-preview-text" style="flex:1; min-width:0;">' +
+          '<div class="day-preview-name">'+escapeHtml(x.label||"(untitled)")+'</div>' +
+          '<div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">'+kindLabel[x.kind]+' · deleted '+trashTimeAgo(x.deletedAt)+'</div>' +
+        '</div>' +
+        '<button class="pill-btn" data-trash-restore="'+x.id+'" style="padding:6px 12px; font-size:12px;">Restore</button>' +
+        '<button class="ledger-del" data-trash-purge="'+x.id+'" style="margin-left:4px;">×</button>' +
+      '</div>';
+    }).join("");
+    body.querySelectorAll("[data-trash-restore]").forEach(function(btn){
+      btn.addEventListener("click", function(){ restoreFromTrash(btn.getAttribute("data-trash-restore")); });
+    });
+    body.querySelectorAll("[data-trash-purge]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var idx = trashedItems.findIndex(function(x){ return x.id===btn.getAttribute("data-trash-purge"); });
+        if(idx!==-1){ trashedItems.splice(idx,1); saveTrash(); renderTrash(); }
+      });
+    });
+  }
+  function restoreFromTrash(trashId){
+    var idx = trashedItems.findIndex(function(x){ return x.id===trashId; });
+    if(idx===-1) return;
+    var entry = trashedItems[idx];
+    if(entry.kind==="task") tasks.unshift(entry.data), saveTasks();
+    else if(entry.kind==="habit") habits.unshift(entry.data), saveHabits();
+    else if(entry.kind==="goal") goals.unshift(entry.data), saveGoals();
+    else if(entry.kind==="shopping") shoppingItems.unshift(entry.data), saveShopping();
+    trashedItems.splice(idx,1); saveTrash();
+    renderTrash(); renderAll();
+    showToast('"'+entry.label+'" restored.');
+  }
+  function openTrashSheet(){
+    renderTrash();
+    document.getElementById("trash-overlay").classList.add("open");
+    document.getElementById("trash-sheet").classList.add("open");
+  }
+  function closeTrashSheet(){
+    document.getElementById("trash-overlay").classList.remove("open");
+    document.getElementById("trash-sheet").classList.remove("open");
+  }
+  document.getElementById("open-trash-btn").addEventListener("click", openTrashSheet);
+  document.getElementById("trash-close").addEventListener("click", closeTrashSheet);
+  document.getElementById("trash-overlay").addEventListener("click", closeTrashSheet);
 
   /* ---------------- export / import ---------------- */
   document.getElementById("export-btn").addEventListener("click", function(){
