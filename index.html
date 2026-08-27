@@ -32,7 +32,7 @@
     --line:#E3DDCE; --moss:#5B6B4F; --moss-soft:#E4E8DA; --moss-2:#7C8E6C;
     --danger:#A3543F; --shadow:0 2px 10px rgba(43,38,32,0.05), 0 10px 26px rgba(43,38,32,0.06);
     --font-display:'Libre Caslon Display', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
-    --font-secondary:'Tangerine', cursive;
+    --font-secondary:'Tangerine', cursive; --card-opacity:88%;
   }
   html[data-secondary-font="tangerine"]{ --font-secondary:'Tangerine', cursive; }
   html[data-secondary-font="caveat"]{ --font-secondary:'Caveat', cursive; }
@@ -69,43 +69,49 @@
     --danger:#C0693F; --shadow:0 2px 10px rgba(51,45,31,0.06), 0 10px 26px rgba(51,45,31,0.07);
   }
   html[data-theme="glass"]{
-    --paper:#E7EFE9; --paper-2:rgba(255,255,255,0.5); --ink:#354238; --ink-soft:#748078;
+    --paper:#E7EFE9; --paper-2:#FFFFFF; --ink:#354238; --ink-soft:#748078;
     --line:rgba(255,255,255,0.65); --moss:#7FA88C; --moss-soft:rgba(196,208,183,0.4); --moss-2:#9DBEA4;
     --danger:#C98B7A; --shadow:0 8px 32px rgba(90,110,95,0.14), 0 2px 10px rgba(90,110,95,0.08);
   }
   html[data-theme="glass"] body{
     background:linear-gradient(160deg, #E3EDE6 0%, #D9E7E1 22%, #DCE3EC 50%, #E9E3E9 75%, #EEE8DF 100%);
     background-attachment:fixed;
-    position:relative;
   }
   html[data-theme="glass"] body::before{
-    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
       radial-gradient(38vw 38vw at 12% 8%, rgba(159,190,164,0.55) 0%, transparent 65%),
       radial-gradient(34vw 34vw at 88% 22%, rgba(200,186,214,0.45) 0%, transparent 65%),
       radial-gradient(40vw 40vw at 20% 92%, rgba(210,177,158,0.4) 0%, transparent 65%),
       radial-gradient(30vw 30vw at 85% 85%, rgba(159,190,164,0.4) 0%, transparent 65%);
+    opacity:1;
   }
-  html[data-theme="glass"] .app{ position:relative; z-index:1; }
-  html[data-theme="glass"] .card,
-  html[data-theme="glass"] .home-hero,
-  html[data-theme="glass"] .next-up-card,
-  html[data-theme="glass"] .sheet,
-  html[data-theme="glass"] .bottom-nav,
-  html[data-theme="glass"] .quickview-popup,
-  html[data-theme="glass"] .confirm-popup,
-  html[data-theme="glass"] .toast,
-  html[data-theme="glass"] .work-summary-card{
-    background:var(--paper-2);
-    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-    border:1px solid rgba(255,255,255,0.7);
+  /* ---- Universal glass-card treatment: every theme gets translucent, blurred, rounded, gapped
+     cards now, not just Glass - this is what "cards and transparency like the glass theme" means
+     applied everywhere. Each theme keeps its own colors (via --paper-2/--line), only the surface
+     TREATMENT (blur, transparency, rounding, spacing) is now shared. --card-opacity is the user's
+     adjustable transparency slider (Settings -> Appearance), default 88%. ---- */
+  body{ position:relative; }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(38vw 38vw at 12% 8%, var(--moss-soft) 0%, transparent 65%),
+      radial-gradient(34vw 34vw at 88% 22%, var(--moss-2) 0%, transparent 65%),
+      radial-gradient(40vw 40vw at 20% 92%, var(--moss-soft) 0%, transparent 65%),
+      radial-gradient(30vw 30vw at 85% 85%, var(--moss-2) 0%, transparent 65%);
+    opacity:0.45;
   }
-  html[data-theme="glass"] .card{
+  .app{ position:relative; z-index:1; }
+  .card, .home-hero, .next-up-card, .sheet, .bottom-nav, .quickview-popup, .confirm-popup, .toast, .work-summary-card{
+    background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 88%), transparent);
+    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    border:1px solid var(--line);
+  }
+  .card{
     border-radius:20px;
     padding:20px 18px;
     margin-bottom:14px;
   }
-  html[data-theme="glass"] .card:last-child{ margin-bottom:0; }
+  .card:last-child{ margin-bottom:0; }
   html[data-font="caslon"]{ --font-display:'Libre Caslon Display', serif; }
   html[data-font="cormorant"]{ --font-display:'Cormorant Garamond', serif; }
   html[data-font="fraunces"]{ --font-display:'Fraunces', serif; }
@@ -573,7 +579,7 @@
           <div class="home-greeting-title" id="home-greeting"></div>
           <div class="home-greeting-date" id="home-date"></div>
         </div>
-        <div class="home-gesture-hint">Hold for categories · Swipe right for shopping</div>
+        <div class="home-gesture-hint">Hold for categories · Swipe right for shopping · Swipe left for organize</div>
       </div>
 
       <div class="next-up-card" id="next-up-card" style="display:none;">
@@ -628,11 +634,6 @@
           <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
           <span class="home-tile-label">Activity</span>
           <span class="home-tile-count" id="activity-count">—</span>
-        </button>
-        <button class="home-tile" id="link-organize" data-tile-id="organize">
-          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
-          <span class="home-tile-label">Organize</span>
-          <span class="home-tile-count" id="organize-count">—</span>
         </button>
       </div>
     </div>
@@ -774,11 +775,21 @@
     </div>
     <div class="section">
       <div class="card">
+        <div class="label-row"><span class="label">Personal</span></div>
         <ul class="cat-list" id="cat-list"></ul>
         <div class="add-line" id="add-category"><span class="plus">+</span>New category</div>
         <div class="cat-add-inline" id="cat-page-add-inline" style="display:none; margin-top:8px;">
           <input type="text" id="cat-page-add-input" placeholder="Category name" maxlength="20">
           <button id="cat-page-add-confirm">Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Work</span></div>
+        <ul class="cat-list" id="work-cat-list"></ul>
+        <div class="add-line" id="add-work-category"><span class="plus">+</span>New work category</div>
+        <div class="cat-add-inline" id="work-cat-page-add-inline" style="display:none; margin-top:8px;">
+          <input type="text" id="work-cat-page-add-input" placeholder="Category name" maxlength="20">
+          <button id="work-cat-page-add-confirm">Add</button>
         </div>
       </div>
     </div>
@@ -846,6 +857,14 @@
       <div class="card">
         <div class="label-row"><span class="label">Appearance</span></div>
         <div class="theme-row" id="theme-row"></div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Card transparency</span></div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">How see-through cards, sheets, and the nav bar are. Lower is more transparent.</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <input type="range" id="transparency-slider" min="40" max="100" step="1" style="flex:1;">
+          <span class="mono" id="transparency-value" style="font-size:12px; color:var(--ink-soft); min-width:34px; text-align:right;">88%</span>
+        </div>
       </div>
       <div class="card">
         <div class="label-row"><span class="label">Typeface</span></div>
@@ -1759,6 +1778,7 @@
       gestureTracking = false;
       var dx = e.changedTouches[0].clientX - gestureStartX, dy = e.changedTouches[0].clientY - gestureStartY;
       if(dx > SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("shopping");
+      else if(dx < -SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("organize");
     }, { passive:true });
   })();
   /* ---------------- toast ---------------- */
@@ -1874,7 +1894,6 @@
   document.getElementById("link-habits").addEventListener("click", function(){ switchTab("habits"); });
   document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
   document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
-  document.getElementById("link-organize").addEventListener("click", function(){ switchTab("organize"); });
   function goToOrganizeDate(d){
     switchTab("organize"); // this resets organizeSelectedDate back to today as a side effect - the two lines below then override it to the date we actually want
     organizeSelectedDate = new Date(d);
@@ -1980,6 +1999,33 @@
         renderCategoriesPage();
       });
     });
+
+    var workWrap = document.getElementById("work-cat-list");
+    if(!workCategories.length){ workWrap.innerHTML = '<div class="empty-note">No work categories yet.</div>'; }
+    else {
+      workWrap.innerHTML = workCategories.map(function(c){
+        var count = tasks.filter(function(t){ return t.category===c.id; }).length;
+        return '<li class="cat-list-row" data-cat="'+c.id+'">' +
+          '<span class="cat-list-name">'+escapeHtml(c.label)+'</span>' +
+          '<span class="cat-list-count">'+count+'</span>' +
+          '<span class="cat-list-chevron">›</span>' +
+          '<button class="cat-list-del" data-cat-del="'+c.id+'">×</button>' +
+        '</li>';
+      }).join("");
+    }
+    workWrap.querySelectorAll(".cat-list-row").forEach(function(row){
+      row.addEventListener("click", function(e){
+        if(e.target.closest(".cat-list-del")) return;
+        openCategoryDetail(row.getAttribute("data-cat"));
+      });
+    });
+    workWrap.querySelectorAll(".cat-list-del").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        deleteWorkCategoryWithUndo(btn.getAttribute("data-cat-del"));
+        renderCategoriesPage();
+      });
+    });
   }
   document.getElementById("add-category").addEventListener("click", function(){
     document.getElementById("cat-page-add-inline").style.display = "flex";
@@ -1992,6 +2038,19 @@
     saveCategories();
     document.getElementById("cat-page-add-input").value = "";
     document.getElementById("cat-page-add-inline").style.display = "none";
+    renderCategoriesPage();
+  });
+  document.getElementById("add-work-category").addEventListener("click", function(){
+    document.getElementById("work-cat-page-add-inline").style.display = "flex";
+    document.getElementById("work-cat-page-add-input").focus();
+  });
+  document.getElementById("work-cat-page-add-confirm").addEventListener("click", function(){
+    var name = document.getElementById("work-cat-page-add-input").value.trim();
+    if(!name) return;
+    workCategories.push({ id:"c"+uid(), label:name });
+    saveWorkCategories();
+    document.getElementById("work-cat-page-add-input").value = "";
+    document.getElementById("work-cat-page-add-inline").style.display = "none";
     renderCategoriesPage();
   });
 
@@ -2171,6 +2230,21 @@
   });
   applyFontSize(currentFontSize);
 
+  /* ---------------- card transparency ---------------- */
+  var currentCardOpacity = loadStr("db2.cardOpacity") || "88";
+  function applyCardOpacity(v){
+    currentCardOpacity = v;
+    document.documentElement.style.setProperty("--card-opacity", v+"%");
+    saveStr("db2.cardOpacity", v);
+    var slider = document.getElementById("transparency-slider");
+    var label = document.getElementById("transparency-value");
+    if(slider) slider.value = v;
+    if(label) label.textContent = v+"%";
+  }
+  var transparencySlider = document.getElementById("transparency-slider");
+  if(transparencySlider) transparencySlider.addEventListener("input", function(){ applyCardOpacity(this.value); });
+  applyCardOpacity(currentCardOpacity);
+
   /* ---------------- secondary (script) font ---------------- */
   var currentSecondaryFont = loadStr("db2.secondaryFont") || "tangerine";
   function applySecondaryFont(f){
@@ -2348,8 +2422,6 @@
     document.getElementById("goals-count").textContent = goalsOpen || "—";
     var completedCount = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt; }).length;
     document.getElementById("activity-count").textContent = completedCount || "—";
-    var subtaskCount = tasks.filter(function(t){ return t.parentId; }).length;
-    document.getElementById("organize-count").textContent = subtaskCount || "—";
     if(currentTab==="organize") renderOrganizeHabitsSection(dateKey(organizeSelectedDate)===todayKey); // habit changes elsewhere (Home, Habits page) always call renderHome() - keep Organize's habit section in sync too
   }
 
@@ -3083,6 +3155,19 @@
     showToast(msg, function(){
       categories.push(removed); saveCategories();
       renderHabitCatRow();
+    });
+  }
+  function deleteWorkCategoryWithUndo(id){
+    var removed = workCategories.find(function(c){ return c.id===id; });
+    if(!removed) return;
+    var affectedCount = tasks.filter(function(t){ return t.category===id; }).length;
+    workCategories = workCategories.filter(function(c){ return c.id!==id; });
+    saveWorkCategories();
+    var msg = affectedCount > 0
+      ? '"'+removed.label+'" deleted — '+affectedCount+' item'+(affectedCount===1?"":"s")+' left uncategorized.'
+      : '"'+removed.label+'" deleted.';
+    showToast(msg, function(){
+      workCategories.push(removed); saveWorkCategories();
     });
   }
   document.getElementById("cat-add-confirm").addEventListener("click", function(){
@@ -3835,7 +3920,7 @@
   // (which tab you were on, etc.) that shouldn't follow you between devices.
   var SYNC_KEYS = ["db2.tasks","db2.habits","db2.goals","db2.categories","db2.shopping",
     "db2.shoppingFor","db2.workCategories","db2.userName","db2.theme","db2.font",
-    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder"];
+    "db2.secondaryFont","db2.fontSize","db2.soundOn","db2.tileOrder","db2.cardOpacity"];
 
   var currentUser = null;
   var justSignedIn = false;
