@@ -1,5 +1,6 @@
-const CACHE = "daybook-v6";
+const CACHE = "daybook-v7";
 const STATIC_ASSETS = ["./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const ALPINE_BG_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200";
 
 // ---------------- Push notifications (Firebase Cloud Messaging background handling) ----------------
 // This only DISPLAYS a notification when one arrives - it doesn't decide when to send one.
@@ -32,7 +33,16 @@ try{
 }catch(e){ /* messaging not supported in this browser/context - the rest of the service worker (caching) still works fine */ }
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(STATIC_ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE).then((c) =>
+      c.addAll(STATIC_ASSETS).then(() =>
+        // best-effort precache of the Alpine theme's background photo - deliberately isolated with its
+        // own catch so a failure here (CORS, the CDN briefly down, etc.) can never break the core app
+        // shell install; { mode: "no-cors" } avoids CORS rejection entirely by accepting an opaque response
+        c.add(new Request(ALPINE_BG_URL, { mode: "no-cors" })).catch(() => {})
+      )
+    )
+  );
   self.skipWaiting();
 });
 
