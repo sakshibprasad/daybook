@@ -1,6 +1,9 @@
-const CACHE = "daybook-v7";
+const CACHE = "daybook-v8";
 const STATIC_ASSETS = ["./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
-const ALPINE_BG_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200";
+const ALPINE_BG_URLS = [
+  "https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200",
+  "https://commons.wikimedia.org/wiki/Special:FilePath/California%20Coast%20veiled%20in%20fog%202%20(15390973448).jpg?width=1200"
+];
 
 // ---------------- Push notifications (Firebase Cloud Messaging background handling) ----------------
 // This only DISPLAYS a notification when one arrives - it doesn't decide when to send one.
@@ -36,10 +39,13 @@ self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE).then((c) =>
       c.addAll(STATIC_ASSETS).then(() =>
-        // best-effort precache of the Alpine theme's background photo - deliberately isolated with its
-        // own catch so a failure here (CORS, the CDN briefly down, etc.) can never break the core app
-        // shell install; { mode: "no-cors" } avoids CORS rejection entirely by accepting an opaque response
-        c.add(new Request(ALPINE_BG_URL, { mode: "no-cors" })).catch(() => {})
+        // best-effort precache of both Alpine theme background photos - deliberately isolated with
+        // its own catch per image so a failure on either one (CORS, the CDN briefly down, etc.) can
+        // never break the core app shell install; { mode: "no-cors" } avoids CORS rejection entirely
+        // by accepting an opaque response
+        Promise.all(ALPINE_BG_URLS.map((url) =>
+          c.add(new Request(url, { mode: "no-cors" })).catch(() => {})
+        ))
       )
     )
   );

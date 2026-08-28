@@ -32,7 +32,10 @@
     --line:#E3DDCE; --moss:#5B6B4F; --moss-soft:#E4E8DA; --moss-2:#7C8E6C;
     --danger:#A3543F; --shadow:0 2px 10px rgba(43,38,32,0.05), 0 10px 26px rgba(43,38,32,0.06);
     --font-display:'Libre Caslon Display', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
-    --font-secondary:'Tangerine', cursive; --card-opacity:70%;
+    --font-secondary:'Tangerine', cursive; --card-opacity:70%; --app-max-width:480px;
+  }
+  @media (min-width:700px){
+    :root{ --app-max-width:640px; } /* more breathing room on unfolded foldables and tablets, instead of a narrow phone-width column with dead space on either side */
   }
   html[data-secondary-font="tangerine"]{ --font-secondary:'Tangerine', cursive; }
   html[data-secondary-font="caveat"]{ --font-secondary:'Caveat', cursive; }
@@ -91,16 +94,18 @@
     --paper:#12151B; --paper-2:#1B1E26; --ink:#F2F0EB; --ink-soft:#B7BCC4;
     --line:rgba(255,255,255,0.22); --moss:#9FC2CC; --moss-soft:rgba(159,194,204,0.18); --moss-2:#C3DEE5;
     --danger:#E8998C; --shadow:0 10px 34px rgba(0,0,0,0.4), 0 2px 10px rgba(0,0,0,0.3);
+    --alpine-bg-url:url('https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200');
   }
-  html[data-theme="alpine"] body{
-    background-color:#12151B;
-    background-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200');
-    background-size:cover; background-position:center top; background-repeat:no-repeat; background-attachment:fixed;
-  }
+  html[data-theme="alpine"] body{ background-color:#12151B; }
   html[data-theme="alpine"] body::before{
-    /* a real photo needs a plain darkening scrim for legibility, not the floating color blobs every
-       other theme gets - those are tuned for flat backgrounds and would just muddy an actual image */
-    background:linear-gradient(180deg, rgba(8,10,14,0.2) 0%, rgba(8,10,14,0.55) 60%, rgba(8,10,14,0.7) 100%);
+    /* the photo lives on this pseudo-element rather than directly on body's own background, because
+       it's already position:fixed - that's a far more reliable way to get a "background stays put,
+       content scrolls over it" effect on mobile browsers than background-attachment:fixed on body,
+       which many mobile browsers just silently ignore and scroll along with everything else anyway.
+       a real photo also needs a plain darkening scrim for legibility, not the floating color blobs
+       every other theme gets - those are tuned for flat backgrounds and would just muddy an image. */
+    background-image:linear-gradient(180deg, rgba(8,10,14,0.2) 0%, rgba(8,10,14,0.55) 60%, rgba(8,10,14,0.7) 100%), var(--alpine-bg-url);
+    background-size:cover; background-position:center top; background-repeat:no-repeat;
     opacity:1;
   }
   /* ---- Universal glass-card treatment: every theme gets translucent, blurred, rounded, gapped
@@ -176,7 +181,7 @@
   ::selection{ background:var(--moss-soft); }
   :focus-visible{ outline:2px solid var(--moss); outline-offset:2px; }
 
-  .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; position:relative; padding-bottom:90px; }
+  .app{ max-width:var(--app-max-width); margin:0 auto; min-height:100vh; min-height:100dvh; position:relative; padding-bottom:90px; }
   #view-month{ padding-bottom:76px; } /* extra room so the last item in the day-list can scroll clear of the fixed "Add a task" bar, which floats above the bottom nav on this page only */
   @media (min-width:600px){
     .app,.bottom-nav,.sheet{ max-width:640px; }
@@ -410,7 +415,7 @@
   .cal-legend-dot{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
   .cal-day-flash{ animation:calDayFlash .9s ease; }
   @keyframes calDayFlash{ 0%{ box-shadow:0 0 0 2px var(--moss); } 100%{ box-shadow:0 0 0 0 transparent; } }
-  .cal-quickadd-wrap{ position:fixed; left:14px; right:14px; bottom:calc(78px + env(safe-area-inset-bottom)); max-width:452px; margin:0 auto; z-index:18; }
+  .cal-quickadd-wrap{ position:fixed; left:14px; right:14px; bottom:calc(78px + env(safe-area-inset-bottom)); max-width:calc(var(--app-max-width) - 28px); margin:0 auto; z-index:18; }
   .cal-quickadd{
     width:100%; display:flex; align-items:center; justify-content:space-between; gap:14px;
     background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
@@ -470,7 +475,7 @@
     backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid color-mix(in srgb, var(--line) 70%, transparent);
     border-radius:26px; display:flex; padding:8px 6px;
-    max-width:452px; margin:0 auto; box-shadow:0 6px 20px rgba(43,38,32,0.12), 0 1px 0 rgba(43,38,32,0.04);
+    max-width:calc(var(--app-max-width) - 28px); margin:0 auto; box-shadow:0 6px 20px rgba(43,38,32,0.12), 0 1px 0 rgba(43,38,32,0.04);
   }
   html[data-theme="dusk"] .bottom-nav{ box-shadow:0 6px 20px rgba(0,0,0,0.35); }
   .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; background:none; border:none; cursor:pointer; padding:9px 0; color:var(--ink-soft); border-radius:18px; transition:background .15s ease, color .15s ease; }
@@ -478,7 +483,7 @@
   .nav-item.active{ color:var(--moss); background:var(--moss-soft); }
   .nav-lb{ font-family:var(--font-body); font-size:9.5px; font-weight:500; margin-top:2px; }
 
-  .fab-wrap{ position:fixed; left:0; right:0; bottom:calc(92px + env(safe-area-inset-bottom)); max-width:480px; margin:0 auto; display:flex; justify-content:flex-end; padding:0 20px; z-index:19; pointer-events:none; }
+  .fab-wrap{ position:fixed; left:0; right:0; bottom:calc(92px + env(safe-area-inset-bottom)); max-width:var(--app-max-width); margin:0 auto; display:flex; justify-content:flex-end; padding:0 20px; z-index:19; pointer-events:none; }
   .fab{ pointer-events:all; width:54px; height:54px; border-radius:50%; border:none; background:var(--ink); color:var(--paper); box-shadow:0 10px 22px rgba(43,38,32,0.25); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s cubic-bezier(.34,1.56,.64,1); }
   html[data-theme="dusk"] .fab{ box-shadow:0 10px 22px rgba(0,0,0,0.5); }
   .fab svg{ width:22px; height:22px; }
@@ -494,7 +499,7 @@
     position:fixed; left:0; right:0; bottom:0; background:color-mix(in srgb, var(--paper) var(--card-opacity, 70%), transparent);
     backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
     border-radius:24px 24px 0 0; padding:10px 22px calc(24px + env(safe-area-inset-bottom));
-    max-width:480px; margin:0 auto; transform:translateY(105%);
+    max-width:var(--app-max-width); margin:0 auto; transform:translateY(105%);
     transition:transform .3s cubic-bezier(.32,.72,0,1); z-index:31; max-height:85vh; overflow-y:auto;
     box-shadow:0 -10px 30px rgba(43,38,32,0.12);
   }
@@ -940,6 +945,14 @@
       <div class="card">
         <div class="label-row"><span class="label">Appearance</span></div>
         <div class="theme-row" id="theme-row"></div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Alpine Background</span></div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Which photo the Alpine theme uses behind the app.</div>
+        <div class="theme-row" id="alpine-bg-row">
+          <div class="theme-opt" data-alpine-bg-opt="peaks">Peaks</div>
+          <div class="theme-opt" data-alpine-bg-opt="coast">Coast</div>
+        </div>
       </div>
       <div class="card">
         <div class="label-row"><span class="label">Card transparency</span></div>
@@ -2312,6 +2325,29 @@
   }
   renderThemePicker();
   applyTheme(currentTheme);
+
+  /* ---------------- Alpine theme: choice of background photo ---------------- */
+  var ALPINE_BACKGROUNDS = {
+    peaks: { label:"Peaks", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200" },
+    coast: { label:"Coast", url:"https://commons.wikimedia.org/wiki/Special:FilePath/California%20Coast%20veiled%20in%20fog%202%20(15390973448).jpg?width=1200" }
+  };
+  var currentAlpineBg = loadStr("db2.alpineBg") || "coast";
+  function applyAlpineBg(id){
+    if(!ALPINE_BACKGROUNDS[id]) id = "peaks";
+    currentAlpineBg = id;
+    document.documentElement.style.setProperty("--alpine-bg-url", "url('"+ALPINE_BACKGROUNDS[id].url+"')");
+    saveStr("db2.alpineBg", id);
+    syncAlpineBgButtons();
+  }
+  function syncAlpineBgButtons(){
+    document.querySelectorAll("#alpine-bg-row .theme-opt").forEach(function(o){
+      o.classList.toggle("active", o.getAttribute("data-alpine-bg-opt")===currentAlpineBg);
+    });
+  }
+  document.querySelectorAll("#alpine-bg-row .theme-opt").forEach(function(o){
+    o.addEventListener("click", function(){ applyAlpineBg(o.getAttribute("data-alpine-bg-opt")); });
+  });
+  applyAlpineBg(currentAlpineBg);
 
   /* ---------------- font ---------------- */
   var currentFont = loadStr("db2.font") || "caslon";
