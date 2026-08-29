@@ -4,9 +4,11 @@
 <script>
   (function(){
     try{
-      var t = localStorage.getItem("db2.theme") || "paper";
-      if(t !== "paper") document.documentElement.setAttribute("data-theme", t);
-    }catch(e){ document.documentElement.setAttribute("data-theme", "paper"); }
+      var validThemes = ["dusk","glass","midnight","silk"];
+      var t = localStorage.getItem("db2.theme") || "dusk";
+      if(validThemes.indexOf(t)===-1) t = "dusk";
+      document.documentElement.setAttribute("data-theme", t);
+    }catch(e){ document.documentElement.setAttribute("data-theme", "dusk"); }
     try{
       // installed/standalone launches already get their own native splash screen from the OS (built from manifest.json) -
       // showing our own animated splash on top of that reads as two loaders in a row, so skip ours in that case
@@ -25,7 +27,7 @@
 <meta name="apple-mobile-web-app-title" content="Daybook">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Alex+Brush&family=Sacramento&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Caveat:wght@700&family=Tangerine:wght@700&family=Alex+Brush&family=Sacramento&family=Great+Vibes&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5F1E6; --paper-2:#EDE7D6; --ink:#2B2620; --ink-soft:#8C8375;
@@ -47,30 +49,10 @@
     --line:#35322B; --moss:#8FAE7C; --moss-soft:#2C3325; --moss-2:#A6C293;
     --danger:#D9836F; --shadow:0 2px 10px rgba(0,0,0,0.2), 0 10px 26px rgba(0,0,0,0.25);
   }
-  html[data-theme="clay"]{
-    --paper:#F7F0E8; --paper-2:#EFE2D3; --ink:#3A2B22; --ink-soft:#96806E;
-    --line:#E6D5C0; --moss:#B0603E; --moss-soft:#F0DAC7; --moss-2:#C77C54;
-    --danger:#9C4A3A; --shadow:0 2px 10px rgba(58,43,34,0.06), 0 10px 26px rgba(58,43,34,0.07);
-  }
-  html[data-theme="cocoa"]{
-    --paper:#17120F; --paper-2:#211A15; --ink:#EDE4D8; --ink-soft:#9C8F7E;
-    --line:#332822; --moss:#C79868; --moss-soft:#2B2019; --moss-2:#D9AF82;
-    --danger:#C97B5F; --shadow:0 2px 10px rgba(0,0,0,0.25), 0 10px 26px rgba(0,0,0,0.3);
-  }
-  html[data-theme="linen"]{
-    --paper:#F3ECE1; --paper-2:#EAE0D0; --ink:#4A3F33; --ink-soft:#A08F79;
-    --line:#E0D3BE; --moss:#B08968; --moss-soft:#EFE3D0; --moss-2:#C7A481;
-    --danger:#A85D45; --shadow:0 2px 10px rgba(74,63,51,0.05), 0 10px 26px rgba(74,63,51,0.06);
-  }
   html[data-theme="midnight"]{
     --paper:#101114; --paper-2:#191B1F; --ink:#E8E9EC; --ink-soft:#7C818C;
     --line:#24262B; --moss:#8CA0C9; --moss-soft:#1E2530; --moss-2:#A8BAE0;
     --danger:#D9776A; --shadow:0 2px 10px rgba(0,0,0,0.3), 0 10px 26px rgba(0,0,0,0.35);
-  }
-  html[data-theme="meadow"]{
-    --paper:#F4EFDD; --paper-2:#EBE3C7; --ink:#332D1F; --ink-soft:#93876A;
-    --line:#E1D6B3; --moss:#707C4E; --moss-soft:#E4E6D2; --moss-2:#8FA06A;
-    --danger:#C0693F; --shadow:0 2px 10px rgba(51,45,31,0.06), 0 10px 26px rgba(51,45,31,0.07);
   }
   html[data-theme="glass"]{
     --paper:#E7EFE9; --paper-2:#FFFFFF; --ink:#354238; --ink-soft:#748078;
@@ -90,23 +72,29 @@
       radial-gradient(45vw 45vw at 50% 45%, rgba(200,186,214,0.35) 0%, transparent 70%);
     opacity:1;
   }
-  html[data-theme="alpine"]{
-    --paper:#12151B; --paper-2:#1B1E26; --ink:#F2F0EB; --ink-soft:#B7BCC4;
-    --line:rgba(255,255,255,0.22); --moss:#9FC2CC; --moss-soft:rgba(159,194,204,0.18); --moss-2:#C3DEE5;
-    --danger:#E8998C; --shadow:0 10px 34px rgba(0,0,0,0.4), 0 2px 10px rgba(0,0,0,0.3);
-    --alpine-bg-url:url('https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200');
+  html[data-theme="silk"]{
+    --paper:#F1EDDD; --paper-2:#FFFFFF; --ink:#33351F; --ink-soft:#7C7A5C;
+    --line:rgba(120,120,60,0.18); --moss:#7C8A4A; --moss-soft:rgba(150,164,100,0.28); --moss-2:#9DAD6E;
+    --danger:#C97A5C; --shadow:0 8px 30px rgba(60,60,20,0.12), 0 2px 10px rgba(60,60,20,0.08);
   }
-  html[data-theme="alpine"] body{ background-color:#12151B; }
-  html[data-theme="alpine"] body::before{
-    /* the photo lives on this pseudo-element rather than directly on body's own background, because
-       it's already position:fixed - that's a far more reliable way to get a "background stays put,
-       content scrolls over it" effect on mobile browsers than background-attachment:fixed on body,
-       which many mobile browsers just silently ignore and scroll along with everything else anyway.
-       a real photo also needs a plain darkening scrim for legibility, not the floating color blobs
-       every other theme gets - those are tuned for flat backgrounds and would just muddy an image. */
-    background-image:linear-gradient(180deg, rgba(8,10,14,0.2) 0%, rgba(8,10,14,0.55) 60%, rgba(8,10,14,0.7) 100%), var(--alpine-bg-url);
-    background-size:cover; background-position:center top; background-repeat:no-repeat;
+  html[data-theme="silk"] body{ background-color:#F1EDDD; }
+  html[data-theme="silk"] body::before{
+    /* an original abstract composition of soft, elongated, overlapping olive tones meant to evoke
+       flowing fabric in motion - not a reproduction of any specific photo, built entirely in CSS */
+    background:
+      radial-gradient(80vw 25vw at 20% 15%, rgba(124,138,74,0.4) 0%, transparent 70%),
+      radial-gradient(70vw 20vw at 55% 30%, rgba(157,173,110,0.35) 0%, transparent 70%),
+      radial-gradient(90vw 22vw at 15% 50%, rgba(90,102,52,0.3) 0%, transparent 70%),
+      radial-gradient(75vw 18vw at 65% 65%, rgba(157,173,110,0.32) 0%, transparent 70%),
+      radial-gradient(85vw 24vw at 30% 82%, rgba(124,138,74,0.35) 0%, transparent 70%),
+      radial-gradient(60vw 16vw at 80% 90%, rgba(90,102,52,0.28) 0%, transparent 70%);
     opacity:1;
+  }
+  html[data-theme="silk"] .card, html[data-theme="silk"] .home-hero, html[data-theme="silk"] .next-up-card,
+  html[data-theme="silk"] .sheet, html[data-theme="silk"] .bottom-nav, html[data-theme="silk"] .quickview-popup,
+  html[data-theme="silk"] .confirm-popup, html[data-theme="silk"] .work-summary-card, html[data-theme="silk"] .home-tile,
+  html[data-theme="silk"] .note-tile{
+    border-radius:22px;
   }
   /* ---- Universal glass-card treatment: every theme gets translucent, blurred, rounded, gapped
      cards now, not just Glass - this is what "cards and transparency like the glass theme" means
@@ -186,14 +174,14 @@
   @media (min-width:600px){
     .app,.bottom-nav,.sheet{ max-width:640px; }
     .section,.topbar,.home-wrap{ padding-left:36px; padding-right:36px; }
-    .home-greeting-title{ font-size:56px; }
+    .home-greeting-title{ font-size:27px; }
     .cal-grid{ gap:4px; }
     .cal-cell{ font-size:14px; }
   }
   @media (min-width:980px){
     .app,.bottom-nav,.sheet{ max-width:820px; }
     .section,.topbar,.home-wrap{ padding-left:52px; padding-right:52px; }
-    .home-greeting-title{ font-size:64px; }
+    .home-greeting-title{ font-size:30px; }
     .topbar-title{ font-size:29px; }
     .cal-grid{ gap:6px; }
   }
@@ -220,21 +208,14 @@
 
   .home-greeting{ padding:0; }
   .home-hero{
-    position:relative; border-radius:22px; padding:26px 22px 24px; margin:8px 0 24px;
-    background:
-      radial-gradient(130% 160% at 12% -10%, var(--moss-soft) 0%, transparent 55%),
-      color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
+    position:relative; border-radius:16px; padding:14px 16px; margin:6px 0 16px;
+    background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
     box-shadow:var(--shadow); overflow:hidden;
   }
-  .home-hero::after{
-    content:""; position:absolute; top:-30%; left:-20%; width:70%; height:90%;
-    background:radial-gradient(circle, var(--moss) 0%, transparent 70%);
-    opacity:0.16; filter:blur(30px); pointer-events:none;
-  }
   .home-hero > *{ position:relative; z-index:1; }
-  .home-greeting-title{ font-family:var(--font-secondary); font-weight:400; font-size:46px; line-height:1.05; color:var(--ink); }
-  .home-greeting-date{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); margin-top:8px; letter-spacing:0.03em; text-transform:uppercase; }
-  .home-gesture-hint{ font-size:10.5px; color:var(--ink-soft); opacity:0.55; margin-top:14px; letter-spacing:0.01em; }
+  .home-greeting-title{ font-family:var(--font-secondary); font-weight:400; font-size:24px; line-height:1.1; color:var(--ink); }
+  .home-greeting-date{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-top:2px; letter-spacing:0.03em; text-transform:uppercase; }
+  .home-gesture-hint{ display:none; }
 
 
   .home-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:26px; padding-bottom:10px; border-bottom:1px solid var(--line); }
@@ -635,9 +616,14 @@
       </div>
       <div class="home-topbar">
         <span class="home-word">Daybook</span>
-        <button class="home-icon-btn" id="settings-btn" aria-label="Settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="home-icon-btn" id="share-today-btn" aria-label="Share today's list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>
+          </button>
+          <button class="home-icon-btn" id="settings-btn" aria-label="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="home-hero">
@@ -947,18 +933,10 @@
         <div class="theme-row" id="theme-row"></div>
       </div>
       <div class="card">
-        <div class="label-row"><span class="label">Alpine Background</span></div>
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Which photo the Alpine theme uses behind the app.</div>
-        <div class="theme-row" id="alpine-bg-row">
-          <div class="theme-opt" data-alpine-bg-opt="peaks">Peaks</div>
-          <div class="theme-opt" data-alpine-bg-opt="coast">Coast</div>
-        </div>
-      </div>
-      <div class="card">
         <div class="label-row"><span class="label">Card transparency</span></div>
         <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">How see-through cards, sheets, and the nav bar are. Lower is more transparent.</div>
         <div style="display:flex; align-items:center; gap:12px;">
-          <input type="range" id="transparency-slider" min="40" max="100" step="1" style="flex:1;">
+          <input type="range" id="transparency-slider" min="10" max="100" step="1" style="flex:1;">
           <span class="mono" id="transparency-value" style="font-size:12px; color:var(--ink-soft); min-width:34px; text-align:right;">70%</span>
         </div>
       </div>
@@ -2271,22 +2249,50 @@
     syncSecondaryFontButtons();
     syncExportReminder();
   });
+
+  /* ---------------- share today's list (plain text, for widget bridges like KWGT/Tasker) ---------------- */
+  function buildTodayShareText(){
+    var open = [], done = [];
+    tasks.forEach(function(t){
+      if(t.list==="work") return; // Work tasks live on their own page, kept out of this summary
+      if(t.parentId) return; // skip subtasks, keep the summary short
+      var isToday;
+      if(t.type==="daily" || t.type==="weekly" || t.type==="monthly") isToday = true;
+      else if(t.type!=="once") isToday = false;
+      else if(!t.dueDate) isToday = true;
+      else isToday = (t.dueDate===todayKey) || (t.dueDate<todayKey && !t.doneOnce);
+      if(!isToday) return;
+      (doneFor(t) ? done : open).push(t.text);
+    });
+    var lines = [];
+    open.forEach(function(text){ lines.push("[ ] "+text); });
+    done.forEach(function(text){ lines.push("[x] "+text); });
+    if(!lines.length) lines.push("Nothing on today's list.");
+    return lines.join("\n");
+  }
+  var shareBtn = document.getElementById("share-today-btn");
+  if(shareBtn) shareBtn.addEventListener("click", function(){
+    var text = buildTodayShareText();
+    if(navigator.share){
+      navigator.share({ title:"Daybook - Today", text:text }).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(text).then(function(){ alert("Copied today's list to clipboard."); });
+    } else {
+      alert(text);
+    }
+  });
   document.getElementById("settings-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("user-name-input").addEventListener("input", function(){ saveStr("db2.userName", this.value.trim()); });
 
   /* ---------------- theme ---------------- */
-  var currentTheme = loadStr("db2.theme") || "paper";
   var THEME_PREVIEWS = {
-    paper: { bg:"#F5F1E6", bg2:"#EDE7D6", ink:"#2B2620", accent:"#5B6B4F", label:"Paper" },
-    clay: { bg:"#F7F0E8", bg2:"#EFE2D3", ink:"#3A2B22", accent:"#B0603E", label:"Clay" },
-    linen: { bg:"#F3ECE1", bg2:"#EAE0D0", ink:"#4A3F33", accent:"#B08968", label:"Linen" },
-    cocoa: { bg:"#17120F", bg2:"#211A15", ink:"#EDE4D8", accent:"#C79868", label:"Cocoa" },
     dusk: { bg:"#1C1B18", bg2:"#26241F", ink:"#EDE7D9", accent:"#8FAE7C", label:"Dusk" },
-    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
-    meadow: { bg:"#F4EFDD", bg2:"#EBE3C7", ink:"#332D1F", accent:"#707C4E", label:"Meadow" },
     glass: { bg:"#E7EFE9", bg2:"rgba(255,255,255,0.6)", ink:"#354238", accent:"#7FA88C", label:"Glass" },
-    alpine: { bg:"#12151B", bg2:"#1B1E26", ink:"#F2F0EB", accent:"#9FC2CC", label:"Alpine" }
+    midnight: { bg:"#101114", bg2:"#191B1F", ink:"#E8E9EC", accent:"#8CA0C9", label:"Midnight" },
+    silk: { bg:"#F1EDDD", bg2:"#FFFFFF", ink:"#33351F", accent:"#7C8A4A", label:"Silk" }
   };
+  var currentTheme = loadStr("db2.theme") || "dusk";
+  if(!THEME_PREVIEWS[currentTheme]) currentTheme = "dusk";
   var THEME_TILTS = [-4, 3, -2, 4, -3, 2, -4];
   function renderThemePicker(){
     var row = document.getElementById("theme-row");
@@ -2310,7 +2316,7 @@
   }
   function applyTheme(t){
     currentTheme = t;
-    document.documentElement.setAttribute("data-theme", t==="paper" ? "" : t);
+    document.documentElement.setAttribute("data-theme", t);
     saveStr("db2.theme", t);
     syncThemeButtons();
     var meta = document.getElementById("meta-theme-color");
@@ -2325,29 +2331,6 @@
   }
   renderThemePicker();
   applyTheme(currentTheme);
-
-  /* ---------------- Alpine theme: choice of background photo ---------------- */
-  var ALPINE_BACKGROUNDS = {
-    peaks: { label:"Peaks", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Longs%20Peak%20with%20Lenticular%20Clouds%2C%20Rocky%20Mountain%20National%20Park.jpg?width=1200" },
-    coast: { label:"Coast", url:"https://commons.wikimedia.org/wiki/Special:FilePath/California%20Coast%20veiled%20in%20fog%202%20(15390973448).jpg?width=1200" }
-  };
-  var currentAlpineBg = loadStr("db2.alpineBg") || "coast";
-  function applyAlpineBg(id){
-    if(!ALPINE_BACKGROUNDS[id]) id = "peaks";
-    currentAlpineBg = id;
-    document.documentElement.style.setProperty("--alpine-bg-url", "url('"+ALPINE_BACKGROUNDS[id].url+"')");
-    saveStr("db2.alpineBg", id);
-    syncAlpineBgButtons();
-  }
-  function syncAlpineBgButtons(){
-    document.querySelectorAll("#alpine-bg-row .theme-opt").forEach(function(o){
-      o.classList.toggle("active", o.getAttribute("data-alpine-bg-opt")===currentAlpineBg);
-    });
-  }
-  document.querySelectorAll("#alpine-bg-row .theme-opt").forEach(function(o){
-    o.addEventListener("click", function(){ applyAlpineBg(o.getAttribute("data-alpine-bg-opt")); });
-  });
-  applyAlpineBg(currentAlpineBg);
 
   /* ---------------- font ---------------- */
   var currentFont = loadStr("db2.font") || "caslon";
