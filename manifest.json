@@ -2,7 +2,7 @@
   "id": "/index.html",
   "name": "Daybook",
   "short_name": "Daybook",
-  "description": "A quiet daily planner - tasks, habits, and goals in one calm place.",
+  "description": "A quiet space for notes, journaling, and habits.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

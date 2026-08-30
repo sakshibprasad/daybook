@@ -1,4 +1,4 @@
-const CACHE = "daybook-v9";
+const CACHE = "daybook-v12";
 const STATIC_ASSETS = ["./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 // ---------------- Push notifications (Firebase Cloud Messaging background handling) ----------------
