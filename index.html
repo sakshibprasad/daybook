@@ -151,7 +151,7 @@
   .note-tile-add .plus{ font-size:16px; }
   /* ---- journal ---- */
   .journal-thumb{ width:100%; height:64px; border-radius:10px; object-fit:cover; margin-bottom:8px; background:var(--paper); }
-  .journal-mood-badges{ font-size:14px; margin-bottom:4px; }
+  .journal-mood-badges{ font-size:10.5px; color:var(--moss-2); font-weight:600; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.02em; }
   .journal-prompt{
     display:flex; align-items:center; gap:8px; background:var(--moss-soft); border-radius:12px; padding:10px 12px; margin-bottom:16px;
   }
@@ -160,12 +160,12 @@
   .journal-prompt-dismiss{ flex-shrink:0; background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:0 2px; }
   .journal-mood-label{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
   .journal-mood-hint{ opacity:0.7; }
-  .journal-mood-row{ display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:6px; }
+  .journal-mood-row{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:6px; }
   .journal-mood-opt{
-    background:var(--paper-2); border:1.5px solid var(--line); border-radius:12px; padding:8px 0;
-    font-size:20px; cursor:pointer; line-height:1;
+    background:var(--paper-2); border:1.5px solid var(--line); border-radius:14px; padding:7px 13px;
+    font-size:12.5px; font-family:var(--font-body); color:var(--ink); cursor:pointer;
   }
-  .journal-mood-opt.active{ border-color:var(--moss); background:var(--moss-soft); }
+  .journal-mood-opt.active{ border-color:var(--moss); background:var(--moss-soft); color:var(--moss-2); font-weight:600; }
   .journal-scribble-row{ display:flex; gap:8px; margin-top:14px; }
   .journal-tool-btn{
     background:var(--paper-2); border:1px solid var(--line); border-radius:12px; padding:8px 12px;
@@ -175,7 +175,8 @@
   .journal-scribble-canvas{
     width:100%; height:220px; border-radius:12px; border:1.5px dashed var(--line); background:#fff; touch-action:none; display:block;
   }
-  .journal-scribble-actions{ display:flex; gap:8px; margin-top:8px; justify-content:flex-end; }
+  .journal-scribble-hint{ font-size:11px; color:var(--ink-soft); line-height:1.4; margin-top:8px; }
+  .journal-scribble-actions{ display:flex; gap:8px; margin-top:8px; justify-content:flex-end; flex-wrap:wrap; }
   .journal-photos-label{ font-size:12px; color:var(--ink-soft); margin:16px 0 8px; }
   .journal-photos-dropzone{ border-radius:14px; transition:background .15s ease; }
   .journal-photos-dropzone.drag-over{ background:var(--moss-soft); }
@@ -247,8 +248,6 @@
   .pull-add-inner input{ flex:1; min-width:0; border:none; border-bottom:1.5px solid var(--line); background:none; font-size:14.5px; color:var(--ink); padding:6px 2px; font-family:inherit; }
   .pull-add-inner input:focus{ outline:none; border-bottom-color:var(--moss); }
   .pull-add-inner button{ flex-shrink:0; background:var(--moss); color:#fff; border:none; border-radius:20px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; }
-  .pull-add-scan-btn{ background:var(--paper-2) !important; color:var(--ink-soft) !important; border-radius:50% !important; width:34px; height:34px; padding:0 !important; display:flex; align-items:center; justify-content:center; }
-  .pull-add-scan-btn svg{ width:16px; height:16px; }
   .home-topbar{ display:flex; align-items:center; justify-content:space-between; padding:18px 0 4px; }
   .home-word{ font-family:var(--font-display); font-weight:600; font-size:14px; letter-spacing:0.02em; color:var(--ink-soft); }
   .home-icon-btn{ width:34px; height:34px; border-radius:50%; border:none; background:var(--paper-2); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; cursor:pointer; }
@@ -264,7 +263,7 @@
   .home-hero > *{ position:relative; z-index:1; }
   .home-greeting-title{ font-family:var(--font-secondary); font-weight:400; font-size:24px; line-height:1.1; color:var(--ink); }
   .home-greeting-date{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-top:2px; letter-spacing:0.03em; text-transform:uppercase; }
-  .home-gesture-hint{ display:none; }
+  .home-gesture-hint{ font-size:9.5px; color:var(--ink-soft); opacity:0.5; margin-top:8px; letter-spacing:0.01em; }
 
 
   .home-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:26px; padding-bottom:10px; border-bottom:1px solid var(--line); }
@@ -337,7 +336,6 @@
 
   .empty-note{ font-family:var(--font-display); font-size:14.5px; color:var(--ink-soft); text-align:center; padding:18px 10px; }
 
-  .home-notes-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
   .home-tile-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px; }
   .home-tile{
     background:color-mix(in srgb, var(--paper-2) var(--card-opacity, 70%), transparent);
@@ -490,6 +488,15 @@
   .heat-cell.heat-future{ background:transparent; border:1px solid var(--line); }
   .heat-cell.heat-empty{ background:transparent; }
   .consistency-badge{ font-family:var(--font-mono); font-size:10px; color:var(--moss); opacity:0.85; font-weight:600; background:var(--moss-soft); padding:1px 6px; border-radius:8px; white-space:nowrap; }
+  .year-month-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; margin-top:8px; }
+  .year-month-cell{ aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; background:var(--line); }
+  .year-month-label{ font-size:9.5px; font-family:var(--font-mono); color:var(--ink-soft); }
+  .year-month-cell.year-month-high{ background:var(--moss); } .year-month-cell.year-month-high .year-month-label{ color:#fff; opacity:0.9; }
+  .year-month-cell.year-month-mid{ background:color-mix(in srgb, var(--moss) 55%, var(--line)); } .year-month-cell.year-month-mid .year-month-label{ color:var(--ink); }
+  .year-month-cell.year-month-low{ background:color-mix(in srgb, var(--moss) 25%, var(--line)); }
+  .year-month-cell.year-month-zero{ background:var(--danger); opacity:0.3; }
+  .year-month-cell.year-month-none{ background:transparent; border:1px solid var(--line); }
+  .year-month-cell.year-month-future{ background:transparent; border:1px dashed var(--line); opacity:0.5; }
 
   /* ---------------- goals ---------------- */
   .goal-row{ display:flex; align-items:center; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); cursor:pointer; }
@@ -660,24 +667,15 @@
     <div class="home-wrap" id="home-wrap">
       <div class="pull-add-bar" id="pull-add-bar">
         <div class="pull-add-inner">
-          <input type="text" id="pull-add-input" placeholder="Quick note…">
-          <button type="button" class="pull-add-scan-btn" id="pull-add-scan-btn" aria-label="Scan handwritten note" title="Scan a handwritten note">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </button>
-          <input type="file" id="scan-list-file" accept="image/*" capture="environment" style="display:none;">
+          <input type="text" id="pull-add-input" placeholder="Quick add a task for today…">
           <button id="pull-add-confirm">Add</button>
         </div>
       </div>
       <div class="home-topbar">
         <span class="home-word">Daybook</span>
-        <div style="display:flex; gap:8px;">
-          <button class="home-icon-btn" id="share-today-btn" aria-label="Share today's habits">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>
-          </button>
-          <button class="home-icon-btn" id="settings-btn" aria-label="Settings">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-          </button>
-        </div>
+        <button class="home-icon-btn" id="settings-btn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
       </div>
 
       <div class="home-hero">
@@ -685,14 +683,168 @@
           <div class="home-greeting-title" id="home-greeting"></div>
           <div class="home-greeting-date" id="home-date"></div>
         </div>
+        <div class="home-gesture-hint">Hold for categories · Swipe right for shopping · Swipe left for organize · Swipe up for notes</div>
       </div>
 
-      <div class="home-section-label" id="home-habits-label" style="display:none;">Today's habits</div>
+      <div class="next-up-card" id="next-up-card" style="display:none;">
+        <div class="next-up-time" id="next-up-time"></div>
+        <div class="next-up-title" id="next-up-title"></div>
+        <div class="next-up-sub" id="next-up-sub"></div>
+        <div class="next-up-footer">
+          <span id="next-up-footer-left"></span>
+          <span class="next-up-arrow">↗</span>
+        </div>
+      </div>
+
+      <div class="home-progress-row">
+        <span class="home-progress-nav">
+          <button class="home-progress-nav-btn" id="home-progress-prev" aria-label="Previous day">‹</button>
+          <span class="home-progress-label">Today</span>
+          <button class="home-progress-nav-btn" id="home-progress-next" aria-label="Next day">›</button>
+        </span>
+        <span class="home-progress-count mono" id="home-progress-count">0/0</span>
+      </div>
+      <div class="home-section-label" id="home-tasks-label" style="display:none;">Tasks</div>
+      <ul class="ledger-list" id="home-today-list"></ul>
+      <div class="work-summary-card" id="work-summary-card" style="display:none;">
+        <div style="flex:1; min-width:0;">
+          <div class="work-summary-label">Work</div>
+          <div class="work-summary-text" id="work-summary-text"></div>
+          <div class="work-summary-preview" id="work-summary-preview"></div>
+        </div>
+        <span class="next-up-arrow">↗</span>
+      </div>
+      <div class="home-section-label" id="home-habits-label" style="display:none;">Habits</div>
       <ul class="ledger-list" id="home-habits-list"></ul>
       <div class="home-week-summary" id="home-week-summary"></div>
 
-      <div class="home-section-label" id="home-notes-label" style="margin-top:26px;">Recent notes</div>
-      <div class="home-notes-grid" id="home-notes-grid"></div>
+      <div class="home-tile-grid">
+        <button class="home-tile" id="link-habits" data-tile-id="habits">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 7-2.9 7-6.8 0-2.7-1.8-4.6-2.9-6.5-.3 2-1.4 2.9-2.4 1.9 1-2.9-.9-5.7-3.3-6.6.5 2.9-1 4.8-2.9 6.6-1.4 1.4-1.9 3.3-1.9 4.6 0 3.9 2.9 6.8 6.4 6.8z"/></svg></span>
+          <span class="home-tile-label">Habits</span>
+          <span class="home-tile-count" id="habits-count">—</span>
+        </button>
+        <button class="home-tile" id="link-goals" data-tile-id="goals">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg></span>
+          <span class="home-tile-label">Goals</span>
+          <span class="home-tile-count" id="goals-count">—</span>
+        </button>
+        <button class="home-tile" id="link-work" data-tile-id="work">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+          <span class="home-tile-label">Work</span>
+          <span class="home-tile-count" id="work-count">—</span>
+        </button>
+        <button class="home-tile" id="link-activity" data-tile-id="activity">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
+          <span class="home-tile-label">Activity</span>
+          <span class="home-tile-count" id="activity-count">—</span>
+        </button>
+        <button class="home-tile" id="link-organize" data-tile-id="organize">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+          <span class="home-tile-label">Organize</span>
+          <span class="home-tile-count" id="organize-count">—</span>
+        </button>
+        <button class="home-tile" id="link-shopping" data-tile-id="shopping">
+          <span class="home-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12Z"/><path d="M6 6 5 3H2"/><circle cx="9.5" cy="19" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.5" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+          <span class="home-tile-label">Shopping</span>
+          <span class="home-tile-count" id="shopping-count">—</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <div class="view" id="view-organize">
+      <div class="topbar bordered">
+        <div class="topbar-title">Organize</div>
+      </div>
+      <div class="date-nav">
+        <button class="date-nav-btn" id="organize-prev">‹</button>
+        <span class="date-nav-label" id="organize-date-label"></span>
+        <button class="date-nav-btn" id="organize-next">›</button>
+        <button class="date-nav-btn organize-today-btn" id="organize-today">Today</button>
+      </div>
+      <div class="section">
+        <div class="home-section-label" id="organize-tasks-label" style="margin-top:0;">Tasks</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder or drag left onto another task to nest it. Tap a task to edit it.</div>
+        <ul class="ledger-list" id="organize-list"></ul>
+        <div class="home-section-label" id="organize-habits-label" style="display:none;">Habits</div>
+        <ul class="ledger-list" id="organize-habits-list"></ul>
+      </div>
+    </div>
+
+  <!-- SHOPPING -->
+  <div class="view" id="view-shopping">
+    <div class="topbar bordered">
+      <div class="topbar-title">Shopping</div>
+    </div>
+    <div class="section">
+      <ul class="ledger-list" id="shopping-list"></ul>
+    </div>
+  </div>
+
+  <!-- WORK -->
+  <div class="view" id="view-work">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="work-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">Work</div>
+    </div>
+    <div class="section">
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">Hold and drag to reorder. Tap a task to edit it.</div>
+      <div id="work-groups"></div>
+    </div>
+  </div>
+
+  <!-- MONTH (also hosts the Week sub-view) -->
+  <div class="view" id="view-month">
+    <div class="topbar">
+      <div class="topbar-title">Calendar</div>
+    </div>
+    <div class="section" style="padding-bottom:0;">
+      <div class="type-row" id="month-subview-toggle">
+        <div class="type-opt active" data-subview="month">Month</div>
+        <div class="type-opt" data-subview="week">Week</div>
+      </div>
+    </div>
+
+    <div id="month-subview-month">
+      <div class="date-nav">
+        <button class="date-nav-btn" id="month-prev">‹</button>
+        <span class="date-nav-label" id="month-label"></span>
+        <button class="date-nav-btn" id="month-next">›</button>
+      </div>
+      <div class="section">
+        <div class="card">
+          <div class="cal-grid" id="cal-dow-row"></div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-legend" id="cal-legend"></div>
+        </div>
+        <div class="card">
+          <div class="label-row"><span class="label" id="cal-day-label">Today</span></div>
+          <ul class="ledger-list" id="cal-day-list"></ul>
+        </div>
+      </div>
+      <div class="cal-quickadd-wrap">
+        <button class="cal-quickadd" id="cal-quickadd">
+          <span class="cal-quickadd-text" id="cal-quickadd-text">Add a task for this day</span>
+          <span class="cal-quickadd-plus">+</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="month-subview-week" style="display:none;">
+      <div class="date-nav">
+        <button class="date-nav-btn" id="week-prev">‹</button>
+        <span class="date-nav-label" id="week-label"></span>
+        <button class="date-nav-btn" id="week-next">›</button>
+      </div>
+      <div class="section">
+        <div class="card">
+          <div class="label-row"><span class="label">This week</span></div>
+          <ul class="ledger-list" id="week-list"></ul>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -705,6 +857,54 @@
     <div class="section">
       <div class="card">
         <ul class="ledger-list" id="habit-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="view" id="view-goals">
+    <div class="topbar bordered"><div class="topbar-title">Goals</div></div>
+    <div class="section">
+      <div class="card">
+        <div class="label-row"><span class="label">Short-term</span></div>
+        <ul class="ledger-list" id="goals-short-list"></ul>
+        <div class="add-line" id="add-goal-short"><span class="plus">+</span>Add a short-term goal</div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Long-term</span></div>
+        <ul class="ledger-list" id="goals-long-list"></ul>
+        <div class="add-line" id="add-goal-long"><span class="plus">+</span>Add a long-term goal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <!-- CATEGORIES -->
+  <div class="view" id="view-categories">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="categories-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">Categories</div>
+    </div>
+    <div class="section">
+      <div class="card">
+        <div class="label-row"><span class="label">Personal</span></div>
+        <ul class="cat-list" id="cat-list"></ul>
+        <div class="add-line" id="add-category"><span class="plus">+</span>New category</div>
+        <div class="cat-add-inline" id="cat-page-add-inline" style="display:none; margin-top:8px;">
+          <input type="text" id="cat-page-add-input" placeholder="Category name" maxlength="20">
+          <button id="cat-page-add-confirm">Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label-row"><span class="label">Work</span></div>
+        <ul class="cat-list" id="work-cat-list"></ul>
+        <div class="add-line" id="add-work-category"><span class="plus">+</span>New work category</div>
+        <div class="cat-add-inline" id="work-cat-page-add-inline" style="display:none; margin-top:8px;">
+          <input type="text" id="work-cat-page-add-input" placeholder="Category name" maxlength="20">
+          <button id="work-cat-page-add-confirm">Add</button>
+        </div>
       </div>
     </div>
   </div>
@@ -730,6 +930,38 @@
         <span class="plus">+</span>
         <span>New entry</span>
       </button>
+    </div>
+  </div>
+
+  <div class="view" id="view-category-detail">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="category-detail-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title" id="category-detail-title">Category</div>
+    </div>
+    <div class="section">
+      <div class="card">
+        <ul class="ledger-list" id="category-detail-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-activity">
+    <div class="topbar bordered with-back">
+      <button class="back-btn" id="activity-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">Activity</div>
+    </div>
+    <div class="section">
+      <div class="theme-row" id="activity-filter-row" style="margin-bottom:4px;">
+        <div class="type-opt active" data-activity-filter="week">This Week</div>
+        <div class="type-opt" data-activity-filter="month">This Month</div>
+        <div class="type-opt" data-activity-filter="all">All Time</div>
+      </div>
+      <div id="activity-body"></div>
+      <div class="add-line" id="clear-old-activity" style="display:none; justify-content:center; color:var(--ink-soft);">Clear completed tasks older than 90 days</div>
     </div>
   </div>
 
@@ -761,8 +993,8 @@
         <input type="text" class="field-plain" id="user-name-input" placeholder="Add your name">
       </div>
       <div class="card">
-        <div class="label-row"><span class="label">Handwritten list scanning</span></div>
-        <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px; line-height:1.5;">Paste a Claude API key to turn photos of handwritten to-do lists into tasks. Stored only on this device, never synced or uploaded anywhere except directly to Anthropic when you scan.</div>
+        <div class="label-row"><span class="label">Handwriting &amp; scribble-to-text</span></div>
+        <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px; line-height:1.5;">Paste a Claude API key to turn scribbled/handwritten input into typed text. Stored only on this device, never synced or uploaded anywhere except directly to Anthropic when you use it.</div>
         <input type="password" class="field-plain" id="claude-api-key-input" placeholder="sk-ant-...">
       </div>
       <div class="card">
@@ -851,6 +1083,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5h4V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
     <span class="nav-lb">Home</span>
   </button>
+  <button class="nav-item" data-tab="month">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="0.9" fill="currentColor" stroke="none"/></svg>
+    <span class="nav-lb">Month</span>
+  </button>
   <button class="nav-item" data-tab="notes">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h9a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z"/><path d="M9 2v5H4"/><path d="M8 12h8M8 16h5"/></svg>
     <span class="nav-lb">Notes</span>
@@ -862,6 +1098,10 @@
   <button class="nav-item" data-tab="habits">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 7-2.9 7-6.8 0-2.7-1.8-4.6-2.9-6.5-.3 2-1.4 2.9-2.4 1.9 1-2.9-.9-5.7-3.3-6.6.5 2.9-1 4.8-2.9 6.6-1.4 1.4-1.9 3.3-1.9 4.6 0 3.9 2.9 6.8 6.4 6.8z"/></svg>
     <span class="nav-lb">Habits</span>
+  </button>
+  <button class="nav-item" data-tab="goals">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>
+    <span class="nav-lb">Goals</span>
   </button>
 </nav>
 
@@ -883,6 +1123,49 @@
   <div class="quickview-meta" id="quickview-meta"></div>
 </div>
 <div class="overlay" id="overlay"></div>
+
+<!-- ADD TASK SHEET (Week/Month) -->
+<div class="sheet" id="task-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="task-sheet-title">New task</div>
+  <input type="text" id="task-input" placeholder="What needs doing?">
+  <div class="type-row" id="task-type-row">
+    <div class="type-opt active" data-type="once">Once</div>
+    <div class="type-opt" data-type="daily">Daily</div>
+    <div class="type-opt" data-type="weekly">Weekly</div>
+    <div class="type-opt" data-type="monthly">Monthly</div>
+  </div>
+  <div class="date-time-row" id="task-date-time-row">
+    <div class="dt-field">
+      <label class="dt-label">Date</label>
+      <input type="date" id="task-date-input">
+    </div>
+    <div class="dt-field">
+      <label class="dt-label">Time (optional)</label>
+      <input type="time" id="task-time-input">
+    </div>
+  </div>
+  <div class="cat-row" id="task-cat-row"></div>
+  <div class="cat-add-inline" id="cat-add-inline" style="display:none;">
+    <input type="text" id="cat-add-input" placeholder="Category name" maxlength="20">
+    <button id="cat-add-confirm">Add</button>
+  </div>
+  <div class="type-row" id="task-priority-row">
+    <div class="type-opt active" data-priority="">No priority</div>
+    <div class="type-opt" data-priority="low">Low</div>
+    <div class="type-opt" data-priority="medium">Medium</div>
+    <div class="type-opt" data-priority="high">High</div>
+  </div>
+  <div class="type-row" id="task-list-row">
+    <div class="type-opt active" data-list="personal">Personal</div>
+    <div class="type-opt" data-list="work">Work</div>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="task-cancel">Cancel</button>
+    <button class="btn btn-primary" id="task-save">Save</button>
+  </div>
+  <button class="btn-danger-text" id="task-delete" style="display:none;">Delete task</button>
+</div>
 
 <!-- NOTE EDITOR SHEET -->
 <div class="overlay" id="note-overlay"></div>
@@ -911,30 +1194,32 @@
 
   <div class="journal-mood-label">Mood <span class="journal-mood-hint">(up to 2)</span></div>
   <div class="journal-mood-row" id="journal-mood-row">
-    <button type="button" class="journal-mood-opt" data-mood="happy"><span>😊</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="loved"><span>🥰</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="calm"><span>😌</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="excited"><span>🤩</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="neutral"><span>😐</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="tired"><span>😴</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="anxious"><span>😰</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="down"><span>😔</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="sad"><span>😢</span></button>
-    <button type="button" class="journal-mood-opt" data-mood="angry"><span>😡</span></button>
+    <button type="button" class="journal-mood-opt" data-mood="happy">Happy</button>
+    <button type="button" class="journal-mood-opt" data-mood="loved">Loved</button>
+    <button type="button" class="journal-mood-opt" data-mood="calm">Calm</button>
+    <button type="button" class="journal-mood-opt" data-mood="excited">Excited</button>
+    <button type="button" class="journal-mood-opt" data-mood="neutral">Neutral</button>
+    <button type="button" class="journal-mood-opt" data-mood="tired">Tired</button>
+    <button type="button" class="journal-mood-opt" data-mood="anxious">Anxious</button>
+    <button type="button" class="journal-mood-opt" data-mood="down">Down</button>
+    <button type="button" class="journal-mood-opt" data-mood="sad">Sad</button>
+    <button type="button" class="journal-mood-opt" data-mood="angry">Angry</button>
   </div>
 
   <textarea id="journal-body-input" placeholder="What's on your mind…" style="width:100%; min-height:140px; border:none; background:none; resize:vertical; font-family:var(--font-body); font-size:15px; line-height:1.5; color:var(--ink); padding:0; outline:none; margin-top:16px;"></textarea>
 
   <div class="journal-scribble-row">
-    <button type="button" class="journal-tool-btn" id="journal-scribble-toggle">✏️ Scribble</button>
-    <button type="button" class="journal-tool-btn" id="journal-paste-btn">📋 Paste</button>
+    <button type="button" class="journal-tool-btn" id="journal-scribble-toggle">Scribble to write</button>
+    <button type="button" class="journal-tool-btn" id="journal-paste-btn">Paste</button>
   </div>
 
   <div class="journal-scribble-wrap" id="journal-scribble-wrap" style="display:none;">
     <canvas id="journal-scribble-canvas" class="journal-scribble-canvas"></canvas>
+    <div class="journal-scribble-hint" id="journal-scribble-hint">Write or draw with your finger, mouse, or pencil — then tap "Convert to text" to turn it into typed words, just like Scribble on iPad.</div>
     <div class="journal-scribble-actions">
       <button type="button" class="journal-tool-btn" id="journal-scribble-clear">Clear</button>
-      <button type="button" class="journal-tool-btn" id="journal-scribble-done">Done</button>
+      <button type="button" class="journal-tool-btn" id="journal-scribble-keep-drawing">Keep as drawing</button>
+      <button type="button" class="btn btn-primary" id="journal-scribble-convert" style="padding:8px 14px; font-size:12.5px;">Convert to text</button>
     </div>
   </div>
 
@@ -948,7 +1233,7 @@
   </div>
 
   <div class="journal-location-row" id="journal-location-row">
-    <button type="button" class="journal-tool-btn" id="journal-location-btn">📍 Add location</button>
+    <button type="button" class="journal-tool-btn" id="journal-location-btn">Add location</button>
     <div class="journal-location-chip" id="journal-location-chip" style="display:none;">
       <a href="#" id="journal-location-link" target="_blank" rel="noopener"></a>
       <button type="button" class="journal-location-remove" id="journal-location-remove" aria-label="Remove location">×</button>
@@ -1016,6 +1301,74 @@
     <button class="btn btn-primary" id="habit-log-save">Save</button>
   </div>
   <button class="btn-danger-text" id="habit-log-clear" style="display:none;">Clear this day's entry</button>
+</div>
+
+<!-- GOAL SHEET -->
+<div class="sheet" id="goal-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="goal-sheet-title">New goal</div>
+  <input type="text" id="goal-input" placeholder="What do you want to achieve?">
+  <div class="dt-field" style="margin-bottom:20px;">
+    <label class="dt-label">Target date (optional)</label>
+    <input type="date" id="goal-date-input">
+  </div>
+  <div class="stepper">
+    <button class="stepper-btn" id="goal-minus">−</button>
+    <input type="number" class="stepper-val" id="goal-progress" min="0" max="100" value="0">
+    <button class="stepper-btn" id="goal-plus">+</button>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="goal-cancel">Cancel</button>
+    <button class="btn btn-primary" id="goal-save">Save</button>
+  </div>
+  <button class="btn-danger-text" id="goal-delete" style="display:none;">Delete goal</button>
+</div>
+
+<!-- SHOPPING SHEET -->
+<div class="sheet" id="shopping-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="shopping-sheet-title">New item</div>
+  <input type="text" id="shopping-input" placeholder="e.g. Milk, Sneakers, Birthday candle…">
+  <div class="type-row" id="shopping-want-row">
+    <div class="type-opt active" data-want="need">Need</div>
+    <div class="type-opt" data-want="want">Want</div>
+  </div>
+  <div class="cat-row" id="shopping-for-row"></div>
+  <div class="cat-add-inline" id="shopping-for-add-inline" style="display:none;">
+    <input type="text" id="shopping-for-add-input" placeholder="e.g. Kids, Office…" maxlength="20">
+    <button id="shopping-for-add-confirm">Add</button>
+  </div>
+  <div class="type-row" id="shopping-priority-row">
+    <div class="type-opt" data-priority="">None</div>
+    <div class="type-opt" data-priority="low">Low</div>
+    <div class="type-opt" data-priority="medium">Medium</div>
+    <div class="type-opt" data-priority="high">High</div>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="shopping-cancel">Cancel</button>
+    <button class="btn btn-primary" id="shopping-save">Save</button>
+  </div>
+  <button class="btn-danger-text" id="shopping-delete" style="display:none;">Delete item</button>
+</div>
+
+<div class="overlay" id="day-preview-overlay"></div>
+<div class="sheet day-preview-sheet" id="day-preview-sheet">
+  <div class="sheet-handle"></div>
+  <div class="day-preview-header">
+    <div class="sheet-title" id="day-preview-title" style="margin-bottom:0;">Day</div>
+    <button class="day-preview-close" id="day-preview-close">Close</button>
+  </div>
+  <div id="day-preview-body"></div>
+</div>
+
+<div class="overlay" id="nest-picker-overlay"></div>
+<div class="sheet day-preview-sheet" id="nest-picker-sheet">
+  <div class="sheet-handle"></div>
+  <div class="day-preview-header">
+    <div class="sheet-title" style="margin-bottom:0;">Make subtask of…</div>
+    <button class="day-preview-close" id="nest-picker-close">Cancel</button>
+  </div>
+  <div id="nest-picker-body"></div>
 </div>
 
 <script>
@@ -1409,6 +1762,8 @@
     document.getElementById("nest-picker-sheet").classList.remove("open");
     window.scrollTo(0,0);
   }
+  document.getElementById("nest-picker-close").addEventListener("click", closeNestPicker);
+  document.getElementById("nest-picker-overlay").addEventListener("click", closeNestPicker);
 
   function taskRowHtml(t){
     var done = doneFor(t);
@@ -1437,7 +1792,6 @@
     setTimeout(commitFn, 150);
   }
   function wireTaskList(container){
-    if(!container) return;
     container.addEventListener("click", function(e){
       var chk = e.target.closest(".ledger-check");
       var del = e.target.closest(".ledger-del");
@@ -1465,7 +1819,7 @@
       else if(body){ var t2 = tasks.find(function(x){return x.id===body.getAttribute("data-edit");}); if(t2) openTaskSheet(t2); }
     });
   }
-  ["home-habits-list"].forEach(function(id){ wireTaskList(document.getElementById(id)); });
+  ["home-today-list","home-habits-list","week-list","cal-day-list","organize-habits-list"].forEach(function(id){ wireTaskList(document.getElementById(id)); });
 
   /* ---------------- swipe: right to delete, left to tick ---------------- */
   (function(){
@@ -1590,73 +1944,16 @@
     function addQuickTask(){
       var text = pullInput.value.trim();
       if(!text){ closeBar(); return; }
-      var firstLine = text.split("\n")[0].slice(0, 60);
-      notes.unshift({ id:uid(), title:firstLine, body:text, createdAt:Date.now(), updatedAt:Date.now() });
-      saveNotes();
+      tasks.unshift({ id:uid(), text:text, type:"once", category:null, priority:null, list:"personal", parentId:null, dueDate: todayKey, dueTime:null, doneOnce:false, completed:{}, createdAt:Date.now() });
+      saveTasks();
       pullInput.value = "";
       closeBar();
       renderAll();
-      showToast("Note added");
+      showToast("Task added");
     }
 
     confirmBtn.addEventListener("click", addQuickTask);
     pullInput.addEventListener("keydown", function(e){ if(e.key==="Enter") addQuickTask(); if(e.key==="Escape") closeBar(); });
-
-    /* ---------------- scan a handwritten note into Notes ---------------- */
-    var scanBtn = document.getElementById("pull-add-scan-btn");
-    var scanFileInput = document.getElementById("scan-list-file");
-    scanBtn.addEventListener("click", function(){
-      var key = loadStr("db2.claudeApiKey");
-      if(!key){
-        showToast("Add a Claude API key in Settings first");
-        return;
-      }
-      scanFileInput.click();
-    });
-    scanFileInput.addEventListener("change", function(){
-      var file = scanFileInput.files && scanFileInput.files[0];
-      scanFileInput.value = "";
-      if(!file) return;
-      var key = loadStr("db2.claudeApiKey");
-      if(!key){ showToast("Add a Claude API key in Settings first"); return; }
-      var reader = new FileReader();
-      reader.onload = function(){
-        var base64 = reader.result.split(",")[1];
-        showToast("Reading your note…");
-        fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-api-key": key,
-            "anthropic-version": "2023-06-01",
-            "anthropic-dangerous-direct-browser-access": "true"
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 1024,
-            messages: [{
-              role: "user",
-              content: [
-                { type:"image", source:{ type:"base64", media_type: file.type||"image/jpeg", data: base64 } },
-                { type:"text", text:"This is a photo of handwritten notes. Transcribe the handwriting as plain text, preserving line breaks and any obvious list structure. No commentary, no markdown, just the transcribed text." }
-              ]
-            }]
-          })
-        }).then(function(r){ return r.json(); }).then(function(data){
-          if(data && data.error){ showToast("Scan failed: "+(data.error.message||"check your API key")); return; }
-          var textOut = (data.content||[]).filter(function(b){ return b.type==="text"; }).map(function(b){ return b.text; }).join("\n").trim();
-          if(!textOut){ showToast("Couldn't make out any handwriting in that photo"); return; }
-          var firstLine = textOut.split("\n")[0].slice(0, 60);
-          notes.unshift({ id:uid(), title:firstLine, body:textOut, createdAt:Date.now(), updatedAt:Date.now() });
-          saveNotes();
-          renderAll();
-          showToast("Note added from scan");
-        }).catch(function(){
-          showToast("Scan failed - check your connection");
-        });
-      };
-      reader.readAsDataURL(file);
-    });
 
     var homeWrap = document.getElementById("home-wrap");
     homeWrap.addEventListener("touchstart", function(e){
@@ -1686,6 +1983,51 @@
     });
   })();
 
+  /* ---------------- long-press for Categories / swipe-right for Shopping (Home) ----------------
+     Both of these pages used to have their own bottom-nav tab and Home tile; now they're reached
+     only through these two gestures, so they're scoped to fire only on "empty" background areas
+     of Home (never on top of a task/habit row, button, or the pull-add bar) to avoid hijacking
+     anything else that's already interactive there. */
+  (function(){
+    var homeWrap2 = document.getElementById("home-wrap");
+    var gestureStartX = 0, gestureStartY = 0, longPressTimer = null, longPressFired = false, gestureTracking = false;
+    var LONG_PRESS_MS = 500;
+    var SWIPE_THRESHOLD = 70;
+
+    function isInteractiveTarget(el){
+      return !!el.closest(".ledger-item, button, .pull-add-bar, .home-tile, input, a, .next-up-card, .work-summary-card");
+    }
+
+    homeWrap2.addEventListener("touchstart", function(e){
+      if(currentTab!=="home" || isInteractiveTarget(e.target)){ gestureTracking = false; return; }
+      gestureTracking = true;
+      longPressFired = false;
+      gestureStartX = e.touches[0].clientX; gestureStartY = e.touches[0].clientY;
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(function(){
+        longPressFired = true;
+        gestureTracking = false;
+        if(navigator.vibrate) navigator.vibrate(12);
+        switchTab("categories");
+      }, LONG_PRESS_MS);
+    }, { passive:true });
+
+    homeWrap2.addEventListener("touchmove", function(e){
+      if(!gestureTracking) return;
+      var dx = e.touches[0].clientX - gestureStartX, dy = e.touches[0].clientY - gestureStartY;
+      if(Math.abs(dx) > 10 || Math.abs(dy) > 10) clearTimeout(longPressTimer); // real movement means this isn't a long-press-and-hold anymore
+    }, { passive:true });
+
+    homeWrap2.addEventListener("touchend", function(e){
+      clearTimeout(longPressTimer);
+      if(!gestureTracking || longPressFired){ gestureTracking = false; return; }
+      gestureTracking = false;
+      var dx = e.changedTouches[0].clientX - gestureStartX, dy = e.changedTouches[0].clientY - gestureStartY;
+      if(dx > SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("shopping");
+      else if(dx < -SWIPE_THRESHOLD && Math.abs(dy) < 60) switchTab("organize");
+      else if(dy < -SWIPE_THRESHOLD && Math.abs(dx) < 60) switchTab("notes");
+    }, { passive:true });
+  })();
   /* ---------------- toast ---------------- */
   var toastTimer = null;
   /* ---------------- trash / recently deleted ---------------- */
@@ -1772,7 +2114,6 @@
 
   /* ---------------- tabs ---------------- */
   var currentTab = loadStr("db2.currentTab") || "home";
-  if(["home","notes","journal","habits"].indexOf(currentTab)===-1) currentTab = "home"; // older saves may point at a tab that no longer exists (Month/Goals/Work/Organize/Shopping/Categories/Activity)
   var lastMainTab = loadStr("db2.lastMainTab") || "home";
   function switchTab(tab){
     currentTab = tab;
@@ -1788,6 +2129,8 @@
     if(tab==="habits") renderHabits();
     if(tab==="goals") renderGoalsView();
     if(tab==="home"){ selectedDate = new Date(realNow); renderHome(); }
+    if(tab==="categories") renderCategoriesPage();
+    if(tab==="activity") renderActivityPage();
     if(tab==="organize"){ organizeSelectedDate = new Date(realNow); renderOrganizePage(); }
     if(tab==="shopping") renderShoppingPage();
     if(tab==="work") renderWorkPage();
@@ -1797,11 +2140,181 @@
   document.querySelectorAll(".nav-item").forEach(function(btn){
     btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
   });
+  document.getElementById("link-habits").addEventListener("click", function(){ switchTab("habits"); });
+  document.getElementById("link-goals").addEventListener("click", function(){ switchTab("goals"); });
+  document.getElementById("link-activity").addEventListener("click", function(){ switchTab("activity"); });
+  document.getElementById("link-organize").addEventListener("click", function(){ switchTab("organize"); });
+  document.getElementById("link-shopping").addEventListener("click", function(){ switchTab("shopping"); });
   function goToOrganizeDate(d){
     switchTab("organize"); // this resets organizeSelectedDate back to today as a side effect - the two lines below then override it to the date we actually want
     organizeSelectedDate = new Date(d);
     renderOrganizePage();
   }
+  document.getElementById("home-progress-prev").addEventListener("click", function(e){
+    e.stopPropagation();
+    var d = new Date(realNow); d.setDate(d.getDate()-1);
+    goToOrganizeDate(d);
+  });
+  document.getElementById("home-progress-next").addEventListener("click", function(e){
+    e.stopPropagation();
+    var d = new Date(realNow); d.setDate(d.getDate()+1);
+    goToOrganizeDate(d);
+  });
+  document.getElementById("categories-back").addEventListener("click", function(){ switchTab(lastMainTab); });
+  document.getElementById("category-detail-back").addEventListener("click", function(){ switchTab("categories"); });
+  document.getElementById("activity-back").addEventListener("click", function(){ switchTab(lastMainTab); });
+
+  var activityFilter = "week";
+  document.querySelectorAll("#activity-filter-row .type-opt").forEach(function(opt){
+    opt.addEventListener("click", function(){
+      document.querySelectorAll("#activity-filter-row .type-opt").forEach(function(o){ o.classList.remove("active"); });
+      opt.classList.add("active");
+      activityFilter = opt.getAttribute("data-activity-filter");
+      renderActivityPage();
+    });
+  });
+  function renderActivityPage(){
+    var body = document.getElementById("activity-body");
+    var weekStart = startOfWeek(realNow).getTime();
+    var monthStart = new Date(realNow.getFullYear(), realNow.getMonth(), 1).getTime();
+    var completed = tasks.filter(function(t){
+      if(!(t.type==="once" && t.doneOnce && t.completedAt)) return false;
+      if(activityFilter==="week") return t.completedAt >= weekStart;
+      if(activityFilter==="month") return t.completedAt >= monthStart;
+      return true;
+    }).sort(function(a,b){ return b.completedAt - a.completedAt; });
+    if(!completed.length){
+      body.innerHTML = '<div class="empty-note">Nothing completed in this range yet.</div>';
+      document.getElementById("clear-old-activity").style.display = activityFilter==="all" ? "flex" : "none";
+      return;
+    }
+    var groups = {};
+    var order = [];
+    completed.forEach(function(t){
+      var dk = dateKey(new Date(t.completedAt));
+      if(!groups[dk]){ groups[dk] = []; order.push(dk); }
+      groups[dk].push(t);
+    });
+    var html = "";
+    order.forEach(function(dk){
+      var d = new Date(dk+"T00:00:00");
+      var label = dk===todayKey ? "Today" : d.toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"});
+      html += '<div class="activity-day-label">'+label+'</div>';
+      html += '<ul class="ledger-list">'+groups[dk].map(taskRowHtml).join("")+'</ul>';
+    });
+    body.innerHTML = html;
+    wireTaskList(body);
+    document.getElementById("clear-old-activity").style.display = activityFilter==="all" ? "flex" : "none";
+  }
+  document.getElementById("clear-old-activity").addEventListener("click", function(){
+    var cutoff = Date.now() - (90*86400000);
+    var removed = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt && t.completedAt < cutoff; });
+    if(!removed.length){ showToast("Nothing older than 90 days to clear."); return; }
+    var removedIds = removed.map(function(t){ return t.id; });
+    tasks = tasks.filter(function(t){ return removedIds.indexOf(t.id)===-1; });
+    saveTasks(); renderActivityPage(); renderHome();
+    showToast(removed.length+" old completed task"+(removed.length===1?"":"s")+" cleared.", function(){
+      tasks = tasks.concat(removed); saveTasks(); renderActivityPage(); renderHome();
+    });
+  });
+  document.getElementById("activity-body").addEventListener("click", function(e){
+    if(e.target.closest(".ledger-check") || e.target.closest(".ledger-del")){
+      setTimeout(renderActivityPage, 0);
+    }
+  });
+
+  function renderCategoriesPage(){
+    var wrap = document.getElementById("cat-list");
+    if(!categories.length){ wrap.innerHTML = '<div class="empty-note">No categories yet.</div>'; }
+    else {
+      wrap.innerHTML = categories.map(function(c){
+        var count = tasks.filter(function(t){ return t.category===c.id; }).length;
+        return '<li class="cat-list-row" data-cat="'+c.id+'">' +
+          '<span class="cat-list-name">'+escapeHtml(c.label)+'</span>' +
+          '<span class="cat-list-count">'+count+'</span>' +
+          '<span class="cat-list-chevron">›</span>' +
+          '<button class="cat-list-del" data-cat-del="'+c.id+'">×</button>' +
+        '</li>';
+      }).join("");
+    }
+    wrap.querySelectorAll(".cat-list-row").forEach(function(row){
+      row.addEventListener("click", function(e){
+        if(e.target.closest(".cat-list-del")) return;
+        openCategoryDetail(row.getAttribute("data-cat"));
+      });
+    });
+    wrap.querySelectorAll(".cat-list-del").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        deleteCategoryWithUndo(btn.getAttribute("data-cat-del"));
+        renderCategoriesPage();
+      });
+    });
+
+    var workWrap = document.getElementById("work-cat-list");
+    if(!workCategories.length){ workWrap.innerHTML = '<div class="empty-note">No work categories yet.</div>'; }
+    else {
+      workWrap.innerHTML = workCategories.map(function(c){
+        var count = tasks.filter(function(t){ return t.category===c.id; }).length;
+        return '<li class="cat-list-row" data-cat="'+c.id+'">' +
+          '<span class="cat-list-name">'+escapeHtml(c.label)+'</span>' +
+          '<span class="cat-list-count">'+count+'</span>' +
+          '<span class="cat-list-chevron">›</span>' +
+          '<button class="cat-list-del" data-cat-del="'+c.id+'">×</button>' +
+        '</li>';
+      }).join("");
+    }
+    workWrap.querySelectorAll(".cat-list-row").forEach(function(row){
+      row.addEventListener("click", function(e){
+        if(e.target.closest(".cat-list-del")) return;
+        openCategoryDetail(row.getAttribute("data-cat"));
+      });
+    });
+    workWrap.querySelectorAll(".cat-list-del").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        deleteWorkCategoryWithUndo(btn.getAttribute("data-cat-del"));
+        renderCategoriesPage();
+      });
+    });
+  }
+  document.getElementById("add-category").addEventListener("click", function(){
+    document.getElementById("cat-page-add-inline").style.display = "flex";
+    document.getElementById("cat-page-add-input").focus();
+  });
+  document.getElementById("cat-page-add-confirm").addEventListener("click", function(){
+    var name = document.getElementById("cat-page-add-input").value.trim();
+    if(!name) return;
+    categories.push({ id:"c"+uid(), label:name });
+    saveCategories();
+    document.getElementById("cat-page-add-input").value = "";
+    document.getElementById("cat-page-add-inline").style.display = "none";
+    renderCategoriesPage();
+  });
+  document.getElementById("add-work-category").addEventListener("click", function(){
+    document.getElementById("work-cat-page-add-inline").style.display = "flex";
+    document.getElementById("work-cat-page-add-input").focus();
+  });
+  document.getElementById("work-cat-page-add-confirm").addEventListener("click", function(){
+    var name = document.getElementById("work-cat-page-add-input").value.trim();
+    if(!name) return;
+    workCategories.push({ id:"c"+uid(), label:name });
+    saveWorkCategories();
+    document.getElementById("work-cat-page-add-input").value = "";
+    document.getElementById("work-cat-page-add-inline").style.display = "none";
+    renderCategoriesPage();
+  });
+
+  function openCategoryDetail(catId){
+    var label = catLabel(catId) || "Category";
+    document.getElementById("category-detail-title").textContent = label;
+    var list = tasks.filter(function(t){ return t.category===catId; })
+      .sort(function(a,b){ var da=doneFor(a), db=doneFor(b); if(da!==db) return da?1:-1; return b.createdAt-a.createdAt; });
+    var wrap = document.getElementById("category-detail-list");
+    wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing in this category yet.</div>';
+    switchTab("category-detail");
+  }
+  wireTaskList(document.getElementById("category-detail-list"));
 
   function syncExportReminder(){
     var el = document.getElementById("export-reminder");
@@ -1877,31 +2390,6 @@
     syncFontSizeButtons();
     syncSecondaryFontButtons();
     syncExportReminder();
-  });
-
-  /* ---------------- share today's list (plain text, for widget bridges like KWGT/Tasker) ---------------- */
-  function buildTodayShareText(){
-    var open = [], done = [];
-    habits.filter(function(h){ return isScheduledOn(h, realNow); }).forEach(function(h){
-      var isDone = !!(h.completed && h.completed[todayKey]);
-      (isDone ? done : open).push(h.name);
-    });
-    var lines = [];
-    open.forEach(function(text){ lines.push("[ ] "+text); });
-    done.forEach(function(text){ lines.push("[x] "+text); });
-    if(!lines.length) lines.push("Nothing scheduled today.");
-    return lines.join("\n");
-  }
-  var shareBtn = document.getElementById("share-today-btn");
-  if(shareBtn) shareBtn.addEventListener("click", function(){
-    var text = buildTodayShareText();
-    if(navigator.share){
-      navigator.share({ title:"Daybook - Today's habits", text:text }).catch(function(){});
-    } else if(navigator.clipboard){
-      navigator.clipboard.writeText(text).then(function(){ alert("Copied today's habits to clipboard."); });
-    } else {
-      alert(text);
-    }
   });
   document.getElementById("settings-back").addEventListener("click", function(){ switchTab(lastMainTab); });
   document.getElementById("user-name-input").addEventListener("input", function(){ saveStr("db2.userName", this.value.trim()); });
@@ -2027,11 +2515,57 @@
 
   /* ---------------- FAB ---------------- */
   document.getElementById("fab-add").addEventListener("click", function(){
-    if(currentTab==="home"){ openNoteSheet(null); }
+    if(currentTab==="home"){ selectedDate = new Date(realNow); openTaskSheet(null, "once"); }
+    else if(currentTab==="month") openTaskSheet(null, monthSubview==="week" ? "weekly" : "once");
     else if(currentTab==="habits") openHabitSheet(null);
+    else if(currentTab==="goals") openGoalSheet(null, "short");
+    else if(currentTab==="organize") openTaskSheet(null, "once", { dueDate: dateKey(organizeSelectedDate) });
+    else if(currentTab==="shopping") openShoppingSheet(null);
+    else if(currentTab==="work") openTaskSheet(null, "once", { list:"work" });
   });
+  document.getElementById("work-summary-card").addEventListener("click", function(){ switchTab("work"); });
 
   /* ---------------- HOME render ---------------- */
+  function computeNextUp(){
+    var now = new Date();
+    var nowStr = pad(now.getHours())+":"+pad(now.getMinutes());
+    var todaysOpen = tasks.filter(function(t){ return t.type==="once" && t.dueDate===todayKey && !doneFor(t); });
+    if(!todaysOpen.length) return null;
+    var rank = { high:3, medium:2, low:1 };
+    function priorityRank(t){ return rank[t.priority] || 0; }
+    // Highest priority first, regardless of time - that's the point of this card (surface what matters most today).
+    // Within the same priority tier: an upcoming timed task (soonest first), then any timed task even if
+    // its time already passed, then untimed tasks (most recently added first).
+    todaysOpen.sort(function(a,b){
+      var pr = priorityRank(b) - priorityRank(a);
+      if(pr) return pr;
+      var aUpcoming = a.dueTime && a.dueTime>=nowStr, bUpcoming = b.dueTime && b.dueTime>=nowStr;
+      if(aUpcoming && bUpcoming) return a.dueTime.localeCompare(b.dueTime);
+      if(aUpcoming) return -1;
+      if(bUpcoming) return 1;
+      if(a.dueTime && b.dueTime) return a.dueTime.localeCompare(b.dueTime);
+      if(a.dueTime) return -1;
+      if(b.dueTime) return 1;
+      return b.createdAt - a.createdAt;
+    });
+    return todaysOpen[0];
+  }
+  function renderNextUp(){
+    var card = document.getElementById("next-up-card");
+    var t = computeNextUp();
+    if(!t){ card.style.display = "none"; return; }
+    card.style.display = "block";
+    document.getElementById("next-up-time").textContent = t.dueTime ? fmtTime(t.dueTime) : "Anytime today";
+    document.getElementById("next-up-title").textContent = t.text;
+    var catName = t.category ? catLabel(t.category) : "";
+    var subParts = [];
+    if(t.priority) subParts.push(t.priority.charAt(0).toUpperCase()+t.priority.slice(1)+" priority");
+    if(catName) subParts.push(catName);
+    document.getElementById("next-up-sub").textContent = subParts.join(" · ");
+    document.getElementById("next-up-sub").style.display = subParts.length ? "block" : "none";
+    document.getElementById("next-up-footer-left").textContent = "Today";
+    card.onclick = function(){ openTaskSheet(t); };
+  }
   function habitRowHtmlHome(h, hideDelete){
     var isToday = isScheduledOn(h, realNow);
     var isNumber = h.trackType==="number";
@@ -2056,55 +2590,93 @@
     document.getElementById("home-greeting").textContent = greetingText();
     document.getElementById("home-date").textContent = new Date().toLocaleDateString(undefined,{ weekday:"long", month:"long", day:"numeric" }).toUpperCase();
 
+    var todaysTasks = tasks.filter(function(t){
+      if(t.list==="work") return false; // Work tasks live on their own page, kept out of Home entirely
+      if(t.parentId) return false; // subtasks are shown nested under their parent, never independently
+      if(t.type==="daily" || t.type==="weekly" || t.type==="monthly") return true;
+      if(t.type!=="once") return false;
+      if(!t.dueDate) return true; // no date set at all - treat as always-relevant, not hidden
+      if(t.dueDate===todayKey) return true;
+      if(t.dueDate && t.dueDate<todayKey && !t.doneOnce) return true;
+      return false;
+    });
     var todaysHabits = habits.filter(function(h){ return isScheduledOn(h, realNow); });
+
+    var taskRows = todaysTasks.map(function(t){ return { item:t, done:doneFor(t), sortKey: t.order!==undefined ? t.order : t.createdAt }; })
+      .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
+    var taskRowsExpanded = [];
+    taskRows.forEach(function(x){
+      taskRowsExpanded.push(x);
+      expandWithSubtasksRecursive(taskChildren(x.item.id), 1).forEach(function(d){ taskRowsExpanded.push({ item:d.item, done:doneFor(d.item) }); });
+    });
+    taskRows = taskRowsExpanded;
+
     var habitRows = todaysHabits.map(function(h){ return { item:h, done: !!(h.completed && h.completed[todayKey]), sortKey: h.order!==undefined ? h.order : h.createdAt }; })
       .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return b.sortKey-a.sortKey; });
 
+    var taskList = document.getElementById("home-today-list");
     var habitList = document.getElementById("home-habits-list");
+    var tasksLabel = document.getElementById("home-tasks-label");
     var habitsLabel = document.getElementById("home-habits-label");
-    var EMPTY_HOME_LINES = ["Nothing scheduled — tap + to add a habit.", "A clear day so far.", "Open and waiting.", "Nothing on the page yet."];
+    var EMPTY_HOME_LINES = ["Nothing yet — tap + to add something.", "A clear day so far.", "Open and waiting.", "Nothing on the page yet."];
 
-    if(!habitRows.length){
-      habitsLabel.style.display = "none";
-      habitList.innerHTML = '<div class="empty-note">'+EMPTY_HOME_LINES[dayOfYear() % EMPTY_HOME_LINES.length]+'</div>';
+    if(!taskRows.length && !habitRows.length){
+      tasksLabel.style.display = "none"; habitsLabel.style.display = "none";
+      taskList.innerHTML = '<div class="empty-note">'+EMPTY_HOME_LINES[dayOfYear() % EMPTY_HOME_LINES.length]+'</div>';
+      habitList.innerHTML = "";
     } else {
-      habitsLabel.style.display = "";
-      habitList.innerHTML = habitRows.map(function(x){ return habitRowHtmlHome(x.item, true); }).join("");
+      tasksLabel.style.display = taskRows.length ? "" : "none";
+      taskList.innerHTML = taskRows.length ? taskRows.map(function(x){ return taskRowHtml(x.item); }).join("") : "";
+      habitsLabel.style.display = habitRows.length ? "" : "none";
+      habitList.innerHTML = habitRows.length ? habitRows.map(function(x){ return habitRowHtmlHome(x.item, true); }).join("") : "";
     }
 
     var weekStartMs = startOfWeek(realNow).getTime();
-    var doneThisWeek = habits.reduce(function(sum, h){
-      if(!h.completed) return sum;
-      return sum + Object.keys(h.completed).filter(function(k){
-        if(!h.completed[k]) return false;
-        var d = new Date(k+"T00:00:00");
-        return d.getTime() >= weekStartMs;
-      }).length;
-    }, 0);
-    document.getElementById("home-week-summary").textContent = doneThisWeek ? doneThisWeek+" check-ins this week" : "";
+    var doneThisWeek = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt && t.completedAt >= weekStartMs; }).length;
+    document.getElementById("home-week-summary").textContent = doneThisWeek ? doneThisWeek+" completed this week" : "";
 
-    var sortedNotes = notes.slice().sort(function(a,b){ return b.updatedAt-a.updatedAt; }).slice(0, 4);
-    var notesGrid = document.getElementById("home-notes-grid");
-    var notesLabel = document.getElementById("home-notes-label");
-    if(!sortedNotes.length){
-      notesLabel.style.display = "none";
-      notesGrid.innerHTML = "";
+    var workAll = tasks.filter(function(t){ return t.list==="work"; });
+    var workCard = document.getElementById("work-summary-card");
+    if(workAll.length){
+      var workDone = workAll.filter(doneFor).length;
+      var workRemaining = workAll.length - workDone;
+      document.getElementById("work-summary-text").textContent = workDone+"/"+workAll.length+" done. "+workRemaining+" remaining.";
+      var openWork = workAll.filter(function(t){ return !doneFor(t); })
+        .sort(function(a,b){ return (b.order!==undefined?b.order:b.createdAt) - (a.order!==undefined?a.order:a.createdAt); });
+      var PREVIEW_MAX = 3;
+      var previewEl = document.getElementById("work-summary-preview");
+      var shown = openWork.slice(0, PREVIEW_MAX).map(function(t){ return '<div>'+escapeHtml(t.text)+'</div>'; }).join("");
+      var extra = openWork.length - PREVIEW_MAX;
+      if(extra > 0) shown += '<div>+'+extra+' more</div>';
+      previewEl.innerHTML = shown;
+      workCard.style.display = "flex";
     } else {
-      notesLabel.style.display = "";
-      notesGrid.innerHTML = sortedNotes.map(function(n){
-        return '<div class="note-tile" role="button" tabindex="0" data-home-note="'+n.id+'">' +
-          '<div class="note-tile-title">'+escapeHtml(n.title||"Untitled")+'</div>' +
-          '<div class="note-tile-snippet">'+escapeHtml(noteSnippet(n))+'</div>' +
-          '<div class="note-tile-time">'+trashTimeAgo(n.updatedAt)+'</div>' +
-        '</div>';
-      }).join("");
-      notesGrid.querySelectorAll("[data-home-note]").forEach(function(row){
-        row.addEventListener("click", function(){
-          var n = notes.find(function(x){ return x.id===row.getAttribute("data-home-note"); });
-          if(n) openNoteSheet(n);
-        });
-      });
+      workCard.style.display = "none";
     }
+
+    var todays = todaysTasks; // kept for the stat line below, tasks-only count as before
+    var doneTaskCount = taskRows.filter(function(x){ return x.done; }).length;
+    var doneHabitCount = todaysHabits.filter(function(h){return h.completed&&h.completed[todayKey];}).length;
+    document.getElementById("home-progress-count").textContent = (doneTaskCount+doneHabitCount)+"/"+(taskRows.length+habitRows.length);
+
+    var openTodos = todays.filter(function(t){ return !doneFor(t); }).length;
+    var habitsScheduledToday = habits.filter(function(h){ return isScheduledOn(h, realNow); });
+    var habitsDoneToday = habitsScheduledToday.filter(function(h){ return h.completed && h.completed[todayKey]; }).length;
+
+    renderNextUp();
+
+    var habitsToday = habits.filter(function(h){ return isScheduledOn(h, realNow); });
+    var habitsDone = habitsToday.filter(function(h){ return h.completed && h.completed[todayKey]; }).length;
+    document.getElementById("habits-count").textContent = habitsToday.length ? (habitsDone+"/"+habitsToday.length) : "—";
+    var goalsOpen = goals.filter(function(g){ return !g.done; }).length;
+    document.getElementById("goals-count").textContent = goalsOpen || "—";
+    var completedCount = tasks.filter(function(t){ return t.type==="once" && t.doneOnce && t.completedAt; }).length;
+    document.getElementById("activity-count").textContent = completedCount || "—";
+    var todayOrganizeCount = tasks.filter(function(t){ return !t.parentId && (t.type==="daily" || (t.type==="once" && t.dueDate===todayKey)); }).length;
+    document.getElementById("organize-count").textContent = todayOrganizeCount || "—";
+    var openShoppingCount = shoppingItems.filter(function(i){ return !i.bought; }).length;
+    document.getElementById("shopping-count").textContent = openShoppingCount || "—";
+    if(currentTab==="organize") renderOrganizeHabitsSection(dateKey(organizeSelectedDate)===todayKey); // habit changes elsewhere (Home, Habits page) always call renderHome() - keep Organize's habit section in sync too
   }
 
   /* ---------------- WEEK render ---------------- */
@@ -2140,6 +2712,8 @@
     var wrap = document.getElementById("week-list");
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this week yet.</div>';
   }
+  document.getElementById("week-prev").addEventListener("click", function(){ selectedDate.setDate(selectedDate.getDate()-7); renderWeek(); });
+  document.getElementById("week-next").addEventListener("click", function(){ selectedDate.setDate(selectedDate.getDate()+7); renderWeek(); });
 
   /* ---------------- MONTH render ---------------- */
   var DOW = ["M","T","W","T","F","S","S"];
@@ -2242,6 +2816,15 @@
     document.getElementById("day-preview-sheet").classList.remove("open");
     window.scrollTo(0,0);
   }
+  document.getElementById("day-preview-body").addEventListener("click", function(e){
+    var editBtn = e.target.closest(".day-preview-edit");
+    if(!editBtn) return;
+    var t = tasks.find(function(x){ return x.id===editBtn.getAttribute("data-task-id"); });
+    closeDayPreview();
+    if(t) openTaskSheet(t);
+  });
+  document.getElementById("day-preview-close").addEventListener("click", closeDayPreview);
+  document.getElementById("day-preview-overlay").addEventListener("click", closeDayPreview);
   function renderCalLegend(){
     var legendEl = document.getElementById("cal-legend");
     var usedCatIds = {};
@@ -2265,6 +2848,9 @@
     wrap.innerHTML = list.length ? list.map(taskRowHtml).join("") : '<div class="empty-note">Nothing for this day.</div>';
     document.getElementById("cal-quickadd-text").textContent = "Add a task for "+(isToday ? "today" : dayLabel);
   }
+  document.getElementById("cal-quickadd").addEventListener("click", function(){ openTaskSheet(null, "once"); });
+  document.getElementById("month-prev").addEventListener("click", function(){ selectedMonthDate.setMonth(selectedMonthDate.getMonth()-1); renderCalendar(); });
+  document.getElementById("month-next").addEventListener("click", function(){ selectedMonthDate.setMonth(selectedMonthDate.getMonth()+1); renderCalendar(); });
   window.addEventListener("resize", function(){ if(currentTab==="month") renderCalendar(); });
   var organizePrevBtn = document.getElementById("organize-prev");
   var organizeNextBtn = document.getElementById("organize-next");
@@ -2342,6 +2928,44 @@
     return html + '</div>';
   }
   var habitViewedMonth = {}; // { habitId: {year, month} }
+  var habitViewedYear = {}; // { habitId: year }
+  function getViewedYear(habitId){
+    if(!habitViewedYear[habitId]) habitViewedYear[habitId] = realNow.getFullYear();
+    return habitViewedYear[habitId];
+  }
+  function yearStats(h, year){
+    var start = new Date(year,0,1), end = new Date(year,11,31);
+    var cutoff = realNow < end ? realNow : end;
+    if(cutoff < start) return { scheduled:0, done:0 };
+    var scheduled=0, done=0, d = new Date(start);
+    while(d <= cutoff){
+      if(isScheduledOn(h, d)){ scheduled++; if(h.completed && h.completed[dateKey(d)]) done++; }
+      d.setDate(d.getDate()+1);
+    }
+    return { scheduled:scheduled, done:done };
+  }
+  var YEAR_MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function yearMonthsHtml(h, year){
+    var html = "";
+    for(var m=0;m<12;m++){
+      var monthStart = new Date(year, m, 1);
+      if(monthStart > realNow){
+        html += '<div class="year-month-cell year-month-future"><span class="year-month-label">'+YEAR_MONTH_LABELS[m]+'</span></div>';
+        continue;
+      }
+      var scheduled=0, done=0;
+      var daysInMonth = new Date(year, m+1, 0).getDate();
+      for(var day=1; day<=daysInMonth; day++){
+        var d = new Date(year, m, day);
+        if(d > realNow) break;
+        if(isScheduledOn(h, d)){ scheduled++; if(h.completed && h.completed[dateKey(d)]) done++; }
+      }
+      var pct = scheduled ? done/scheduled : null;
+      var cls = pct===null ? "year-month-none" : pct>=0.8 ? "year-month-high" : pct>=0.4 ? "year-month-mid" : pct>0 ? "year-month-low" : "year-month-zero";
+      html += '<div class="year-month-cell '+cls+'" title="'+(scheduled ? done+"/"+scheduled+" this month" : "nothing scheduled")+'"><span class="year-month-label">'+YEAR_MONTH_LABELS[m]+'</span></div>';
+    }
+    return html;
+  }
   function getViewedMonth(habitId){
     if(!habitViewedMonth[habitId]) habitViewedMonth[habitId] = { year: realNow.getFullYear(), month: realNow.getMonth() };
     return habitViewedMonth[habitId];
@@ -2409,6 +3033,8 @@
       var avgLabel = isNumber ? formatHabitAverage(h) : null;
       var wStats = weekStats(h), mStats = monthStats(h);
       var vm = getViewedMonth(h.id);
+      var vy = getViewedYear(h.id);
+      var yStats = yearStats(h, vy);
       var isOpen = !!openDropdowns[h.id];
       var timeTag = h.time ? '<span class="ledger-tag">'+fmtTime(h.time)+'</span>' : '';
       var catName = h.category ? catLabel(h.category) : null;
@@ -2431,6 +3057,13 @@
             '<button class="month-nav-btn" data-month-nav="next" data-hid="'+h.id+'">›</button>' +
           '</div>' +
           '<div class="month-heatmap">'+monthHeatmapHtml(h, vm.year, vm.month)+'</div>' +
+          '<div class="habit-perf-row" style="margin-top:14px;"><span class="habit-perf-label">This year</span><span class="habit-perf-stat">'+yStats.done+'/'+yStats.scheduled+'</span></div>' +
+          '<div class="month-nav-row">' +
+            '<button class="month-nav-btn" data-year-nav="prev" data-hid="'+h.id+'">‹</button>' +
+            '<span class="month-nav-label">'+vy+'</span>' +
+            '<button class="month-nav-btn" data-year-nav="next" data-hid="'+h.id+'">›</button>' +
+          '</div>' +
+          '<div class="year-month-grid">'+yearMonthsHtml(h, vy)+'</div>' +
         '</div>' +
         '</div>' +
         '<button class="habit-dropdown-toggle'+(isOpen?" open":"")+'" data-dropdown-toggle="'+h.id+'" aria-label="Show performance">' +
@@ -2455,7 +3088,7 @@
         renderHabits();
       });
     });
-    wrap.querySelectorAll(".month-nav-btn").forEach(function(btn){
+    wrap.querySelectorAll(".month-nav-btn[data-month-nav]").forEach(function(btn){
       btn.addEventListener("click", function(e){
         e.stopPropagation();
         var id = btn.getAttribute("data-hid");
@@ -2464,6 +3097,16 @@
         vm.month += dir;
         if(vm.month < 0){ vm.month = 11; vm.year--; }
         if(vm.month > 11){ vm.month = 0; vm.year++; }
+        openDropdowns[id] = true;
+        renderHabits();
+      });
+    });
+    wrap.querySelectorAll(".month-nav-btn[data-year-nav]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var id = btn.getAttribute("data-hid");
+        var dir = btn.getAttribute("data-year-nav")==="prev" ? -1 : 1;
+        habitViewedYear[id] = getViewedYear(id) + dir;
         openDropdowns[id] = true;
         renderHabits();
       });
@@ -2528,6 +3171,8 @@
       });
     });
   }
+  document.getElementById("add-goal-short").addEventListener("click", function(){ openGoalSheet(null,"short"); });
+  document.getElementById("add-goal-long").addEventListener("click", function(){ openGoalSheet(null,"long"); });
 
   /* ---------------- WORK ---------------- */
   function renderWorkPage(){
@@ -2570,6 +3215,8 @@
       });
     });
   }
+  document.getElementById("work-back").addEventListener("click", function(){ switchTab(lastMainTab); });
+  document.getElementById("link-work").addEventListener("click", function(){ switchTab("work"); });
 
   /* ---------------- SHOPPING ---------------- */
   function wantTag(w){ return w==="want" ? '<span class="ledger-tag">Want</span>' : '<span class="ledger-tag">Need</span>'; }
@@ -2602,8 +3249,16 @@
     addToTrash("shopping", removed.text, removed);
     showToast("Item deleted.", function(){ shoppingItems.splice(idx,0,removed); saveShopping(); renderShoppingPage(); removeFromTrashByOriginalId(removed.id); });
   }
+  document.getElementById("shopping-list").addEventListener("click", function(e){
+    var chk = e.target.closest(".ledger-check");
+    var del = e.target.closest(".ledger-del");
+    var body = e.target.closest(".ledger-body");
+    if(chk){ var it = shoppingItems.find(function(x){ return x.id===chk.getAttribute("data-id"); }); if(it){ it.bought = !it.bought; saveShopping(); renderShoppingPage(); } return; }
+    if(del){ deleteShoppingItem(del.getAttribute("data-id")); return; }
+    if(body){ var it2 = shoppingItems.find(function(x){ return x.id===body.getAttribute("data-edit"); }); if(it2) openShoppingSheet(it2); return; }
+  });
 
-  /* ---------------- SHOPPING SHEET (dead: shopping-sheet HTML removed) ---------------- */
+  /* ---------------- SHOPPING SHEET ---------------- */
   var shoppingSheet = document.getElementById("shopping-sheet");
   var editingShoppingId = null, shoppingWant = "need", shoppingFor = "myself", shoppingPriority = "";
   function renderShoppingForRow(){
@@ -2649,6 +3304,18 @@
       renderShoppingForRow(); renderShoppingPage();
     });
   }
+  document.getElementById("shopping-for-add-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("shopping-for-add-confirm").click(); });
+  document.getElementById("shopping-for-add-confirm").addEventListener("click", function(){
+    var name = document.getElementById("shopping-for-add-input").value.trim();
+    if(!name) return;
+    var id = uid();
+    shoppingForOptions.push({ id:id, label:name });
+    saveShoppingForOptions();
+    shoppingFor = id;
+    document.getElementById("shopping-for-add-input").value = "";
+    document.getElementById("shopping-for-add-inline").style.display = "none";
+    renderShoppingForRow();
+  });
   function openShoppingSheet(existing){
     editingShoppingId = existing ? existing.id : null;
     shoppingWant = existing ? (existing.want||"need") : "need";
@@ -2677,7 +3344,22 @@
       o.classList.add("active"); shoppingPriority = o.getAttribute("data-priority");
     });
   });
-
+  document.getElementById("shopping-cancel").addEventListener("click", closeShoppingSheetFn);
+  document.getElementById("shopping-save").addEventListener("click", function(){
+    var text = document.getElementById("shopping-input").value.trim();
+    if(!text) return;
+    if(editingShoppingId){
+      var it = shoppingItems.find(function(x){ return x.id===editingShoppingId; });
+      if(it){ it.text=text; it.want=shoppingWant; it.forWhom=shoppingFor; it.priority=shoppingPriority||null; }
+    } else {
+      shoppingItems.unshift({ id:uid(), text:text, want:shoppingWant, forWhom:shoppingFor, priority:shoppingPriority||null, bought:false, createdAt:Date.now() });
+    }
+    saveShopping(); closeShoppingSheetFn(); renderShoppingPage();
+  });
+  document.getElementById("shopping-delete").addEventListener("click", function(){
+    var id = editingShoppingId; closeShoppingSheetFn(); if(id) deleteShoppingItem(id);
+  });
+  document.getElementById("shopping-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("shopping-save").click(); });
 
   /* ---------------- TASK SHEET ---------------- */
   var overlay = document.getElementById("overlay");
@@ -2886,6 +3568,18 @@
     closeNoteSheetFn();
     if(id) deleteNoteWithUndo(id);
   });
+  document.getElementById("cat-add-confirm").addEventListener("click", function(){
+    var name = document.getElementById("cat-add-input").value.trim();
+    if(!name) return;
+    var id = "c"+uid();
+    if(taskList==="work"){ workCategories.push({ id:id, label:name }); saveWorkCategories(); }
+    else { categories.push({ id:id, label:name }); saveCategories(); }
+    document.getElementById("cat-add-input").value = "";
+    document.getElementById("cat-add-inline").style.display = "none";
+    renderTaskCatRow();
+    var opt = document.querySelector('#task-cat-row .cat-opt[data-cat="'+id+'"]');
+    if(opt) opt.classList.add("active");
+  });
   document.getElementById("habit-cat-add-confirm").addEventListener("click", function(){
     var name = document.getElementById("habit-cat-add-input").value.trim();
     if(!name) return;
@@ -2948,14 +3642,41 @@
       document.getElementById("cat-add-inline").style.display = "none";
     });
   });
+  document.getElementById("task-cancel").addEventListener("click", closeTaskSheet);
   overlay.addEventListener("click", function(){
-    closeHabitSheetFn(); closeHabitLogSheetFn();
+    closeTaskSheet(); closeHabitSheetFn(); closeGoalSheetFn(); closeShoppingSheetFn(); closeHabitLogSheetFn();
   });
+  document.getElementById("task-save").addEventListener("click", function(){
+    var text = document.getElementById("task-input").value.trim();
+    if(!text) return;
+    var activeCat = document.querySelector("#task-cat-row .cat-opt.active");
+    var cat = activeCat ? activeCat.getAttribute("data-cat") : null;
+    var dateVal = document.getElementById("task-date-input").value;
+    var timeVal = document.getElementById("task-time-input").value;
+    if(editingTaskId){
+      var t = tasks.find(function(x){ return x.id===editingTaskId; });
+      if(t){
+        t.text=text; t.type=taskType; t.category=cat; t.priority = taskPriority || null; t.list = taskList || "personal";
+        t.dueDate = taskType==="once" ? (dateVal || selKey()) : null;
+        t.dueTime = taskType==="once" ? (timeVal || null) : null;
+      }
+    } else {
+      tasks.unshift({ id:uid(), text:text, type:taskType, category:cat, priority: taskPriority || null, list: taskList || "personal", parentId: taskSheetParentId||null, dueDate: taskType==="once" ? (dateVal||selKey()) : null, dueTime: taskType==="once" ? (timeVal||null) : null, doneOnce:false, completed:{}, createdAt:Date.now() });
+    }
+    var wasHome = currentTab==="home";
+    saveTasks(); closeTaskSheet();
+    if(wasHome && taskList==="work") switchTab("work"); // added from Home as a Work task - jump straight there so it's obvious where it went, instead of just vanishing off Home's list
+    else renderAll();
+  });
+  document.getElementById("task-delete").addEventListener("click", function(){
+    var id = editingTaskId; closeTaskSheet(); if(id) deleteTask(id);
+  });
+  document.getElementById("task-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("task-save").click(); });
 
   /* ---------------- JOURNAL ---------------- */
   var journalEntries = load("db2.journal", []);
   function saveJournal(){ save("db2.journal", journalEntries); }
-  var JOURNAL_MOOD_EMOJI = { happy:"😊", loved:"🥰", calm:"😌", excited:"🤩", neutral:"😐", tired:"😴", anxious:"😰", down:"😔", sad:"😢", angry:"😡" };
+  var JOURNAL_MOOD_LABEL = { happy:"Happy", loved:"Loved", calm:"Calm", excited:"Excited", neutral:"Neutral", tired:"Tired", anxious:"Anxious", down:"Down", sad:"Sad", angry:"Angry" };
   var JOURNAL_PROMPTS = [
     "What made you smile today?", "What's weighing on your mind right now?", "Describe today in three words.",
     "What are you grateful for today?", "What's something you're looking forward to?", "What did you learn today?",
@@ -2980,11 +3701,11 @@
     if(!sorted.length){ wrap.innerHTML = '<div class="empty-note">No journal entries yet — tap "New entry" below to start.</div>'; }
     else {
       wrap.innerHTML = sorted.map(function(e, i){
-        var moodBadges = (e.moods||[]).map(function(m){ return JOURNAL_MOOD_EMOJI[m]||""; }).join(" ");
+        var moodBadges = (e.moods||[]).map(function(m){ return JOURNAL_MOOD_LABEL[m]||""; }).join(" · ");
         var thumb = (e.photos && e.photos.length) ? '<img class="journal-thumb" src="'+e.photos[0]+'">' : "";
         return '<div class="note-tile" role="button" tabindex="0" data-journal="'+e.id+'">' +
           thumb +
-          (moodBadges ? '<div class="journal-mood-badges">'+moodBadges+'</div>' : '') +
+          (moodBadges ? '<div class="journal-mood-badges">'+escapeHtml(moodBadges)+'</div>' : '') +
           '<button class="note-tile-del" data-journal-del="'+e.id+'">×</button>' +
           '<div class="note-tile-snippet">'+escapeHtml(journalSnippet(e))+'</div>' +
           '<div class="note-tile-time">'+trashTimeAgo(e.updatedAt)+'</div>' +
@@ -3125,7 +3846,7 @@
     });
   });
 
-  /* ---- scribble canvas ---- */
+  /* ---- scribble: draw with finger/mouse/pencil, then convert handwriting to typed text ---- */
   var scribbleCtx = null, scribbleDrawing = false, scribbleHasInk = false;
   function setupScribbleCanvas(){
     var canvas = document.getElementById("journal-scribble-canvas");
@@ -3172,12 +3893,50 @@
     setTimeout(setupScribbleCanvas, 30); // let layout settle so getBoundingClientRect is accurate
   });
   document.getElementById("journal-scribble-clear").addEventListener("click", function(){ setupScribbleCanvas(); });
-  document.getElementById("journal-scribble-done").addEventListener("click", function(){
+  document.getElementById("journal-scribble-keep-drawing").addEventListener("click", function(){
     if(scribbleCtx && scribbleHasInk){
       var canvas = document.getElementById("journal-scribble-canvas");
       try{ journalPhotos.push(canvas.toDataURL("image/png")); renderJournalPhotosRow(); }catch(err){}
     }
     document.getElementById("journal-scribble-wrap").style.display = "none";
+  });
+  document.getElementById("journal-scribble-convert").addEventListener("click", function(){
+    if(!scribbleCtx || !scribbleHasInk){ showToast("Write something first."); return; }
+    var key = loadStr("db2.claudeApiKey");
+    if(!key){ showToast("Add a Claude API key in Settings first"); return; }
+    var canvas = document.getElementById("journal-scribble-canvas");
+    var base64 = canvas.toDataURL("image/png").split(",")[1];
+    showToast("Reading your handwriting…");
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        messages: [{
+          role: "user",
+          content: [
+            { type:"image", source:{ type:"base64", media_type:"image/png", data: base64 } },
+            { type:"text", text:"This is a photo of handwriting or a scribbled note. Transcribe it as plain typed text, preserving line breaks. Output only the transcribed text, no commentary, no markdown." }
+          ]
+        }]
+      })
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if(data && data.error){ showToast("Couldn't convert: "+(data.error.message||"check your API key")); return; }
+      var textOut = (data.content||[]).filter(function(b){ return b.type==="text"; }).map(function(b){ return b.text; }).join("\n").trim();
+      if(!textOut){ showToast("Couldn't make out any handwriting there."); return; }
+      var ta = document.getElementById("journal-body-input");
+      ta.value = ta.value ? ta.value+"\n"+textOut : textOut;
+      document.getElementById("journal-scribble-wrap").style.display = "none";
+      showToast("Converted to text");
+    }).catch(function(){
+      showToast("Conversion failed - check your connection");
+    });
   });
 
   /* ---- location ---- */
@@ -3298,7 +4057,7 @@
       o.classList.toggle("active", habitDays.indexOf(parseInt(o.getAttribute("data-d"),10))!==-1);
     });
   }
-  function closeHabitSheetFn(){ habitSheet.classList.remove("open"); editingHabitId=null; var logSheet=document.getElementById("habit-log-sheet"); if(!logSheet || !logSheet.classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
+  function closeHabitSheetFn(){ habitSheet.classList.remove("open"); editingHabitId=null; if(!taskSheet.classList.contains("open") && !document.getElementById("goal-sheet").classList.contains("open") && !document.getElementById("habit-log-sheet").classList.contains("open")) overlay.classList.remove("open"); window.scrollTo(0,0); }
   document.querySelectorAll("#habit-sheet .type-opt[data-htype]").forEach(function(o){
     o.addEventListener("click", function(){
       document.querySelectorAll("#habit-sheet .type-opt[data-htype]").forEach(function(x){ x.classList.remove("active"); });
@@ -3416,7 +4175,6 @@
   /* ---------------- swipe-down-to-dismiss for sheets ---------------- */
   (function(){
     function wireSwipeToDismiss(sheetEl, closeFn){
-      if(!sheetEl) return;
       var startY = 0, startX = 0, deltaY = 0, dragging = false;
       function start(y, x){ dragging = true; startY = y; startX = x; deltaY = 0; sheetEl.style.transition = "none"; }
       function move(y, x){
@@ -3446,7 +4204,12 @@
       }, { passive:false });
       sheetEl.addEventListener("touchend", end, { passive:true });
     }
+    wireSwipeToDismiss(taskSheet, closeTaskSheet);
     wireSwipeToDismiss(habitSheet, closeHabitSheetFn);
+    wireSwipeToDismiss(goalSheet, closeGoalSheetFn);
+    wireSwipeToDismiss(document.getElementById("day-preview-sheet"), closeDayPreview);
+    wireSwipeToDismiss(document.getElementById("nest-picker-sheet"), closeNestPicker);
+    wireSwipeToDismiss(shoppingSheet, closeShoppingSheetFn);
     wireSwipeToDismiss(document.getElementById("habit-log-sheet"), closeHabitLogSheetFn);
     wireSwipeToDismiss(document.getElementById("trash-sheet"), closeTrashSheet);
     wireSwipeToDismiss(document.getElementById("note-sheet"), closeNoteSheetFn);
@@ -3470,6 +4233,27 @@
       else if(id==="note-sheet") closeNoteSheetFn();
     });
   });
+  document.getElementById("goal-minus").addEventListener("click", function(){ goalProgress=Math.max(0,goalProgress-10); document.getElementById("goal-progress").value=goalProgress; });
+  document.getElementById("goal-plus").addEventListener("click", function(){ goalProgress=Math.min(100,goalProgress+10); document.getElementById("goal-progress").value=goalProgress; });
+  document.getElementById("goal-progress").addEventListener("input", function(){ var v=parseInt(this.value,10); goalProgress = isNaN(v)?0:Math.max(0,Math.min(100,v)); });
+  document.getElementById("goal-cancel").addEventListener("click", closeGoalSheetFn);
+  document.getElementById("goal-save").addEventListener("click", function(){
+    var text = document.getElementById("goal-input").value.trim();
+    if(!text) return;
+    var targetDate = document.getElementById("goal-date-input").value || null;
+    if(editingGoalId){
+      var g = goals.find(function(x){ return x.id===editingGoalId; });
+      if(g){ g.text=text; g.timeframe=goalTimeframe; g.progress=goalProgress; g.done = goalProgress>=100; g.targetDate=targetDate; }
+    } else {
+      goals.unshift({ id:uid(), text:text, timeframe:goalTimeframe, progress:goalProgress, done:goalProgress>=100, targetDate:targetDate, createdAt:Date.now() });
+    }
+    saveGoals(); closeGoalSheetFn(); renderGoalsView(); renderHome();
+  });
+  document.getElementById("goal-delete").addEventListener("click", function(){
+    var id = editingGoalId; closeGoalSheetFn();
+    if(id){ goals = goals.filter(function(g){ return g.id!==id; }); saveGoals(); renderGoalsView(); renderHome(); }
+  });
+  document.getElementById("goal-input").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("goal-save").click(); });
 
   /* ---------------- recently deleted (trash) ---------------- */
   function renderTrash(){
